@@ -58,12 +58,14 @@ const ProfileSelector = ({ onProfileSelect, onCreateProfile }) => {
 };
 
 const ProfilePage = ({ profile, onBack, onParentDashboard }) => {
+  const avatarColors = ['bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-orange-400'];
+  
   return (
     <div className="min-h-screen pb-24">
       {/* Profile Header */}
       <div className="bg-gradient-to-b from-orange-400 to-orange-500 px-4 py-8 text-center">
-        <div className="w-28 h-28 bg-white rounded-full mx-auto flex items-center justify-center text-6xl shadow-xl mb-4">
-          {profile.avatar}
+        <div className="w-28 h-28 bg-white rounded-full mx-auto flex items-center justify-center shadow-xl mb-4">
+          <span className="text-orange-500 text-5xl font-bold">{profile.name.charAt(0).toUpperCase()}</span>
         </div>
         <h1 className="text-white text-2xl font-bold">{profile.name}</h1>
         <p className="text-white/80">{profile.age} yaşında</p>
