@@ -6,11 +6,14 @@ import { booksApi, progressApi } from '../../services/api';
 import { bookPages as mockPages } from '../../data/mockData';
 import ReaderSettings from './ReaderSettings';
 import CompletionCelebration from './CompletionCelebration';
-
-// Default user ID until authentication is implemented
-const DEFAULT_USER_ID = 'default-user';
+import { useAuth } from '../../contexts/AuthContext';
 
 const BookReaderLandscape = ({ book, onClose }) => {
+  const { user, isAuthenticated } = useAuth();
+  
+  // Use authenticated user ID or fallback to default
+  const userId = isAuthenticated && user?.user_id ? user.user_id : 'default-user';
+  
   const [currentPage, setCurrentPage] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(true);
@@ -28,6 +31,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
   });
   const [resumeContinue, setResumeContinue] = useState(() => {
     const saved = localStorage.getItem('reading_resumeContinue');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
     return saved !== null ? JSON.parse(saved) : true;
   });
 
