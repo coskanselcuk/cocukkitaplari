@@ -113,7 +113,9 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
       {/* Empty State */}
       {ageFilteredBooks.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20">
-          <span className="text-6xl mb-4">📚</span>
+          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4">
+            <BookOpen className="text-white/60" size={40} />
+          </div>
           <p className="text-white/80 text-lg">Bu kategoride kitap bulunamadı</p>
         </div>
       )}
