@@ -193,10 +193,32 @@ const BookReaderLandscape = ({ book, onClose }) => {
     setTouchStart(null);
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
     audioRef.current?.pause();
-    if (book && currentPage >= totalPages - 1) localStorage.removeItem(`book_progress_${book.id}`);
+    
+    // If book is completed, mark it as complete in backend and clear progress
+    if (book && currentPage >= totalPages - 1) {
+      try {
+        await progressApi.markComplete(DEFAULT_USER_ID, book.id);
+        await progressApi.deleteProgress(DEFAULT_USER_ID, book.id);
+      } catch (error) {
+        console.log('Error marking complete:', error);
+      }
+      localStorage.removeItem(`book_progress_${book.id}`);
+    }
     onClose();
+  };
+
+  const handleBookComplete = async () => {
+    // Mark book as complete in backend
+    if (book) {
+      try {
+        await progressApi.markComplete(DEFAULT_USER_ID, book.id);
+      } catch (error) {
+        console.log('Error marking complete:', error);
+      }
+    }
+    setShowCelebration(true);
   };
 
   if (showCelebration) {
