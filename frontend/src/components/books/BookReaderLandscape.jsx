@@ -2,10 +2,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   ChevronLeft, ChevronRight, X, Settings, Play, Pause, Loader2
 } from 'lucide-react';
-import { booksApi } from '../../services/api';
+import { booksApi, progressApi } from '../../services/api';
 import { bookPages as mockPages } from '../../data/mockData';
 import ReaderSettings from './ReaderSettings';
 import CompletionCelebration from './CompletionCelebration';
+
+// Default user ID until authentication is implemented
+const DEFAULT_USER_ID = 'default-user';
 
 const BookReaderLandscape = ({ book, onClose }) => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -17,6 +20,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
   const [pages, setPages] = useState(mockPages);
   const [isLoadingPages, setIsLoadingPages] = useState(true);
   const [touchStart, setTouchStart] = useState(null);
+  const [progressLoaded, setProgressLoaded] = useState(false);
   
   const [autoPlay, setAutoPlay] = useState(() => {
     const saved = localStorage.getItem('reading_autoPlay');
