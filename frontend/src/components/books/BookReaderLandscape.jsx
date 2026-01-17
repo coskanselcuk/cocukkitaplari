@@ -120,27 +120,21 @@ const BookReaderLandscape = ({ book, onClose }) => {
     if (audioUrl && audioRef.current) {
       // Set up the audio
       audioRef.current.src = audioUrl;
+      audioRef.current.load();
       
-      // Wait for audio to be ready to play
-      return new Promise((resolve) => {
-        const handleCanPlay = () => {
-          audioRef.current.removeEventListener('canplaythrough', handleCanPlay);
-          setIsAudioReady(true);
-          resolve(true);
-        };
-        audioRef.current.addEventListener('canplaythrough', handleCanPlay);
-        audioRef.current.load();
-        
-        // Pre-fetch next page
-        prefetchNextAudio(pageIndex);
-      });
+      // Pre-fetch next page
+      prefetchNextAudio(pageIndex);
+      
+      // For base64 data URLs, mark as ready immediately since they're fully loaded
+      setIsAudioReady(true);
+      return true;
     }
     return false;
   }, [generatePageAudio, prefetchNextAudio]);
 
   // Actually start playing audio
   const startPlayback = useCallback(async () => {
-    if (audioRef.current && audioRef.current.src && audioRef.current.readyState >= 3) {
+    if (audioRef.current && audioRef.current.src) {
       try {
         await audioRef.current.play();
         setIsPlaying(true);
@@ -153,6 +147,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   // When page changes: reset states and prepare new audio
   useEffect(() => {
+    let isMounted = true;
+    
     // Reset readiness states
     setIsImageLoaded(false);
     setIsAudioReady(false);
@@ -162,6 +158,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
     if (autoPlay) {
       preparePageAudio(currentPage);
     }
+    
+    return () => { isMounted = false; };
   }, [currentPage, autoPlay, preparePageAudio]);
 
   // Start playback ONLY when both image and audio are ready
