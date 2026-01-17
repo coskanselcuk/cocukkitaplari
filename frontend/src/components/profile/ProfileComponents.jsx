@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Check, Star, BookOpen, Clock, Award, User, Settings } from 'lucide-react';
+import { Plus, Edit2, Trash2, Check, Star, BookOpen, Clock, Award, User, Settings, LogIn, LogOut, Crown } from 'lucide-react';
 import { profiles } from '../../data/mockData';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ProfileSelector = ({ onProfileSelect, onCreateProfile }) => {
   const [isEditing, setIsEditing] = useState(false);
