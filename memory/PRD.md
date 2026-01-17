@@ -46,6 +46,14 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Backend Progress Sync & Book Pages Seeding
+- **Progress API Integration**: BookReaderLandscape now saves/loads progress from backend
+- **Debounced Saving**: Progress saves 1 second after page changes (avoids excessive API calls)
+- **Fallback**: Uses localStorage if backend fails
+- **Book Completion**: Marks books complete in backend when finished
+- **Seeded Pages**: Added 5-page stories to all books (Rafadan Tayfa, Ege ile Gaga, Ormanın Şarkısı, Küçük Sincap, Keloğlan)
+- **Fixed hotspots**: Added empty hotspots array to all pages for API compatibility
+
 ### January 17, 2026 - Admin Panel CRUD
 - **Full CRUD for Books**: Create, Read, Update, Delete books via Admin Panel
 - **Full CRUD for Pages**: Create, Read, Update, Delete pages for each book
