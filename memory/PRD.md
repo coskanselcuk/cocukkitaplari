@@ -157,8 +157,9 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 ## Prioritized Backlog
 
 ### P1 - High Priority
-- [ ] Wire up reading progress API to frontend (sync across devices)
+- [x] Wire up reading progress API to frontend (sync across devices) ✅
 - [ ] Add CRUD for categories in admin panel
+- [ ] Generate audio for newly seeded books (requires ElevenLabs credits)
 
 ### P2 - Medium Priority
 - [ ] User profile management and authentication
