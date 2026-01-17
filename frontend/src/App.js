@@ -163,8 +163,21 @@ function AppContent() {
 
   // Admin Panel View
   if (showAdmin) {
+    const handleAdminClose = async () => {
+      // Refetch books when admin panel closes
+      try {
+        const response = await booksApi.getAll();
+        if (response.books) {
+          setBooks(response.books);
+        }
+      } catch (error) {
+        console.error('Error fetching books:', error);
+      }
+      setShowAdmin(false);
+    };
+    
     return (
-      <AdminPanel onBack={() => setShowAdmin(false)} />
+      <AdminPanel onBack={handleAdminClose} />
     );
   }
 
