@@ -159,18 +159,18 @@ const BookReaderLandscape = ({ book, onClose }) => {
       } else {
         console.log('Book complete, showing celebration');
         // Mark complete in backend
-        progressApi.markComplete(DEFAULT_USER_ID, book?.id).catch(() => {});
+        progressApi.markComplete(userId, book?.id).catch(() => {});
         setShowCelebration(true);
       }
     }
-  }, [book?.id]); // Include book.id for completion tracking
+  }, [book?.id, userId]); // Include book.id and userId for completion tracking
 
   const goNext = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(prev => prev + 1);
     } else {
       // Mark complete and show celebration
-      progressApi.markComplete(DEFAULT_USER_ID, book?.id).catch(() => {});
+      progressApi.markComplete(userId, book?.id).catch(() => {});
       setShowCelebration(true);
     }
   };
