@@ -17,6 +17,7 @@ from routes.category_routes import router as category_router
 from routes.progress_routes import router as progress_router
 from routes.admin_routes import router as admin_router
 from routes.auth_routes import router as auth_router
+from routes.upload_routes import router as upload_router
 
 
 ROOT_DIR = Path(__file__).parent
@@ -84,6 +85,7 @@ app.include_router(category_router, prefix="/api")
 app.include_router(progress_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
+app.include_router(upload_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
