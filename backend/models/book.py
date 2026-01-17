@@ -29,6 +29,7 @@ class BookBase(BaseModel):
     duration: str
     hasAudio: bool = True
     isNew: bool = False
+    isPremium: bool = False  # Premium content requires subscription
     rating: float = 0.0
     readCount: int = 0
     totalPages: int = 0
