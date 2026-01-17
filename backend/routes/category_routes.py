@@ -70,3 +70,37 @@ async def create_category(category_data: CategoryCreate):
     await db.categories.insert_one(doc)
     
     return CategoryResponse(**doc)
+
+
+@router.put("/{category_id}", response_model=CategoryResponse)
+async def update_category(category_id: str, category_data: CategoryUpdate):
+    """Update a category"""
+    db = get_db()
+    
+    # Check if category exists
+    category = await db.categories.find_one({"id": category_id}, {"_id": 0})
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    # Build update dict with only provided fields
+    update_data = {k: v for k, v in category_data.model_dump().items() if v is not None}
+    
+    if update_data:
+        await db.categories.update_one({"id": category_id}, {"$set": update_data})
+    
+    # Return updated category
+    updated = await db.categories.find_one({"id": category_id}, {"_id": 0})
+    return CategoryResponse(**updated)
+
+
+@router.delete("/{category_id}")
+async def delete_category(category_id: str):
+    """Delete a category"""
+    db = get_db()
+    
+    result = await db.categories.delete_one({"id": category_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    return {"message": "Kategori başarıyla silindi"}
