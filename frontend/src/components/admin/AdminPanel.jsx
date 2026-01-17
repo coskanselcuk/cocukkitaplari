@@ -553,12 +553,44 @@ const AdminPanel = ({ onBack }) => {
 
         {activeTab === 'categories' && (
           <div className="bg-white rounded-xl shadow-sm p-4">
-            <h2 className="font-bold text-gray-800 mb-4">Kategoriler</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="font-bold text-gray-800">Kategoriler</h2>
+              <button
+                onClick={() => setShowAddCategory(true)}
+                className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1"
+              >
+                <Plus size={16} /> Yeni Kategori
+              </button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {categories.map(cat => (
-                <div key={cat.id} className="p-3 border rounded-lg">
-                  <p className="font-medium text-gray-800">{cat.name}</p>
-                  <p className="text-sm text-gray-500">{cat.slug}</p>
+                <div key={cat.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{cat.icon || '📚'}</span>
+                      <div>
+                        <p className="font-medium text-gray-800">{cat.name}</p>
+                        <p className="text-sm text-gray-500">{cat.slug}</p>
+                        <p className="text-xs text-gray-400 mt-1">Yaş: {cat.ageGroup || 'Belirtilmemiş'}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => openEditCategory(cat)}
+                        className="p-1.5 hover:bg-blue-100 rounded text-blue-600"
+                        title="Düzenle"
+                      >
+                        <Edit size={14} />
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm({ type: 'category', id: cat.id, title: cat.name })}
+                        className="p-1.5 hover:bg-red-100 rounded text-red-600"
+                        title="Sil"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
