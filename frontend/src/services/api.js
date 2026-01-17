@@ -84,4 +84,19 @@ export const ttsApi = {
   },
 };
 
+export const authApi = {
+  exchangeSession: async (sessionId) => {
+    const response = await api.post('/auth/session', { session_id: sessionId });
+    return response.data;
+  },
+  getCurrentUser: async () => {
+    const response = await api.get('/auth/me');
+    return response.data;
+  },
+  logout: async () => {
+    const response = await api.post('/auth/logout');
+    return response.data;
+  }
+};
+
 export default api;
