@@ -284,9 +284,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
       setIsPlaying(false);
     } else {
       // If no audio loaded yet, prepare and play
-      if (!audioRef.current.src || audioRef.current.src === '' || audioRef.current.readyState < 3) {
+      if (!audioRef.current.src || audioRef.current.src === '') {
         await preparePageAudio(currentPage);
-        // Start playback after audio is ready
         startPlayback();
       } else {
         try {
