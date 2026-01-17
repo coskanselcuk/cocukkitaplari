@@ -228,6 +228,7 @@ function App() {
             profile={currentProfile}
             onBack={() => setActiveTab('home')}
             onParentDashboard={() => setShowParentDashboard(true)}
+            onAdminPanel={() => setShowAdmin(true)}
           />
         )}
       </main>
