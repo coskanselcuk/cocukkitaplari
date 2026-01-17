@@ -33,8 +33,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
     const saved = localStorage.getItem('reading_resumeContinue');
     return saved !== null ? JSON.parse(saved) : true;
   });
-    return saved !== null ? JSON.parse(saved) : true;
-  });
 
   const audioRef = useRef(null);
   
