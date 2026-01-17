@@ -235,7 +235,8 @@ export const profiles = [
   {
     id: 1,
     name: 'Elif',
-    avatar: '👧',
+    avatar: 'E',
+    avatarColor: 'bg-pink-400',
     age: 6,
     booksRead: 24,
     totalReadingTime: '3s 45dk',
@@ -244,7 +245,8 @@ export const profiles = [
   {
     id: 2,
     name: 'Can',
-    avatar: '👦',
+    avatar: 'C',
+    avatarColor: 'bg-blue-400',
     age: 8,
     booksRead: 42,
     totalReadingTime: '6s 20dk',
