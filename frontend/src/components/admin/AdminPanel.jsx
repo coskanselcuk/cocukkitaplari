@@ -269,6 +269,67 @@ const AdminPanel = ({ onBack }) => {
     }
   };
 
+  // Category CRUD functions
+  const createCategory = async () => {
+    setIsSaving(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/categories`, {
+        ...newCategory,
+        sortOrder: categories.length + 1
+      });
+      setCategories([...categories, response.data]);
+      setShowAddCategory(false);
+      setNewCategory({ name: '', slug: '', icon: '📚', ageGroup: '4-6', sortOrder: 0 });
+    } catch (error) {
+      console.error('Error creating category:', error);
+      alert(error.response?.data?.detail || 'Kategori oluşturulurken hata oluştu');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const openEditCategory = (cat) => {
+    setEditingCategory(cat);
+    setEditCategory({
+      name: cat.name || '',
+      slug: cat.slug || '',
+      icon: cat.icon || '📚',
+      ageGroup: cat.ageGroup || '4-6',
+      sortOrder: cat.sortOrder || 0
+    });
+    setShowEditCategory(true);
+  };
+
+  const updateCategory = async () => {
+    if (!editingCategory) return;
+    setIsSaving(true);
+    try {
+      const response = await axios.put(`${API_URL}/api/categories/${editingCategory.id}`, editCategory);
+      setCategories(categories.map(c => c.id === editingCategory.id ? response.data : c));
+      setShowEditCategory(false);
+      setEditingCategory(null);
+    } catch (error) {
+      console.error('Error updating category:', error);
+      alert('Kategori güncellenirken hata oluştu');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const deleteCategory = async (categoryId) => {
+    setIsSaving(true);
+    try {
+      await axios.delete(`${API_URL}/api/categories/${categoryId}`);
+      setCategories(categories.filter(c => c.id !== categoryId));
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error('Error deleting category:', error);
+      alert('Kategori silinirken hata oluştu');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const generateAudioForBook = async () => {
     if (!selectedBook) return;
     setIsGeneratingAudio(true);
