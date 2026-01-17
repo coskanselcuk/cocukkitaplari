@@ -380,7 +380,8 @@ const AdminPanel = ({ onBack }) => {
                       <button
                         onClick={generateAudioForBook}
                         disabled={isGeneratingAudio || bookPages.length === 0}
-                        className="bg-purple-500 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 disabled:opacity-50"
+                        className="bg-purple-500 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title={bookPages.length === 0 ? 'Önce sayfa ekleyin' : 'Tüm sayfalar için ses oluştur'}
                       >
                         <Volume2 size={16} /> Ses Oluştur
                       </button>
@@ -400,9 +401,17 @@ const AdminPanel = ({ onBack }) => {
                     </div>
                   )}
 
+                  {bookPages.length === 0 && (
+                    <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="text-sm text-yellow-700">
+                        <strong>İpucu:</strong> Ses oluşturmak için önce kitaba sayfa eklemeniz gerekiyor.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="space-y-3 max-h-80 overflow-y-auto">
                     {bookPages.length === 0 ? (
-                      <p className="text-gray-500 text-center py-8">Henüz sayfa eklenmemiş</p>
+                      <p className="text-gray-500 text-center py-8">Henüz sayfa eklenmemiş. "Sayfa Ekle" butonuna tıklayın.</p>
                     ) : (
                       bookPages.map((page, idx) => (
                         <div key={idx} className="p-3 border rounded-lg">
