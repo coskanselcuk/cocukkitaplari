@@ -212,13 +212,24 @@ async def delete_book(book_id: str):
 
 @router.delete("/{book_id}/pages/{page_id}")
 async def delete_page(book_id: str, page_id: str):
-    """Delete a page"""
+    """Delete a page and reorder remaining pages"""
     db = get_db()
     
-    result = await db.pages.delete_one({"id": page_id, "bookId": book_id})
-    
-    if result.deleted_count == 0:
+    # Get the page to find its number before deleting
+    page = await db.pages.find_one({"id": page_id, "bookId": book_id}, {"_id": 0})
+    if not page:
         raise HTTPException(status_code=404, detail="Page not found")
+    
+    deleted_page_num = page.get("pageNumber", 0)
+    
+    # Delete the page
+    await db.pages.delete_one({"id": page_id, "bookId": book_id})
+    
+    # Shift remaining pages down to fill the gap
+    await db.pages.update_many(
+        {"bookId": book_id, "pageNumber": {"$gt": deleted_page_num}},
+        {"$inc": {"pageNumber": -1}}
+    )
     
     # Update book's total pages
     total_pages = await db.pages.count_documents({"bookId": book_id})
