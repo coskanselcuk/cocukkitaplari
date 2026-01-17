@@ -46,6 +46,11 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Audio Generation & Progress Sync Testing
+- **Generated Audio**: Book 4 "Ormanın Şarkısı" now has audio for all 5 pages
+- **Progress Sync Verified**: Reading progress saves to backend and resumes correctly
+- **Voice**: Using "Irem" (NsFK0aDGLbVusA7tQfOB) - Young Turkish audiobook narrator
+
 ### January 17, 2026 - Category CRUD
 - **Full CRUD for Categories**: Create, Read, Update, Delete categories via Admin Panel
 - **Updated model**: Made optional fields (description, color, gradient, islandImage) have defaults
