@@ -11,7 +11,6 @@ import {
   Loader2
 } from 'lucide-react';
 import { bookPages } from '../../data/mockData';
-import BookQuiz from './BookQuiz';
 import ReaderSettings from './ReaderSettings';
 import axios from 'axios';
 
@@ -23,11 +22,12 @@ const BookReaderLandscape = ({ book, onClose }) => {
   const [showControls, setShowControls] = useState(true);
   const [isPageTurning, setIsPageTurning] = useState(false);
   const [turnDirection, setTurnDirection] = useState(null);
-  const [showQuiz, setShowQuiz] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [audioCache, setAudioCache] = useState({});
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
+  const [isAudioReady, setIsAudioReady] = useState(false);
   
   // Settings state
   const [autoPlay, setAutoPlay] = useState(() => {
@@ -120,26 +120,45 @@ const BookReaderLandscape = ({ book, onClose }) => {
     if (audioUrl && audioRef.current) {
       audioRef.current.src = audioUrl;
       audioRef.current.load();
+      setIsAudioReady(true);
       
+      // Pre-fetch next page
+      prefetchNextAudio(currentPage);
+    }
+  }, [currentPage, generatePageAudio, prefetchNextAudio]);
+
+  // Actually start playing audio when BOTH image and audio are ready
+  const startPlayback = useCallback(async () => {
+    if (audioRef.current && isImageLoaded && isAudioReady) {
       try {
         await audioRef.current.play();
         setIsPlaying(true);
-        
-        // Pre-fetch next page
-        prefetchNextAudio(currentPage);
       } catch (error) {
         console.log('Audio play prevented:', error);
         setIsPlaying(false);
       }
     }
-  }, [currentPage, generatePageAudio, prefetchNextAudio]);
+  }, [isImageLoaded, isAudioReady]);
 
-  // Play audio when page changes (if autoPlay or manually triggered)
+  // Reset readiness states when page changes
+  useEffect(() => {
+    setIsImageLoaded(false);
+    setIsAudioReady(false);
+  }, [currentPage]);
+
+  // Prepare audio when page changes (if autoPlay)
   useEffect(() => {
     if (autoPlay) {
       playCurrentPageAudio();
     }
   }, [currentPage, autoPlay, playCurrentPageAudio]);
+
+  // Start playback only when both image and audio are ready
+  useEffect(() => {
+    if (autoPlay && isImageLoaded && isAudioReady) {
+      startPlayback();
+    }
+  }, [autoPlay, isImageLoaded, isAudioReady, startPlayback]);
 
   // Handle audio ended
   useEffect(() => {
@@ -154,8 +173,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
         if (currentPage < totalPages - 1) {
           goToNextPage();
         } else {
-          // End of book - show quiz
-          setShowQuiz(true);
+          // End of book - close reader and return to library
+          handleClose();
         }
       }
     };
@@ -181,8 +200,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
         setTurnDirection(null);
       }, 300);
     } else {
-      // End of book - show quiz
-      setShowQuiz(true);
+      // End of book - close reader and return to library
+      handleClose();
     }
   };
 
@@ -257,18 +276,17 @@ const BookReaderLandscape = ({ book, onClose }) => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
+    // Clear reading progress when book is completed
+    if (book && currentPage >= totalPages - 1) {
+      localStorage.removeItem(`book_progress_${book.id}`);
+    }
     onClose();
   };
 
-  if (showQuiz) {
-    return <BookQuiz book={book} onClose={() => {
-      // Clear progress when quiz is done
-      if (book) {
-        localStorage.removeItem(`book_progress_${book.id}`);
-      }
-      onClose();
-    }} />;
-  }
+  // Handle image load event
+  const handleImageLoad = () => {
+    setIsImageLoaded(true);
+  };
 
   const currentPageData = pages[currentPage];
 
@@ -324,7 +342,15 @@ const BookReaderLandscape = ({ book, onClose }) => {
                 src={currentPageData.image} 
                 alt={`Sayfa ${currentPage + 1}`}
                 className="w-full h-full object-cover"
+                onLoad={handleImageLoad}
               />
+              
+              {/* Loading overlay while image loads */}
+              {!isImageLoaded && (
+                <div className="absolute inset-0 bg-amber-100 flex items-center justify-center">
+                  <Loader2 size={48} className="animate-spin text-orange-500" />
+                </div>
+              )}
               
               {/* Interactive Hotspots */}
               <div 
