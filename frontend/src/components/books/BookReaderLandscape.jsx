@@ -402,6 +402,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
                 alt={`Sayfa ${currentPage + 1}`}
                 className="w-full h-full object-cover"
                 onLoad={handleImageLoad}
+                onError={handleImageError}
               />
               
               {/* Loading overlay while image loads */}
