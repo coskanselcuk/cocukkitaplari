@@ -215,10 +215,6 @@ function App() {
           />
         )}
         
-        {activeTab === 'games' && (
-          <GamesPage />
-        )}
-        
         {activeTab === 'profile' && (
           <ProfilePage 
             profile={currentProfile}
