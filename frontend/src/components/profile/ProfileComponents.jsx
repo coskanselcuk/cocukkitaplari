@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Check, Star, BookOpen, Clock, Award, User } from 'lucide-react';
+import { Plus, Edit2, Trash2, Check, Star, BookOpen, Clock, Award, User, Settings } from 'lucide-react';
 import { profiles } from '../../data/mockData';
 
 const ProfileSelector = ({ onProfileSelect, onCreateProfile }) => {
