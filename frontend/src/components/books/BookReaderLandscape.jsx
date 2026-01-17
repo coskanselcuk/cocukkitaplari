@@ -74,7 +74,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
       if (!resumeContinue || !book?.id || progressLoaded) return;
       
       try {
-        const response = await progressApi.getUserProgress(DEFAULT_USER_ID);
+        const response = await progressApi.getUserProgress(userId);
         const bookProgress = response.books?.find(b => b.bookId === book.id);
         if (bookProgress && bookProgress.currentPage > 0) {
           setCurrentPage(bookProgress.currentPage);
@@ -89,7 +89,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
     };
     
     loadProgress();
-  }, [book?.id, resumeContinue, progressLoaded]);
+  }, [book?.id, resumeContinue, progressLoaded, userId]);
 
   // Save progress to backend (debounced)
   const saveProgressRef = useRef(null);
@@ -104,7 +104,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
     // Debounce save to avoid too many API calls
     saveProgressRef.current = setTimeout(async () => {
       try {
-        await progressApi.saveProgress(DEFAULT_USER_ID, book.id, currentPage);
+        await progressApi.saveProgress(userId, book.id, currentPage);
       } catch (error) {
         // Fallback to localStorage if backend fails
         console.log('Saving to localStorage');
@@ -117,7 +117,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
         clearTimeout(saveProgressRef.current);
       }
     };
-  }, [book?.id, currentPage, resumeContinue, progressLoaded]);
+  }, [book?.id, currentPage, resumeContinue, progressLoaded, userId]);
 
   // Stop audio when page changes
   useEffect(() => {
