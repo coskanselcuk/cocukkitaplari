@@ -116,8 +116,10 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 - `reading_progress` - User reading progress
 
 ## Third-Party Integrations
-- **ElevenLabs TTS** - Turkish audio narration with Valory voice (multilingual_v2 model)
-- **MongoDB** - Database for all content and progress
+- **ElevenLabs TTS** - Turkish audio narration with **Irem** voice (ID: `NsFK0aDGLbVusA7tQfOB`)
+  - Audio is pre-generated and stored in MongoDB
+  - No runtime TTS calls needed during reading
+- **MongoDB** - Database for all content, progress, and pre-generated audio
 
 ## Prioritized Backlog
 
