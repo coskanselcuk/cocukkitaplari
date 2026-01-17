@@ -28,7 +28,11 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 - ✅ Audio waits for image to load before playing
 - ✅ Image error fallback - audio plays even if image fails
 
-### Celebration & Engagement
+### Admin Features
+- ✅ Content Management Panel (İçerik Yönetimi)
+- ✅ Add/view books and pages without burning TTS credits
+- ✅ Generate audio for selected books via admin
+- ✅ View categories
 - ✅ Completion celebration with confetti animation
 - ✅ Star badge and congratulations message (Turkish)
 - ✅ Options to restart book or return home
