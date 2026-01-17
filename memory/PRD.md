@@ -30,6 +30,8 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ### Admin Features
 - ✅ Content Management Panel (İçerik Yönetimi)
+- ✅ Full CRUD for books (Create, Read, Update, Delete)
+- ✅ Full CRUD for pages (Create, Read, Update, Delete)
 - ✅ Add/view books and pages without burning TTS credits
 - ✅ Generate audio for selected books via admin
 - ✅ View categories
