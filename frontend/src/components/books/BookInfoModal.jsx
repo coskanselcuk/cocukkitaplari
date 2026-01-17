@@ -1,7 +1,7 @@
 import React from 'react';
-import { X, Clock, Users, BookOpen, FileText } from 'lucide-react';
+import { X, Clock, Users, BookOpen, FileText, Crown, Lock } from 'lucide-react';
 
-const BookInfoModal = ({ book, isOpen, onClose, onStart }) => {
+const BookInfoModal = ({ book, isOpen, onClose, onStart, isPremium, canAccess }) => {
   if (!isOpen || !book) return null;
 
   return (
@@ -22,6 +22,13 @@ const BookInfoModal = ({ book, isOpen, onClose, onStart }) => {
           <X size={20} className="text-gray-600" />
         </button>
         
+        {/* Premium Badge */}
+        {isPremium && (
+          <div className="absolute top-4 left-4 z-10 bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+            <Crown size={12} /> Premium
+          </div>
+        )}
+        
         {/* Book Cover */}
         <div className="relative h-48 bg-gradient-to-b from-cyan-400 to-cyan-500 flex items-center justify-center">
           <img 
@@ -29,6 +36,13 @@ const BookInfoModal = ({ book, isOpen, onClose, onStart }) => {
             alt={book.title}
             className="h-40 w-28 object-cover rounded-lg shadow-2xl"
           />
+          {isPremium && !canAccess && (
+            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+              <div className="bg-white/90 rounded-full p-3">
+                <Lock size={24} className="text-gray-600" />
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Book Info */}
@@ -59,7 +73,7 @@ const BookInfoModal = ({ book, isOpen, onClose, onStart }) => {
             {/* Page Count */}
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-500">Sayfa Sayısı</span>
-              <span className="text-gray-800 font-medium">{book.pages}</span>
+              <span className="text-gray-800 font-medium">{book.totalPages || book.pages}</span>
             </div>
             
             {/* Duration */}
@@ -72,10 +86,23 @@ const BookInfoModal = ({ book, isOpen, onClose, onStart }) => {
           {/* Start Button */}
           <button
             onClick={() => onStart(book)}
-            className="w-full mt-6 bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+            className={`w-full mt-6 font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 ${
+              isPremium && !canAccess 
+                ? 'bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-white'
+                : 'bg-green-500 hover:bg-green-600 text-white'
+            }`}
           >
-            <BookOpen size={20} />
-            Başla
+            {isPremium && !canAccess ? (
+              <>
+                <Crown size={20} />
+                Premium&apos;a Abone Ol
+              </>
+            ) : (
+              <>
+                <BookOpen size={20} />
+                Başla
+              </>
+            )}
           </button>
         </div>
       </div>
