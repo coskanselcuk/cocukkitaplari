@@ -39,6 +39,17 @@ const BookReaderLandscape = ({ book, onClose }) => {
   });
 
   const audioRef = useRef(null);
+  
+  // Refs to always have current values in event handlers
+  const currentPageRef = useRef(currentPage);
+  const autoPlayRef = useRef(autoPlay);
+  const totalPagesRef = useRef(pages.length);
+  
+  // Keep refs in sync
+  useEffect(() => { currentPageRef.current = currentPage; }, [currentPage]);
+  useEffect(() => { autoPlayRef.current = autoPlay; }, [autoPlay]);
+  useEffect(() => { totalPagesRef.current = pages.length; }, [pages.length]);
+
   const totalPages = pages.length;
 
   // Fetch pages from API
@@ -99,7 +110,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
     setIsPlaying(false);
     setIsImageLoaded(false);
     
-    // If autoPlay is on, mark that we need to auto-start when image loads
     if (autoPlay) {
       setPendingAutoStart(true);
     }
@@ -119,37 +129,43 @@ const BookReaderLandscape = ({ book, onClose }) => {
       .catch(() => setIsPlaying(false));
   }, [pendingAutoStart, isImageLoaded, currentPage, pages]);
 
-  // Handle audio ended
+  // Advance to next page (used by ended handler)
+  const advanceToNextPage = useCallback(() => {
+    const current = currentPageRef.current;
+    const total = totalPagesRef.current;
+    
+    if (current < total - 1) {
+      setTurnDirection('next');
+      setIsPageTurning(true);
+      setTimeout(() => {
+        setCurrentPage(current + 1);
+        setIsPageTurning(false);
+        setTurnDirection(null);
+      }, 250);
+    } else {
+      setShowCelebration(true);
+    }
+  }, []);
+
+  // Handle audio ended - set up ONCE, use refs for current values
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const handleEnded = () => {
+      console.log('Audio ended. AutoPlay:', autoPlayRef.current, 'Page:', currentPageRef.current);
       setIsPlaying(false);
       
-      // Use functional update to get current state
-      setCurrentPage(prevPage => {
-        if (autoPlay && prevPage < totalPages - 1) {
-          // Trigger page change animation
-          setTurnDirection('next');
-          setIsPageTurning(true);
-          setTimeout(() => {
-            setIsPageTurning(false);
-            setTurnDirection(null);
-          }, 250);
-          return prevPage + 1;
-        } else if (prevPage >= totalPages - 1) {
-          setShowCelebration(true);
-        }
-        return prevPage;
-      });
+      if (autoPlayRef.current) {
+        advanceToNextPage();
+      }
     };
 
     audio.addEventListener('ended', handleEnded);
     return () => audio.removeEventListener('ended', handleEnded);
-  }, [autoPlay, totalPages]);
+  }, [advanceToNextPage]);
 
-  // Navigation functions
+  // Manual navigation
   const goToPage = useCallback((newPage, direction) => {
     if (newPage < 0 || newPage >= totalPages) return;
     
@@ -193,7 +209,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
       setIsPlaying(false);
     } else {
       if (pageData?.audioUrl) {
-        // Only set src if not already set
         if (!audioRef.current.src || audioRef.current.src === '') {
           audioRef.current.src = pageData.audioUrl;
         }
