@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Check, Star, BookOpen, Clock } from 'lucide-react';
+import { Plus, Edit2, Trash2, Check, Star, BookOpen, Clock, Award, User } from 'lucide-react';
 import { profiles } from '../../data/mockData';
 
 const ProfileSelector = ({ onProfileSelect, onCreateProfile }) => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const avatarOptions = ['👧', '👦', '🧒', '👶', '🧑', '👸', '🤴', '🦸', '🧜', '🧙'];
+  const avatarColors = ['bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-orange-400', 'bg-teal-400'];
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
