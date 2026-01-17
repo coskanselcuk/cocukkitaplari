@@ -4,7 +4,7 @@ export const categories = [
   {
     id: 'bizim-kahramanlar',
     name: 'Bizim Kahramanlar',
-    description: 'TRT Çocuk karakterlerinin maceraları',
+    description: 'Kahramanların maceraları',
     icon: 'hero',
     color: '#FF6B6B',
     gradient: 'from-red-400 to-orange-400',
