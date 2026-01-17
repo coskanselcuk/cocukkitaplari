@@ -114,24 +114,33 @@ const BookReaderLandscape = ({ book, onClose }) => {
   }, [totalPages, audioCache, generatePageAudio]);
 
   // Play audio for current page - prepares audio but doesn't play yet
-  const preparePageAudio = useCallback(async () => {
-    const audioUrl = await generatePageAudio(currentPage);
+  const preparePageAudio = useCallback(async (pageIndex) => {
+    const audioUrl = await generatePageAudio(pageIndex);
     
     if (audioUrl && audioRef.current) {
+      // Set up the audio
       audioRef.current.src = audioUrl;
-      audioRef.current.load();
       
-      // Pre-fetch next page
-      prefetchNextAudio(currentPage);
-      
-      // Mark audio as ready after it's loaded
-      setIsAudioReady(true);
+      // Wait for audio to be ready to play
+      return new Promise((resolve) => {
+        const handleCanPlay = () => {
+          audioRef.current.removeEventListener('canplaythrough', handleCanPlay);
+          setIsAudioReady(true);
+          resolve(true);
+        };
+        audioRef.current.addEventListener('canplaythrough', handleCanPlay);
+        audioRef.current.load();
+        
+        // Pre-fetch next page
+        prefetchNextAudio(pageIndex);
+      });
     }
-  }, [currentPage, generatePageAudio, prefetchNextAudio]);
+    return false;
+  }, [generatePageAudio, prefetchNextAudio]);
 
   // Actually start playing audio
   const startPlayback = useCallback(async () => {
-    if (audioRef.current && audioRef.current.src) {
+    if (audioRef.current && audioRef.current.src && audioRef.current.readyState >= 3) {
       try {
         await audioRef.current.play();
         setIsPlaying(true);
@@ -151,7 +160,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
     
     // Prepare audio for the new page (if autoPlay is on)
     if (autoPlay) {
-      preparePageAudio();
+      preparePageAudio(currentPage);
     }
   }, [currentPage, autoPlay, preparePageAudio]);
 
