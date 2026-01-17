@@ -30,8 +30,8 @@ DEFAULT_VOICE_SETTINGS = VoiceSettings(
     use_speaker_boost=True
 )
 
-# Valory - Intimate, Warm and Inviting voice (perfect for children's stories)
-VALORY_VOICE_ID = "VhxAIIZM8IRmnl5fyeyk"
+# Irem - Young Turkish girl, ideal for audiobooks and storytelling
+IREM_VOICE_ID = "NsFK0aDGLbVusA7tQfOB"
 
 # Fallback voices if Valory is not available
 FALLBACK_VOICES = [
