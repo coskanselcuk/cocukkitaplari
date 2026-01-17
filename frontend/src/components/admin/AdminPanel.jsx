@@ -819,12 +819,11 @@ const AdminPanel = ({ onBack }) => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Kapak Resmi URL</label>
-                <input
-                  type="text"
+                <ImageUpload
                   value={editBook.coverImage}
-                  onChange={(e) => setEditBook({...editBook, coverImage: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2"
+                  onChange={(url) => setEditBook({...editBook, coverImage: url})}
+                  label="Kapak Resmi"
+                  placeholder="https://images.unsplash.com/..."
                 />
               </div>
               <div>
