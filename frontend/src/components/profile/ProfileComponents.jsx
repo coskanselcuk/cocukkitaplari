@@ -149,9 +149,85 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
           </div>
         </div>
       </div>
+
+      {/* Subscription Management */}
+      {isAuthenticated && (
+        <div className="px-4 mt-4">
+          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl shadow-xl p-6 border border-yellow-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+                <Crown className="text-white" size={24} />
+              </div>
+              <div>
+                <h2 className="text-gray-800 font-bold text-lg">Üyelik Durumu</h2>
+                <p className={`text-sm font-semibold ${isPremiumUser ? 'text-green-600' : 'text-gray-500'}`}>
+                  {isPremiumUser ? '👑 Premium Üye' : '🆓 Ücretsiz Üye'}
+                </p>
+              </div>
+            </div>
+            
+            {isPremiumUser ? (
+              <div className="space-y-3">
+                <div className="bg-white/80 rounded-xl p-4">
+                  <div className="flex items-center gap-2 text-green-600 mb-2">
+                    <Check size={18} />
+                    <span className="font-medium">Tüm kitaplara sınırsız erişim</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-green-600 mb-2">
+                    <Check size={18} />
+                    <span className="font-medium">Sesli okuma özelliği</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-green-600">
+                    <Check size={18} />
+                    <span className="font-medium">Yeni içeriklere öncelikli erişim</span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 text-center">
+                  Aboneliğinizi App Store veya Google Play üzerinden yönetebilirsiniz.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="bg-white/80 rounded-xl p-4">
+                  <p className="text-gray-600 mb-3">
+                    Premium üyelik ile tüm hikayelere erişin!
+                  </p>
+                  <ul className="space-y-2 text-sm text-gray-500">
+                    <li className="flex items-center gap-2">
+                      <Crown size={14} className="text-yellow-500" />
+                      50+ premium hikaye
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Crown size={14} className="text-yellow-500" />
+                      Sesli okuma özelliği
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <Crown size={14} className="text-yellow-500" />
+                      Reklamsız deneyim
+                    </li>
+                  </ul>
+                </div>
+                <button
+                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
+                  onClick={() => {
+                    // TODO: Open native subscription flow
+                    alert('Abonelik işlemi için App Store veya Google Play kullanılacaktır.');
+                  }}
+                >
+                  <Crown size={20} />
+                  Premium&apos;a Yükselt
+                </button>
+                <p className="text-xs text-gray-400 text-center">
+                  Aylık ₺29.99 • İstediğiniz zaman iptal edin
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       
       {/* Badges */}
-      <div className="px-4 mt-6">
+      <div className="px-4 mt-4">
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <h2 className="text-gray-800 font-bold text-lg mb-4">Rozetlerim</h2>
           <div className="flex flex-wrap gap-3">
