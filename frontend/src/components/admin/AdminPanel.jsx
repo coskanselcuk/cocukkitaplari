@@ -570,28 +570,28 @@ const AdminPanel = ({ onBack }) => {
       {/* Add Page Modal */}
       {showAddPage && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-lg">Yeni Sayfa Ekle</h3>
-              <button onClick={() => setShowAddPage(false)} className="p-1 hover:bg-gray-100 rounded">
-                <X size={20} />
+          <div className="bg-white rounded-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b">
+              <h3 className="font-bold text-lg text-gray-800">Yeni Sayfa Ekle</h3>
+              <button onClick={() => setShowAddPage(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                <X size={20} className="text-gray-600" />
               </button>
             </div>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Sayfa Numarası: {bookPages.length + 1}
-                </label>
+              <div className="bg-orange-50 rounded-lg p-3">
+                <p className="text-sm text-orange-700 font-medium">
+                  Sayfa Numarası: <span className="text-orange-600 font-bold">{bookPages.length + 1}</span>
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Metin</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Metin *</label>
                 <textarea
                   value={newPage.text}
                   onChange={(e) => setNewPage({...newPage, text: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   rows={4}
-                  placeholder="Sayfa metni..."
+                  placeholder="Bu sayfada anlatılacak hikaye metni..."
                 />
               </div>
               <div>
@@ -600,23 +600,24 @@ const AdminPanel = ({ onBack }) => {
                   type="text"
                   value={newPage.image}
                   onChange={(e) => setNewPage({...newPage, image: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="https://images.unsplash.com/..."
                 />
+                <p className="text-xs text-gray-500 mt-1">Sayfa için illüstrasyon resmi URL'si</p>
               </div>
             </div>
 
-            <div className="flex gap-2 mt-6">
+            <div className="flex gap-3 mt-6 pt-4 border-t">
               <button
                 onClick={() => setShowAddPage(false)}
-                className="flex-1 py-2 border rounded-lg hover:bg-gray-50"
+                className="flex-1 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-gray-700"
               >
                 İptal
               </button>
               <button
                 onClick={createPage}
                 disabled={isSaving || !newPage.text}
-                className="flex-1 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
               >
                 {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 Kaydet
