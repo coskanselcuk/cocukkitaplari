@@ -153,15 +153,19 @@ const BookReaderLandscape = ({ book, onClose }) => {
         setCurrentPage(current + 1);
       } else {
         console.log('Book complete, showing celebration');
+        // Mark complete in backend
+        progressApi.markComplete(DEFAULT_USER_ID, book?.id).catch(() => {});
         setShowCelebration(true);
       }
     }
-  }, []); // Empty deps - function uses refs, not state directly
+  }, [book?.id]); // Include book.id for completion tracking
 
   const goNext = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(prev => prev + 1);
     } else {
+      // Mark complete and show celebration
+      progressApi.markComplete(DEFAULT_USER_ID, book?.id).catch(() => {});
       setShowCelebration(true);
     }
   };
