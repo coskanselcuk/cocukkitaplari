@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Header from './components/layout/Header';
 import BottomNav from './components/layout/BottomNav';
 import IslandMap from './components/home/IslandMap';
@@ -13,7 +13,8 @@ import AdminPanel from './components/admin/AdminPanel';
 import SearchModal from './components/search/SearchModal';
 import CreateProfileModal from './components/profile/CreateProfileModal';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { books, categories, profiles } from './data/mockData';
+import { booksApi } from './services/api';
+import { profiles } from './data/mockData';
 import './App.css';
 
 // Main App Content (wrapped by AuthProvider)
@@ -34,6 +35,40 @@ function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingBook, setIsLoadingBook] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [books, setBooks] = useState([]);
+
+  // Fetch books from API
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await booksApi.getAll();
+        if (response.books) {
+          setBooks(response.books);
+        }
+      } catch (error) {
+        console.error('Error fetching books:', error);
+      }
+    };
+    fetchBooks();
+  }, []);
+
+  // Refetch books when returning from admin panel
+  useEffect(() => {
+    if (!showAdmin && books.length > 0) {
+      // Refetch books when admin panel closes
+      const fetchBooks = async () => {
+        try {
+          const response = await booksApi.getAll();
+          if (response.books) {
+            setBooks(response.books);
+          }
+        } catch (error) {
+          console.error('Error fetching books:', error);
+        }
+      };
+      fetchBooks();
+    }
+  }, [showAdmin]);
 
   // Simulate splash screen
   useEffect(() => {
@@ -41,11 +76,12 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, []);
 
-  const newBooks = books.filter(book => book.isNew);
-  const popularBooks = [...books].sort((a, b) => b.readCount - a.readCount).slice(0, 6);
-  const recommendedBooks = books.filter(book => 
-    book.ageGroup.includes(currentProfile?.age?.toString())
-  ).slice(0, 6);
+  // Memoized book lists derived from API data
+  const newBooks = useMemo(() => books.filter(book => book.isNew), [books]);
+  const popularBooks = useMemo(() => [...books].sort((a, b) => (b.readCount || 0) - (a.readCount || 0)).slice(0, 6), [books]);
+  const recommendedBooks = useMemo(() => books.filter(book => 
+    book.ageGroup?.includes(currentProfile?.age?.toString())
+  ).slice(0, 6), [books, currentProfile]);
 
   const handleBookSelect = (book) => {
     setSelectedBook(book);
