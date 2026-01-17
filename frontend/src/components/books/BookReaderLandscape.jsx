@@ -112,7 +112,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
           onClick={(e) => { e.stopPropagation(); toggleAudio(); }}
           className={`rounded-full p-3 shadow-lg transition-colors ${isPlaying ? 'bg-orange-500 text-white' : 'bg-white/90 text-gray-700'}`}
         >
-          {isPlaying ? <Music size={24} /> : <MusicOff size={24} />}
+          {isPlaying ? <Music size={24} /> : <VolumeX size={24} />}
         </button>
       </div>
 
