@@ -102,6 +102,7 @@ async def complete_book(data: ProgressCompleteRequest):
     
     # Check if progress exists, if not create it
     existing = await db.reading_progress.find_one({"userId": data.userId, "bookId": data.bookId})
+    if not existing:
         # Create new completed entry if doesn't exist
         await db.reading_progress.insert_one({
             "id": f"{data.userId}_{data.bookId}",
