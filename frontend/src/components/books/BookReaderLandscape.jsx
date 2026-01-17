@@ -171,17 +171,35 @@ const BookReaderLandscape = ({ book, onClose }) => {
       // If autoPlay is on, go to next page automatically
       if (autoPlay) {
         if (currentPage < totalPages - 1) {
-          goToNextPage();
+          // Navigate to next page
+          setTurnDirection('next');
+          setIsPageTurning(true);
+          
+          if (audioRef.current) {
+            audioRef.current.pause();
+          }
+          
+          setTimeout(() => {
+            setCurrentPage(prev => prev + 1);
+            setIsPageTurning(false);
+            setTurnDirection(null);
+          }, 300);
         } else {
           // End of book - close reader and return to library
-          handleClose();
+          if (audioRef.current) {
+            audioRef.current.pause();
+          }
+          if (book) {
+            localStorage.removeItem(`book_progress_${book.id}`);
+          }
+          onClose();
         }
       }
     };
 
     audio.addEventListener('ended', handleEnded);
     return () => audio.removeEventListener('ended', handleEnded);
-  }, [autoPlay, currentPage, totalPages]);
+  }, [autoPlay, currentPage, totalPages, book, onClose]);
 
   const goToNextPage = () => {
     if (currentPage < totalPages - 1) {
