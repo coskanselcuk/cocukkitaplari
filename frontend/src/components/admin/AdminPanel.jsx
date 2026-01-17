@@ -952,7 +952,10 @@ const AdminPanel = ({ onBack }) => {
             </div>
             
             <p className="text-gray-600 mb-6">
-              <strong>&quot;{showDeleteConfirm.title}&quot;</strong> {showDeleteConfirm.type === 'book' ? 'kitabını ve tüm sayfalarını' : 'sayfasını'} silmek üzeresiniz. Bu işlem geri alınamaz.
+              <strong>&quot;{showDeleteConfirm.title}&quot;</strong> {
+                showDeleteConfirm.type === 'book' ? 'kitabını ve tüm sayfalarını' : 
+                showDeleteConfirm.type === 'category' ? 'kategorisini' : 'sayfasını'
+              } silmek üzeresiniz. Bu işlem geri alınamaz.
             </p>
 
             <div className="flex gap-2">
@@ -963,12 +966,174 @@ const AdminPanel = ({ onBack }) => {
                 İptal
               </button>
               <button
-                onClick={() => showDeleteConfirm.type === 'book' ? deleteBook(showDeleteConfirm.id) : deletePage(showDeleteConfirm.id)}
+                onClick={() => {
+                  if (showDeleteConfirm.type === 'book') deleteBook(showDeleteConfirm.id);
+                  else if (showDeleteConfirm.type === 'category') deleteCategory(showDeleteConfirm.id);
+                  else deletePage(showDeleteConfirm.id);
+                }}
                 disabled={isSaving}
                 className="flex-1 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                 Sil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Category Modal */}
+      {showAddCategory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b">
+              <h3 className="font-bold text-lg text-gray-800">Yeni Kategori Ekle</h3>
+              <button onClick={() => setShowAddCategory(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                <X size={20} className="text-gray-600" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Adı *</label>
+                <input
+                  type="text"
+                  value={newCategory.name}
+                  onChange={(e) => setNewCategory({...newCategory, name: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
+                  placeholder="Örn: Macera Hikayeleri"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+                <input
+                  type="text"
+                  value={newCategory.slug}
+                  onChange={(e) => setNewCategory({...newCategory, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
+                  placeholder="Örn: macera-hikayeleri"
+                />
+                <p className="text-xs text-gray-500 mt-1">URL dostu isim (küçük harf, tire ile)</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">İkon</label>
+                  <input
+                    type="text"
+                    value={newCategory.icon}
+                    onChange={(e) => setNewCategory({...newCategory, icon: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white text-center text-2xl"
+                    placeholder="📚"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Yaş Grubu</label>
+                  <select
+                    value={newCategory.ageGroup}
+                    onChange={(e) => setNewCategory({...newCategory, ageGroup: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
+                  >
+                    <option value="3-5">3-5 yaş</option>
+                    <option value="4-6">4-6 yaş</option>
+                    <option value="5-7">5-7 yaş</option>
+                    <option value="6-8">6-8 yaş</option>
+                    <option value="tümü">Tüm yaşlar</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6 pt-4 border-t">
+              <button
+                onClick={() => setShowAddCategory(false)}
+                className="flex-1 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-gray-700"
+              >
+                İptal
+              </button>
+              <button
+                onClick={createCategory}
+                disabled={isSaving || !newCategory.name || !newCategory.slug}
+                className="flex-1 py-2.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                Kaydet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Category Modal */}
+      {showEditCategory && editingCategory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b">
+              <h3 className="font-bold text-lg text-gray-800">Kategoriyi Düzenle</h3>
+              <button onClick={() => { setShowEditCategory(false); setEditingCategory(null); }} className="p-2 hover:bg-gray-100 rounded-full">
+                <X size={20} className="text-gray-600" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Adı</label>
+                <input
+                  type="text"
+                  value={editCategory.name}
+                  onChange={(e) => setEditCategory({...editCategory, name: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                <input
+                  type="text"
+                  value={editCategory.slug}
+                  onChange={(e) => setEditCategory({...editCategory, slug: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">İkon</label>
+                  <input
+                    type="text"
+                    value={editCategory.icon}
+                    onChange={(e) => setEditCategory({...editCategory, icon: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white text-center text-2xl"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Yaş Grubu</label>
+                  <select
+                    value={editCategory.ageGroup}
+                    onChange={(e) => setEditCategory({...editCategory, ageGroup: e.target.value})}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
+                  >
+                    <option value="3-5">3-5 yaş</option>
+                    <option value="4-6">4-6 yaş</option>
+                    <option value="5-7">5-7 yaş</option>
+                    <option value="6-8">6-8 yaş</option>
+                    <option value="tümü">Tüm yaşlar</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6 pt-4 border-t">
+              <button
+                onClick={() => { setShowEditCategory(false); setEditingCategory(null); }}
+                className="flex-1 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-gray-700"
+              >
+                İptal
+              </button>
+              <button
+                onClick={updateCategory}
+                disabled={isSaving || !editCategory.name}
+                className="flex-1 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                Güncelle
               </button>
             </div>
           </div>
