@@ -139,3 +139,80 @@ async def create_page(book_id: str, page_data: PageCreate):
     await db.books.update_one({"id": book_id}, {"$set": {"totalPages": total_pages}})
     
     return PageResponse(**doc)
+
+
+@router.put("/{book_id}", response_model=BookResponse)
+async def update_book(book_id: str, book_data: BookUpdate):
+    """Update a book"""
+    db = get_db()
+    
+    # Check if book exists
+    book = await db.books.find_one({"id": book_id}, {"_id": 0})
+    if not book:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    # Build update dict with only provided fields
+    update_data = {k: v for k, v in book_data.model_dump().items() if v is not None}
+    update_data["updatedAt"] = datetime.now(timezone.utc).isoformat()
+    
+    if update_data:
+        await db.books.update_one({"id": book_id}, {"$set": update_data})
+    
+    # Return updated book
+    updated_book = await db.books.find_one({"id": book_id}, {"_id": 0})
+    return BookResponse(**updated_book)
+
+
+@router.put("/{book_id}/pages/{page_id}", response_model=PageResponse)
+async def update_page(book_id: str, page_id: str, page_data: PageUpdate):
+    """Update a page"""
+    db = get_db()
+    
+    # Check if page exists
+    page = await db.pages.find_one({"id": page_id, "bookId": book_id}, {"_id": 0})
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+    
+    # Build update dict with only provided fields
+    update_data = {k: v for k, v in page_data.model_dump().items() if v is not None}
+    
+    if update_data:
+        await db.pages.update_one({"id": page_id}, {"$set": update_data})
+    
+    # Return updated page
+    updated_page = await db.pages.find_one({"id": page_id}, {"_id": 0})
+    return PageResponse(**updated_page)
+
+
+@router.delete("/{book_id}")
+async def delete_book(book_id: str):
+    """Delete a book and all its pages"""
+    db = get_db()
+    
+    # Delete pages first
+    await db.pages.delete_many({"bookId": book_id})
+    
+    # Delete book
+    result = await db.books.delete_one({"id": book_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    return {"message": "Kitap başarıyla silindi"}
+
+
+@router.delete("/{book_id}/pages/{page_id}")
+async def delete_page(book_id: str, page_id: str):
+    """Delete a page"""
+    db = get_db()
+    
+    result = await db.pages.delete_one({"id": page_id, "bookId": book_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Page not found")
+    
+    # Update book's total pages
+    total_pages = await db.pages.count_documents({"bookId": book_id})
+    await db.books.update_one({"id": book_id}, {"$set": {"totalPages": total_pages}})
+    
+    return {"message": "Sayfa başarıyla silindi"}
