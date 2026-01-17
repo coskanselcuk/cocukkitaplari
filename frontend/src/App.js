@@ -65,15 +65,6 @@ function AppContent() {
       setIsLoadingBook(false);
     }, 500);
   };
-    setShowBookInfo(false);
-    setIsLoadingBook(true);
-    
-    // Simulate loading
-    setTimeout(() => {
-      setIsLoadingBook(false);
-      setShowReader(true);
-    }, 2000);
-  };
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
