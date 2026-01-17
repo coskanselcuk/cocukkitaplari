@@ -1,12 +1,30 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel
+from datetime import datetime, timezone
 import os
 
 from models.book import (
     Book, BookCreate, BookResponse, BooksListResponse,
     Page, PageCreate, PageResponse, BookPagesResponse
 )
+
+
+class BookUpdate(BaseModel):
+    title: Optional[str] = None
+    author: Optional[str] = None
+    category: Optional[str] = None
+    coverImage: Optional[str] = None
+    description: Optional[str] = None
+    ageGroup: Optional[str] = None
+    duration: Optional[str] = None
+
+
+class PageUpdate(BaseModel):
+    text: Optional[str] = None
+    image: Optional[str] = None
+    pageNumber: Optional[int] = None
 
 router = APIRouter(prefix="/books", tags=["books"])
 
