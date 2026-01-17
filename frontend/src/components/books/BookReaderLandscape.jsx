@@ -184,6 +184,13 @@ const BookReaderLandscape = ({ book, onClose }) => {
     if (autoPlay) {
       preparePageAudio(currentPage);
     }
+    
+    // Fallback timeout for image loading - if image doesn't load in 5 seconds, proceed anyway
+    const imageTimeout = setTimeout(() => {
+      setIsImageLoaded(true);
+    }, 5000);
+    
+    return () => clearTimeout(imageTimeout);
   }, [currentPage, autoPlay, preparePageAudio]);
 
   // Start playback ONLY when both image and audio are ready
