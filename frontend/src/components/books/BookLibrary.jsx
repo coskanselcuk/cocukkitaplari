@@ -1,30 +1,57 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Grid, List, Filter, BookOpen } from 'lucide-react';
+import { ArrowLeft, Grid, List, BookOpen, Search } from 'lucide-react';
 import { books, categories } from '../../data/mockData';
 import BookCard from './BookCard';
 
 const BookLibrary = ({ category, onBack, onBookSelect }) => {
   const [viewMode, setViewMode] = useState('grid');
   const [selectedAge, setSelectedAge] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   
-  const filteredBooks = category 
+  let filteredBooks = category 
     ? books.filter(book => book.category === category.id)
     : books;
 
-  const ageFilteredBooks = selectedAge === 'all' 
-    ? filteredBooks 
-    : filteredBooks.filter(book => book.ageGroup === selectedAge);
+  // Filter by age
+  if (selectedAge !== 'all') {
+    filteredBooks = filteredBooks.filter(book => book.ageGroup === selectedAge);
+  }
+
+  // Filter by search
+  if (searchQuery) {
+    filteredBooks = filteredBooks.filter(book => 
+      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      book.author.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }
 
   const ageGroups = ['all', '3-5', '4-6', '5-7', '6-8', '6-9', '7-10'];
 
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-indigo-900 via-indigo-800 to-indigo-900 pb-24 relative">
+      {/* Stars background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(80)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full"
+            style={{
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              opacity: Math.random() * 0.8 + 0.2,
+              animation: `twinkle ${2 + Math.random() * 3}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 2}s`
+            }}
+          />
+        ))}
+      </div>
+
       {/* Header */}
-      <div className="sticky top-0 z-40 bg-gradient-to-b from-cyan-500 to-cyan-500/80 backdrop-blur-sm px-4 py-4 safe-area-top">
+      <div className="sticky top-0 z-40 bg-gradient-to-b from-indigo-900/95 to-indigo-900/80 backdrop-blur-sm px-4 py-4 safe-area-top">
         <div className="flex items-center justify-between mb-4">
           <button 
             onClick={onBack}
-            className="bg-white/20 backdrop-blur-sm rounded-full p-2 text-white"
+            className="bg-white/10 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/20 transition-colors"
           >
             <ArrowLeft size={24} />
           </button>
@@ -36,21 +63,33 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
           <div className="flex gap-2">
             <button 
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white text-cyan-600' : 'bg-white/20 text-white'}`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white text-indigo-600' : 'bg-white/10 text-white hover:bg-white/20'}`}
             >
               <Grid size={20} />
             </button>
             <button 
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white text-cyan-600' : 'bg-white/20 text-white'}`}
+              className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white text-indigo-600' : 'bg-white/10 text-white hover:bg-white/20'}`}
             >
               <List size={20} />
             </button>
           </div>
         </div>
+
+        {/* Search bar */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50" size={18} />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Kitap ara..."
+            className="w-full bg-white/10 text-white placeholder-white/50 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-orange-400"
+          />
+        </div>
         
         {/* Age Filter */}
-        <div className="overflow-x-auto scrollbar-hide">
+        <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
           <div className="flex gap-2 pb-2">
             {ageGroups.map(age => (
               <button
@@ -58,8 +97,8 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
                 onClick={() => setSelectedAge(age)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
                   selectedAge === age 
-                    ? 'bg-orange-500 text-white shadow-lg' 
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                    ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' 
+                    : 'bg-white/10 text-white hover:bg-white/20'
                 }`}
               >
                 {age === 'all' ? 'Tümü' : `${age} yaş`}
@@ -70,10 +109,12 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
       </div>
       
       {/* Books Grid/List */}
-      <div className="px-4 py-4">
+      <div className="px-4 py-4 relative z-10">
+        <p className="text-white/60 text-sm mb-4">{filteredBooks.length} kitap bulundu</p>
+        
         {viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {ageFilteredBooks.map(book => (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            {filteredBooks.map(book => (
               <BookCard 
                 key={book.id} 
                 book={book} 
@@ -84,24 +125,24 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
           </div>
         ) : (
           <div className="space-y-4">
-            {ageFilteredBooks.map(book => (
+            {filteredBooks.map(book => (
               <button
                 key={book.id}
                 onClick={() => onBookSelect(book)}
-                className="w-full bg-white rounded-2xl p-4 flex gap-4 shadow-lg hover:shadow-xl transition-all duration-300 text-left"
+                className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex gap-4 hover:bg-white/15 transition-all duration-300 text-left"
               >
                 <img 
                   src={book.coverImage} 
                   alt={book.title}
-                  className="w-20 h-28 object-cover rounded-xl"
+                  className="w-20 h-28 object-cover rounded-xl shadow-lg"
                 />
                 <div className="flex-1">
-                  <h3 className="font-bold text-gray-800 mb-1">{book.title}</h3>
-                  <p className="text-gray-500 text-sm mb-2">{book.author}</p>
-                  <p className="text-gray-600 text-sm mb-2 line-clamp-2">{book.description}</p>
+                  <h3 className="font-bold text-white mb-1">{book.title}</h3>
+                  <p className="text-white/60 text-sm mb-2">{book.author}</p>
+                  <p className="text-white/50 text-sm mb-2 line-clamp-2">{book.description}</p>
                   <div className="flex items-center gap-4 text-sm">
-                    <span className="text-cyan-600 font-semibold">{book.duration}</span>
-                    <span className="text-orange-500 font-semibold">{book.ageGroup} yaş</span>
+                    <span className="text-cyan-400 font-semibold">{book.duration}</span>
+                    <span className="text-orange-400 font-semibold">{book.ageGroup} yaş</span>
                   </div>
                 </div>
               </button>
@@ -111,14 +152,22 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
       </div>
       
       {/* Empty State */}
-      {ageFilteredBooks.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20">
-          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4">
-            <BookOpen className="text-white/60" size={40} />
+      {filteredBooks.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 relative z-10">
+          <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-4">
+            <BookOpen className="text-white/40" size={40} />
           </div>
-          <p className="text-white/80 text-lg">Bu kategoride kitap bulunamadı</p>
+          <p className="text-white/60 text-lg">Kitap bulunamadı</p>
         </div>
       )}
+
+      {/* Add twinkle animation */}
+      <style>{`
+        @keyframes twinkle {
+          0%, 100% { opacity: 0.2; }
+          50% { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 };
