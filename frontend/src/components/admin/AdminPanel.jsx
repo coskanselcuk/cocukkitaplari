@@ -580,17 +580,27 @@ const AdminPanel = ({ onBack }) => {
             </div>
 
             <div className="space-y-4">
-              <div className="bg-orange-50 rounded-lg p-3">
-                <p className="text-sm text-orange-700 font-medium">
-                  Sayfa Numarası: <span className="text-orange-600 font-bold">{bookPages.length + 1}</span>
-                </p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sayfa Konumu</label>
+                <select
+                  value={newPage.insertPosition}
+                  onChange={(e) => setNewPage({...newPage, insertPosition: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                >
+                  <option value="end">Sona Ekle (Sayfa {bookPages.length + 1})</option>
+                  <option value="start">Başa Ekle (Sayfa 1)</option>
+                  {bookPages.map((_, idx) => (
+                    <option key={idx} value={String(idx + 1)}>Sayfa {idx + 1}'den sonra</option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">Sayfa numaraları otomatik güncellenecek</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Metin *</label>
                 <textarea
                   value={newPage.text}
                   onChange={(e) => setNewPage({...newPage, text: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   rows={4}
                   placeholder="Bu sayfada anlatılacak hikaye metni..."
                 />
@@ -601,7 +611,7 @@ const AdminPanel = ({ onBack }) => {
                   type="text"
                   value={newPage.image}
                   onChange={(e) => setNewPage({...newPage, image: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="https://images.unsplash.com/..."
                 />
                 <p className="text-xs text-gray-500 mt-1">Sayfa için illüstrasyon resmi URL'si</p>
