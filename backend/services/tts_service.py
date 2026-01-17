@@ -3,6 +3,11 @@ import os
 import base64
 import logging
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+ROOT_DIR = Path(__file__).parent.parent
+load_dotenv(ROOT_DIR / '.env')
 
 logger = logging.getLogger(__name__)
 
@@ -12,9 +17,9 @@ client = None
 
 if elevenlabs_api_key:
     client = ElevenLabs(api_key=elevenlabs_api_key)
-    logger.info("ElevenLabs client initialized")
+    logger.info("ElevenLabs client initialized successfully")
 else:
-    logger.warning("ELEVENLABS_API_KEY not found")
+    logger.warning("ELEVENLABS_API_KEY not found in environment")
 
 # Turkish child-friendly voice settings
 # Using a warm, friendly voice suitable for children's stories
