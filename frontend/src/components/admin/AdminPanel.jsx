@@ -20,10 +20,13 @@ const AdminPanel = ({ onBack }) => {
   const [showAddPage, setShowAddPage] = useState(false);
   const [showEditBook, setShowEditBook] = useState(false);
   const [showEditPage, setShowEditPage] = useState(false);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [showEditCategory, setShowEditCategory] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [audioGenProgress, setAudioGenProgress] = useState('');
   const [editingPage, setEditingPage] = useState(null);
+  const [editingCategory, setEditingCategory] = useState(null);
 
   // New book form
   const [newBook, setNewBook] = useState({
