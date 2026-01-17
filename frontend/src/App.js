@@ -75,8 +75,8 @@ function App() {
           <div className="bg-white rounded-3xl p-6 shadow-2xl mb-6">
             <div className="text-center">
               <h1 className="text-4xl font-black">
-                <span className="text-cyan-500">TRT</span>
-                <span className="text-orange-500 ml-1">Çocuk</span>
+                <span className="text-cyan-500">Çocuk</span>
+                <span className="text-orange-500 ml-1">Kitapları</span>
               </h1>
               <p className="text-orange-500 font-bold text-2xl mt-2">Kitaplık</p>
             </div>
