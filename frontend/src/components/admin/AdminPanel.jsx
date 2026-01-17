@@ -45,6 +45,24 @@ const AdminPanel = ({ onBack }) => {
     image: ''
   });
 
+  // Edit book form
+  const [editBook, setEditBook] = useState({
+    title: '',
+    author: '',
+    category: '',
+    coverImage: '',
+    description: '',
+    ageGroup: '',
+    duration: ''
+  });
+
+  // Edit page form
+  const [editPage, setEditPage] = useState({
+    text: '',
+    image: '',
+    pageNumber: 1
+  });
+
   useEffect(() => {
     fetchData();
   }, []);
