@@ -59,23 +59,60 @@ const BookReaderLandscape = ({ book, onClose }) => {
     fetchPages();
   }, [book?.id]);
 
-  // Save settings
+  // Save settings (keep in localStorage - these are user preferences)
   useEffect(() => { localStorage.setItem('reading_autoPlay', JSON.stringify(autoPlay)); }, [autoPlay]);
   useEffect(() => { localStorage.setItem('reading_resumeContinue', JSON.stringify(resumeContinue)); }, [resumeContinue]);
 
-  // Load/save progress
+  // Load progress from backend
   useEffect(() => {
-    if (resumeContinue && book) {
-      const saved = localStorage.getItem(`book_progress_${book.id}`);
-      if (saved) setCurrentPage(JSON.parse(saved).page);
-    }
-  }, [book, resumeContinue]);
+    const loadProgress = async () => {
+      if (!resumeContinue || !book?.id || progressLoaded) return;
+      
+      try {
+        const response = await progressApi.getUserProgress(DEFAULT_USER_ID);
+        const bookProgress = response.books?.find(b => b.bookId === book.id);
+        if (bookProgress && bookProgress.currentPage > 0) {
+          setCurrentPage(bookProgress.currentPage);
+        }
+      } catch (error) {
+        // Fallback to localStorage if backend fails
+        console.log('Using localStorage for progress');
+        const saved = localStorage.getItem(`book_progress_${book.id}`);
+        if (saved) setCurrentPage(JSON.parse(saved).page);
+      }
+      setProgressLoaded(true);
+    };
+    
+    loadProgress();
+  }, [book?.id, resumeContinue, progressLoaded]);
 
+  // Save progress to backend (debounced)
+  const saveProgressRef = useRef(null);
   useEffect(() => {
-    if (resumeContinue && book) {
-      localStorage.setItem(`book_progress_${book.id}`, JSON.stringify({ page: currentPage }));
+    if (!resumeContinue || !book?.id || !progressLoaded) return;
+    
+    // Clear previous timeout
+    if (saveProgressRef.current) {
+      clearTimeout(saveProgressRef.current);
     }
-  }, [book, currentPage, resumeContinue]);
+    
+    // Debounce save to avoid too many API calls
+    saveProgressRef.current = setTimeout(async () => {
+      try {
+        await progressApi.saveProgress(DEFAULT_USER_ID, book.id, currentPage);
+      } catch (error) {
+        // Fallback to localStorage if backend fails
+        console.log('Saving to localStorage');
+        localStorage.setItem(`book_progress_${book.id}`, JSON.stringify({ page: currentPage }));
+      }
+    }, 1000); // Save after 1 second of no page changes
+    
+    return () => {
+      if (saveProgressRef.current) {
+        clearTimeout(saveProgressRef.current);
+      }
+    };
+  }, [book?.id, currentPage, resumeContinue, progressLoaded]);
 
   // Stop audio when page changes
   useEffect(() => {
