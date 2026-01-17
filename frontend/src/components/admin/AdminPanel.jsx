@@ -411,7 +411,7 @@ const AdminPanel = ({ onBack }) => {
 
                   <div className="space-y-3 max-h-80 overflow-y-auto">
                     {bookPages.length === 0 ? (
-                      <p className="text-gray-500 text-center py-8">Henüz sayfa eklenmemiş. "Sayfa Ekle" butonuna tıklayın.</p>
+                      <p className="text-gray-500 text-center py-8">Henüz sayfa eklenmemiş. Sayfa Ekle butonuna tıklayın.</p>
                     ) : (
                       bookPages.map((page, idx) => (
                         <div key={idx} className="p-3 border rounded-lg">
