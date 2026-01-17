@@ -46,6 +46,21 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Local Image Upload & Loading Animations
+- **Local Image Upload**: Implemented file upload functionality in admin panel
+  - New ImageUpload component with drag-and-drop support
+  - Toggle between "Yükle" (Upload) and "URL" modes
+  - Supports JPG, PNG, GIF, WEBP formats (max 10MB)
+  - Backend API: POST /api/upload/image, GET/DELETE /api/upload/images/{filename}
+  - Files stored in /app/backend/uploads/ directory
+  - Integrated into Add Book, Edit Book, Add Page, Edit Page modals
+- **Skeleton Loading Animations**: Added shimmer loading states
+  - BookCardSkeleton component with shimmer effect
+  - BookLibrary shows skeleton grid while fetching books
+  - SearchModal shows skeleton grid while loading data
+  - Matches the app's visual style (semi-transparent cards)
+- **Testing**: All 7 upload API tests passed, all frontend features verified
+
 ### January 17, 2026 - Search Fix & Premium Badges
 - **Search Fixed**: SearchModal now fetches from API instead of mock data
 - **"Annemin Elleri"** and all other books now searchable
@@ -133,7 +148,10 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 │   │   ├── book_routes.py    # GET /api/books, /api/books/{id}/pages
 │   │   ├── category_routes.py # GET /api/categories
 │   │   ├── progress_routes.py # Reading progress CRUD
-│   │   └── tts_routes.py     # TTS API endpoints
+│   │   ├── tts_routes.py     # TTS API endpoints
+│   │   ├── auth_routes.py    # Google OAuth authentication
+│   │   └── upload_routes.py  # Image upload API (NEW)
+│   ├── uploads/              # Uploaded images directory (NEW)
 │   ├── services/
 │   │   └── tts_service.py    # ElevenLabs integration
 │   ├── seed_data.py          # Database seeder
@@ -142,14 +160,18 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 └── frontend/
     ├── src/
     │   ├── components/
+    │   │   ├── admin/
+    │   │   │   ├── AdminPanel.jsx    # Content management
+    │   │   │   └── ImageUpload.jsx   # Drag-drop image upload (NEW)
     │   │   ├── books/
     │   │   │   ├── BookReaderLandscape.jsx # Main reader with TTS
-    │   │   │   ├── CompletionCelebration.jsx # NEW: Celebration screen
+    │   │   │   ├── BookCardSkeleton.jsx    # Skeleton loading (NEW)
+    │   │   │   ├── CompletionCelebration.jsx # Celebration screen
     │   │   │   └── ...
     │   │   └── home/
     │   │       └── IslandMap.jsx # Category islands
     │   ├── services/
-    │   │   └── api.js          # NEW: API service layer
+    │   │   └── api.js          # API service layer
     │   ├── data/mockData.js    # Fallback mock data
     │   └── App.js
     └── .env                    # REACT_APP_BACKEND_URL
@@ -209,13 +231,13 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 ### P4 - Enhancement Ideas (Backlog)
 - [ ] Bulk audio generation - select multiple books and generate TTS for all at once
 - [ ] Reading streak feature - show consecutive reading days with star rewards
-- [ ] **Local image upload for book covers and pages** (instead of URL only) - HIGH PRIORITY for CMS usability
+- [x] **Local image upload for book covers and pages** ✅ COMPLETED
 - [ ] Drag-and-drop page reordering in admin panel
 - [ ] Book preview mode in admin before publishing
 
 ## Testing Notes
-- Backend tests: `/app/tests/test_backend_api.py`
-- Test results: `/app/test_reports/iteration_1.json`
+- Backend tests: `/app/tests/test_backend_api.py`, `/app/tests/test_upload_api.py`
+- Test results: `/app/test_reports/iteration_3.json` (latest)
 - Playwright has issues with external images (ORB blocking in test env)
 
 ## Files Reference
