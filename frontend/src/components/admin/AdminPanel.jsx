@@ -288,7 +288,11 @@ const AdminPanel = ({ onBack }) => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg">
+          <button 
+            onClick={onBack} 
+            className="p-2 hover:bg-gray-100 rounded-lg text-gray-700"
+            data-testid="admin-back-btn"
+          >
             <ArrowLeft size={24} />
           </button>
           <h1 className="text-xl font-bold text-gray-800">İçerik Yönetimi</h1>
