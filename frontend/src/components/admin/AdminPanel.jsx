@@ -794,7 +794,7 @@ const AdminPanel = ({ onBack }) => {
             </div>
             
             <p className="text-gray-600 mb-6">
-              <strong>"{showDeleteConfirm.title}"</strong> {showDeleteConfirm.type === 'book' ? 'kitabını ve tüm sayfalarını' : 'sayfasını'} silmek üzeresiniz. Bu işlem geri alınamaz.
+              <strong>&quot;{showDeleteConfirm.title}&quot;</strong> {showDeleteConfirm.type === 'book' ? 'kitabını ve tüm sayfalarını' : 'sayfasını'} silmek üzeresiniz. Bu işlem geri alınamaz.
             </p>
 
             <div className="flex gap-2">
