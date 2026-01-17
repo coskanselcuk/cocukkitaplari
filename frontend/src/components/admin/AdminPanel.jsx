@@ -67,6 +67,24 @@ const AdminPanel = ({ onBack }) => {
     pageNumber: 1
   });
 
+  // New category form
+  const [newCategory, setNewCategory] = useState({
+    name: '',
+    slug: '',
+    icon: '📚',
+    ageGroup: '4-6',
+    sortOrder: 0
+  });
+
+  // Edit category form
+  const [editCategory, setEditCategory] = useState({
+    name: '',
+    slug: '',
+    icon: '',
+    ageGroup: '',
+    sortOrder: 0
+  });
+
   useEffect(() => {
     fetchData();
   }, []);
