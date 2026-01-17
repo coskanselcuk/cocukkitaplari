@@ -260,14 +260,16 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
           Ebeveyn Paneli
         </button>
         
-        {/* Admin Panel Button */}
-        <button 
-          onClick={onAdminPanel}
-          className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-2xl py-4 font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
-        >
-          <Settings size={20} />
-          İçerik Yönetimi
-        </button>
+        {/* Admin Panel Button - Only visible to admin (coskanselcuk@gmail.com) */}
+        {isAdmin && (
+          <button 
+            onClick={onAdminPanel}
+            className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-2xl py-4 font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            <Settings size={20} />
+            İçerik Yönetimi
+          </button>
+        )}
       </div>
     </div>
   );
