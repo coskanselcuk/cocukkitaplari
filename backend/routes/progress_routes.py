@@ -54,7 +54,7 @@ async def save_progress(data: ProgressUpdateRequest):
     now = datetime.now(timezone.utc).isoformat()
     
     # Upsert progress
-    result = await db.reading_progress.update_one(
+    await db.reading_progress.update_one(
         {"userId": data.userId, "bookId": data.bookId},
         {
             "$set": {
