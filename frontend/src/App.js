@@ -54,6 +54,18 @@ function AppContent() {
     fetchBooks();
   }, []);
 
+  // Initialize in-app purchases for native apps
+  useEffect(() => {
+    if (isNativeApp()) {
+      initializeStore((result) => {
+        if (result.success) {
+          console.log('Purchase successful, refreshing user data');
+          // Could refresh user subscription status here
+        }
+      });
+    }
+  }, []);
+
   // Simulate splash screen
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 2500);
