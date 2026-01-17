@@ -46,6 +46,19 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Premium Content UI & Admin Access Control
+- **Premium Content Visibility**: Non-premium users now clearly see locked content
+  - Lock icon overlay on premium book covers with darkened image
+  - Play button hidden for locked content
+  - Book info modal shows "Premium'a Abone Ol" (Subscribe) button instead of "Başla"
+  - Premium badge prominently displayed
+- **Admin Access Control**: Restricted admin panel to coskanselcuk@gmail.com only
+  - Added `isAdmin` check in AuthContext
+  - "İçerik Yönetimi" button hidden for non-admin users
+- **Content Cleanup**: Reorganized to 5 free + 5 premium books
+  - Free: Rafadan Tayfa, Ege ile Gaga, Annemin Elleri, Pırıl ve Sihirli Orman, Minik Bulut
+  - Premium: Ormanın Şarkısı, Küçük Sincap, Keloğlan ve Altın Elma, Ay Prensesi, Deniz Altı Macerası
+
 ### January 17, 2026 - Local Image Upload & Loading Animations
 - **Local Image Upload**: Implemented file upload functionality in admin panel
   - New ImageUpload component with drag-and-drop support
