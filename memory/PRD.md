@@ -44,6 +44,13 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Admin Panel CRUD
+- **Full CRUD for Books**: Create, Read, Update, Delete books via Admin Panel
+- **Full CRUD for Pages**: Create, Read, Update, Delete pages for each book
+- **Backend endpoints**: PUT /api/books/{id}, PUT /api/books/{id}/pages/{page_id}, DELETE endpoints
+- **UI modals**: Edit Book modal, Edit Page modal, Delete confirmation dialog
+- **Turkish UI**: All labels and messages in Turkish (Düzenle, Sil, Güncelle, etc.)
+
 ### January 17, 2026 - Auto-Play Bug Fix
 - **Fixed**: Critical auto-play bug where pages wouldn't advance after audio ended
 - **Root Cause**: React closure issue - `handleAudioEnded` captured stale state values
