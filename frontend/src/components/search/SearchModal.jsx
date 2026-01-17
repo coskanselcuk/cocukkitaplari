@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, Filter, Loader2 } from 'lucide-react';
+import { Search, X, Filter } from 'lucide-react';
 import { booksApi, categoriesApi } from '../../services/api';
 import BookCard from '../books/BookCard';
+import { BookCardSkeletonGrid } from '../books/BookCardSkeleton';
 
 const SearchModal = ({ isOpen, onClose, onBookSelect }) => {
   const [query, setQuery] = useState('');
@@ -101,9 +102,9 @@ const SearchModal = ({ isOpen, onClose, onBookSelect }) => {
       {/* Results */}
       <div className="px-4 py-4 overflow-y-auto" style={{ height: 'calc(100vh - 160px)' }}>
         {isLoading ? (
-          <div className="text-center py-10">
-            <Loader2 className="mx-auto text-white/80 mb-4 animate-spin" size={48} />
-            <p className="text-white/80 text-lg">Yükleniyor...</p>
+          <div data-testid="search-loading">
+            <div className="h-4 w-28 rounded bg-white/20 mb-4 animate-pulse" />
+            <BookCardSkeletonGrid count={6} />
           </div>
         ) : query.length === 0 && selectedCategory === 'all' ? (
           <div className="text-center py-10">

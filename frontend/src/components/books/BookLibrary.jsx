@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, Grid, List, BookOpen, Search, Loader2 } from 'lucide-react';
+import { ArrowLeft, Grid, List, BookOpen, Search } from 'lucide-react';
 import { booksApi, categoriesApi } from '../../services/api';
 import { books as mockBooks, categories as mockCategories } from '../../data/mockData';
 import BookCard from './BookCard';
+import { BookCardSkeletonGrid } from './BookCardSkeleton';
 
 const BookLibrary = ({ category, onBack, onBookSelect }) => {
   const [viewMode, setViewMode] = useState('grid');
@@ -137,10 +138,40 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
       {/* Books Grid/List */}
       <div className="px-4 py-4 relative z-10">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="w-12 h-12 text-orange-400 animate-spin mb-4" />
-            <p className="text-white/60">Kitaplar yükleniyor...</p>
-          </div>
+          <>
+            <div className="h-4 w-24 rounded bg-white/10 mb-4 animate-pulse" />
+            {viewMode === 'grid' ? (
+              <BookCardSkeletonGrid count={8} />
+            ) : (
+              <div className="space-y-4" data-testid="list-skeleton">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex gap-4">
+                    <div className="w-20 h-28 rounded-xl bg-white/5 skeleton-shimmer" />
+                    <div className="flex-1 space-y-3">
+                      <div className="h-4 w-3/4 rounded bg-white/10 skeleton-shimmer" />
+                      <div className="h-3 w-1/2 rounded bg-white/10 skeleton-shimmer" />
+                      <div className="h-3 w-full rounded bg-white/10 skeleton-shimmer" />
+                      <div className="flex gap-4">
+                        <div className="h-3 w-16 rounded bg-white/10 skeleton-shimmer" />
+                        <div className="h-3 w-16 rounded bg-white/10 skeleton-shimmer" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                <style>{`
+                  @keyframes shimmer {
+                    0% { background-position: -200% 0; }
+                    100% { background-position: 200% 0; }
+                  }
+                  .skeleton-shimmer {
+                    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+                    background-size: 200% 100%;
+                    animation: shimmer 1.5s ease-in-out infinite;
+                  }
+                `}</style>
+              </div>
+            )}
+          </>
         ) : (
           <>
             <p className="text-white/60 text-sm mb-4">{filteredBooks.length} kitap bulundu</p>
