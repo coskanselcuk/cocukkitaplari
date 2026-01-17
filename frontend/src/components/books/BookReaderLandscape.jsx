@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   Music, 
   VolumeX,
@@ -27,6 +27,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [pages, setPages] = useState(mockPages);
   const [isLoadingPages, setIsLoadingPages] = useState(true);
+  const [pendingAutoStart, setPendingAutoStart] = useState(false);
   
   const [autoPlay, setAutoPlay] = useState(() => {
     const saved = localStorage.getItem('reading_autoPlay');
@@ -38,15 +39,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
   });
 
   const audioRef = useRef(null);
-  const currentPageRef = useRef(currentPage);
-  const hasAutoStartedRef = useRef(false);
-  
   const totalPages = pages.length;
-
-  // Keep ref in sync
-  useEffect(() => {
-    currentPageRef.current = currentPage;
-  }, [currentPage]);
 
   // Fetch pages from API
   useEffect(() => {
@@ -96,9 +89,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
     }
   }, [book, currentPage, resumeContinue]);
 
-  // CRITICAL: Stop audio and reset state when page changes
+  // When page changes: stop audio and mark pending auto-start
   useEffect(() => {
-    // Stop any playing audio immediately
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -106,24 +98,28 @@ const BookReaderLandscape = ({ book, onClose }) => {
     }
     setIsPlaying(false);
     setIsImageLoaded(false);
-    hasAutoStartedRef.current = false;
-  }, [currentPage]);
+    
+    // If autoPlay is on, mark that we need to auto-start when image loads
+    if (autoPlay) {
+      setPendingAutoStart(true);
+    }
+  }, [currentPage, autoPlay]);
 
-  // Auto-start audio when image loads (only if autoPlay is ON and hasn't auto-started yet)
+  // Auto-start when image loads AND we have a pending auto-start
   useEffect(() => {
-    if (!autoPlay || !isImageLoaded || hasAutoStartedRef.current) return;
+    if (!pendingAutoStart || !isImageLoaded) return;
     
     const pageData = pages[currentPage];
     if (!pageData?.audioUrl || !audioRef.current) return;
 
-    hasAutoStartedRef.current = true;
+    setPendingAutoStart(false);
     audioRef.current.src = pageData.audioUrl;
     audioRef.current.play()
       .then(() => setIsPlaying(true))
       .catch(() => setIsPlaying(false));
-  }, [autoPlay, isImageLoaded, currentPage, pages]);
+  }, [pendingAutoStart, isImageLoaded, currentPage, pages]);
 
-  // Handle audio ended - auto advance if autoPlay is on
+  // Handle audio ended
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -131,30 +127,38 @@ const BookReaderLandscape = ({ book, onClose }) => {
     const handleEnded = () => {
       setIsPlaying(false);
       
-      if (autoPlay && currentPageRef.current < totalPages - 1) {
-        // Auto advance to next page
-        changePage(currentPageRef.current + 1, 'next');
-      } else if (currentPageRef.current >= totalPages - 1) {
-        setShowCelebration(true);
-      }
+      // Use functional update to get current state
+      setCurrentPage(prevPage => {
+        if (autoPlay && prevPage < totalPages - 1) {
+          // Trigger page change animation
+          setTurnDirection('next');
+          setIsPageTurning(true);
+          setTimeout(() => {
+            setIsPageTurning(false);
+            setTurnDirection(null);
+          }, 250);
+          return prevPage + 1;
+        } else if (prevPage >= totalPages - 1) {
+          setShowCelebration(true);
+        }
+        return prevPage;
+      });
     };
 
     audio.addEventListener('ended', handleEnded);
     return () => audio.removeEventListener('ended', handleEnded);
   }, [autoPlay, totalPages]);
 
-  // Unified page change function - ALWAYS stops audio first
-  const changePage = (newPage, direction) => {
+  // Navigation functions
+  const goToPage = useCallback((newPage, direction) => {
     if (newPage < 0 || newPage >= totalPages) return;
     
-    // Stop current audio
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
     setIsPlaying(false);
     
-    // Animate transition
     setTurnDirection(direction);
     setIsPageTurning(true);
     
@@ -163,11 +167,11 @@ const BookReaderLandscape = ({ book, onClose }) => {
       setIsPageTurning(false);
       setTurnDirection(null);
     }, 250);
-  };
+  }, [totalPages]);
 
   const goToNextPage = () => {
     if (currentPage < totalPages - 1) {
-      changePage(currentPage + 1, 'next');
+      goToPage(currentPage + 1, 'next');
     } else {
       setShowCelebration(true);
     }
@@ -175,11 +179,11 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   const goToPrevPage = () => {
     if (currentPage > 0) {
-      changePage(currentPage - 1, 'prev');
+      goToPage(currentPage - 1, 'prev');
     }
   };
 
-  // Toggle play/pause - works regardless of autoPlay setting
+  // Toggle play/pause
   const togglePlayPause = () => {
     if (!audioRef.current) return;
     const pageData = pages[currentPage];
@@ -189,8 +193,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
       setIsPlaying(false);
     } else {
       if (pageData?.audioUrl) {
-        // If src is empty or different, set it
-        if (!audioRef.current.src || !audioRef.current.src.startsWith('data:')) {
+        // Only set src if not already set
+        if (!audioRef.current.src || audioRef.current.src === '') {
           audioRef.current.src = pageData.audioUrl;
         }
         audioRef.current.play()
@@ -213,9 +217,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
   };
 
   const handleClose = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
+    if (audioRef.current) audioRef.current.pause();
     if (book && currentPage >= totalPages - 1) {
       localStorage.removeItem(`book_progress_${book.id}`);
     }
@@ -279,7 +281,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
         </div>
       </div>
 
-      {/* Content Area - flex-1 to fill remaining space */}
+      {/* Content Area */}
       <div className="flex-1 px-4 pb-4 overflow-hidden">
         {currentPageData && (
           <div className={`h-full flex flex-col transition-all duration-250 ${isPageTurning ? (turnDirection === 'next' ? '-translate-x-4 opacity-50' : 'translate-x-4 opacity-50') : ''}`}>
@@ -298,7 +300,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
                 </div>
               )}
               
-              {/* Swipe hint */}
               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/40 text-white text-xs px-3 py-1 rounded-full flex items-center gap-2 opacity-60">
                 <ChevronLeft size={14} />
                 <span>Kaydır</span>
@@ -316,11 +317,10 @@ const BookReaderLandscape = ({ book, onClose }) => {
         )}
       </div>
 
-      {/* Bottom Controls - fixed height, no overlap */}
+      {/* Bottom Controls */}
       <div className={`flex-shrink-0 p-4 pt-0 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <div className="bg-white rounded-2xl shadow-xl p-3">
           <div className="flex items-center justify-center gap-6">
-            {/* Prev */}
             <button 
               onClick={(e) => { e.stopPropagation(); goToPrevPage(); }}
               disabled={currentPage === 0}
@@ -329,7 +329,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
               <ChevronLeft size={28} className="text-gray-700" />
             </button>
             
-            {/* Play/Pause */}
             <button 
               onClick={(e) => { e.stopPropagation(); togglePlayPause(); }}
               className="bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-full p-4 shadow-lg"
@@ -337,7 +336,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
               {isPlaying ? <Pause size={28} fill="white" /> : <Play size={28} fill="white" />}
             </button>
             
-            {/* Next */}
             <button 
               onClick={(e) => { e.stopPropagation(); goToNextPage(); }}
               className="p-2 rounded-full hover:bg-gray-100"
@@ -346,7 +344,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
             </button>
           </div>
           
-          {/* Status */}
           <div className="mt-2 flex items-center justify-center gap-4 text-xs">
             {autoPlay && (
               <span className="flex items-center gap-1 text-orange-500">
@@ -364,7 +361,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
         </div>
       </div>
 
-      {/* Settings Modal */}
       <ReaderSettings
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
