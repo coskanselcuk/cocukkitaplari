@@ -1,4 +1,4 @@
-// Mock Data for TRT Çocuk Kitaplık Clone
+// Mock Data for Çocuk Kitapları Kitaplık Clone
 
 export const categories = [
   {
@@ -52,7 +52,7 @@ export const books = [
   {
     id: 1,
     title: 'Pırıl ve Sihirli Orman',
-    author: 'TRT Çocuk',
+    author: 'Çocuk Kitapları',
     category: 'bizim-kahramanlar',
     coverImage: 'https://images.unsplash.com/photo-1598618137594-8e7657a6ef6a?w=300&h=400&fit=crop',
     pages: 24,
@@ -67,7 +67,7 @@ export const books = [
   {
     id: 2,
     title: 'Rafadan Tayfa: Piknik Günü',
-    author: 'TRT Çocuk',
+    author: 'Çocuk Kitapları',
     category: 'bizim-kahramanlar',
     coverImage: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop',
     pages: 20,
@@ -82,7 +82,7 @@ export const books = [
   {
     id: 3,
     title: 'Ege ile Gaga: Deniz Macerası',
-    author: 'TRT Çocuk',
+    author: 'Çocuk Kitapları',
     category: 'bizim-kahramanlar',
     coverImage: 'https://images.unsplash.com/photo-1629992101753-56d196c8aabb?w=300&h=400&fit=crop',
     pages: 18,
@@ -217,7 +217,7 @@ export const books = [
   {
     id: 12,
     title: 'Akıllı Tavşan Momo',
-    author: 'TRT Çocuk',
+    author: 'Çocuk Kitapları',
     category: 'bizim-kahramanlar',
     coverImage: 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=300&h=400&fit=crop',
     pages: 22,
