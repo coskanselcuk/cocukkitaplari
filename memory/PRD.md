@@ -46,6 +46,13 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Search Fix & Premium Badges
+- **Search Fixed**: SearchModal now fetches from API instead of mock data
+- **"Annemin Elleri"** and all other books now searchable
+- **Premium Badges**: Added to BookCard component (golden with crown icon)
+- **Library View**: Shows premium badges on books 4, 5, 6
+- **Search Results**: Shows premium badges when searching
+
 ### January 17, 2026 - Subscription Management UI
 - **Profile Page**: Added subscription status section (shows only when authenticated)
 - **Free User View**: Shows benefits list and "Premium'a Yükselt" upgrade button
