@@ -1,0 +1,480 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  ArrowLeft, Plus, Trash2, Edit, Save, X, BookOpen, 
+  FileText, Image, Volume2, Loader2, Check
+} from 'lucide-react';
+import { booksApi, categoriesApi } from '../../services/api';
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+const AdminPanel = ({ onBack }) => {
+  const [books, setBooks] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [bookPages, setBookPages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('books');
+  const [showAddBook, setShowAddBook] = useState(false);
+  const [showAddPage, setShowAddPage] = useState(false);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [audioGenProgress, setAudioGenProgress] = useState('');
+
+  // New book form
+  const [newBook, setNewBook] = useState({
+    title: '',
+    author: 'Çocuk Kitapları',
+    category: 'bizim-masallar',
+    coverImage: '',
+    description: '',
+    ageGroup: '4-6',
+    duration: '5 dk',
+    hasAudio: true,
+    isNew: true
+  });
+
+  // New page form
+  const [newPage, setNewPage] = useState({
+    pageNumber: 1,
+    text: '',
+    image: ''
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [booksRes, catsRes] = await Promise.all([
+        booksApi.getAll(),
+        categoriesApi.getAll()
+      ]);
+      setBooks(booksRes.books || []);
+      setCategories(catsRes.categories || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const selectBook = async (book) => {
+    setSelectedBook(book);
+    try {
+      const response = await booksApi.getPages(book.id);
+      setBookPages(response.pages || []);
+    } catch (error) {
+      console.error('Error fetching pages:', error);
+      setBookPages([]);
+    }
+  };
+
+  const createBook = async () => {
+    setIsSaving(true);
+    try {
+      const response = await axios.post(`${API_URL}/api/books`, newBook);
+      setBooks([...books, response.data]);
+      setShowAddBook(false);
+      setNewBook({
+        title: '',
+        author: 'Çocuk Kitapları',
+        category: 'bizim-masallar',
+        coverImage: '',
+        description: '',
+        ageGroup: '4-6',
+        duration: '5 dk',
+        hasAudio: true,
+        isNew: true
+      });
+    } catch (error) {
+      console.error('Error creating book:', error);
+      alert('Kitap oluşturulurken hata oluştu');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const createPage = async () => {
+    if (!selectedBook) return;
+    setIsSaving(true);
+    try {
+      const pageData = {
+        ...newPage,
+        bookId: selectedBook.id,
+        pageNumber: bookPages.length + 1
+      };
+      const response = await axios.post(`${API_URL}/api/books/${selectedBook.id}/pages`, pageData);
+      setBookPages([...bookPages, response.data]);
+      setShowAddPage(false);
+      setNewPage({ pageNumber: 1, text: '', image: '' });
+    } catch (error) {
+      console.error('Error creating page:', error);
+      alert('Sayfa oluşturulurken hata oluştu');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const generateAudioForBook = async () => {
+    if (!selectedBook) return;
+    setIsGeneratingAudio(true);
+    setAudioGenProgress('Ses dosyaları oluşturuluyor...');
+    
+    try {
+      const response = await axios.post(`${API_URL}/api/admin/generate-audio/${selectedBook.id}`);
+      setAudioGenProgress(`Tamamlandı! ${response.data.success_count} sayfa için ses oluşturuldu.`);
+      
+      // Refresh pages to get audio URLs
+      const pagesRes = await booksApi.getPages(selectedBook.id);
+      setBookPages(pagesRes.pages || []);
+      
+      setTimeout(() => {
+        setIsGeneratingAudio(false);
+        setAudioGenProgress('');
+      }, 2000);
+    } catch (error) {
+      console.error('Error generating audio:', error);
+      setAudioGenProgress('Hata oluştu: ' + (error.response?.data?.detail || error.message));
+      setTimeout(() => {
+        setIsGeneratingAudio(false);
+        setAudioGenProgress('');
+      }, 3000);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-4">
+          <button onClick={onBack} className="p-2 hover:bg-gray-100 rounded-lg">
+            <ArrowLeft size={24} />
+          </button>
+          <h1 className="text-xl font-bold text-gray-800">İçerik Yönetimi</h1>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setActiveTab('books')}
+            className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'books' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700'}`}
+          >
+            <BookOpen size={18} className="inline mr-2" />
+            Kitaplar ({books.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('categories')}
+            className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'categories' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700'}`}
+          >
+            Kategoriler ({categories.length})
+          </button>
+        </div>
+
+        {activeTab === 'books' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Books List */}
+            <div className="bg-white rounded-xl shadow-sm p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="font-bold text-gray-800">Kitaplar</h2>
+                <button
+                  onClick={() => setShowAddBook(true)}
+                  className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1"
+                >
+                  <Plus size={16} /> Yeni Kitap
+                </button>
+              </div>
+
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {books.map(book => (
+                  <button
+                    key={book.id}
+                    onClick={() => selectBook(book)}
+                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                      selectedBook?.id === book.id 
+                        ? 'border-orange-500 bg-orange-50' 
+                        : 'border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <img src={book.coverImage} alt="" className="w-12 h-16 object-cover rounded" />
+                      <div>
+                        <p className="font-medium text-gray-800">{book.title}</p>
+                        <p className="text-sm text-gray-500">{book.author} • {book.totalPages} sayfa</p>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Book Details / Pages */}
+            <div className="bg-white rounded-xl shadow-sm p-4">
+              {selectedBook ? (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="font-bold text-gray-800">{selectedBook.title} - Sayfalar</h2>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={generateAudioForBook}
+                        disabled={isGeneratingAudio || bookPages.length === 0}
+                        className="bg-purple-500 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 disabled:opacity-50"
+                      >
+                        <Volume2 size={16} /> Ses Oluştur
+                      </button>
+                      <button
+                        onClick={() => setShowAddPage(true)}
+                        className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1"
+                      >
+                        <Plus size={16} /> Sayfa Ekle
+                      </button>
+                    </div>
+                  </div>
+
+                  {isGeneratingAudio && (
+                    <div className="mb-4 p-3 bg-purple-50 rounded-lg flex items-center gap-2">
+                      <Loader2 size={16} className="animate-spin text-purple-500" />
+                      <span className="text-sm text-purple-700">{audioGenProgress}</span>
+                    </div>
+                  )}
+
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {bookPages.length === 0 ? (
+                      <p className="text-gray-500 text-center py-8">Henüz sayfa eklenmemiş</p>
+                    ) : (
+                      bookPages.map((page, idx) => (
+                        <div key={idx} className="p-3 border rounded-lg">
+                          <div className="flex items-start gap-3">
+                            <div className="bg-orange-100 text-orange-600 font-bold rounded-full w-8 h-8 flex items-center justify-center text-sm">
+                              {page.pageNumber}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-700 line-clamp-2">{page.text}</p>
+                              <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                                <Image size={12} />
+                                <span className="truncate max-w-32">{page.image?.split('/').pop()}</span>
+                                {page.audioUrl ? (
+                                  <span className="flex items-center gap-1 text-green-600">
+                                    <Check size={12} /> Ses var
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">Ses yok</span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-12 text-gray-500">
+                  <BookOpen size={48} className="mx-auto mb-2 opacity-30" />
+                  <p>Bir kitap seçin</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'categories' && (
+          <div className="bg-white rounded-xl shadow-sm p-4">
+            <h2 className="font-bold text-gray-800 mb-4">Kategoriler</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {categories.map(cat => (
+                <div key={cat.id} className="p-3 border rounded-lg">
+                  <p className="font-medium text-gray-800">{cat.name}</p>
+                  <p className="text-sm text-gray-500">{cat.slug}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Add Book Modal */}
+      {showAddBook && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-lg">Yeni Kitap Ekle</h3>
+              <button onClick={() => setShowAddBook(false)} className="p-1 hover:bg-gray-100 rounded">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Başlık</label>
+                <input
+                  type="text"
+                  value={newBook.title}
+                  onChange={(e) => setNewBook({...newBook, title: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                  placeholder="Kitap başlığı"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Yazar</label>
+                <input
+                  type="text"
+                  value={newBook.author}
+                  onChange={(e) => setNewBook({...newBook, author: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                <select
+                  value={newBook.category}
+                  onChange={(e) => setNewBook({...newBook, category: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                >
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.slug}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Kapak Resmi URL</label>
+                <input
+                  type="text"
+                  value={newBook.coverImage}
+                  onChange={(e) => setNewBook({...newBook, coverImage: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+                <textarea
+                  value={newBook.description}
+                  onChange={(e) => setNewBook({...newBook, description: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                  rows={2}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Yaş Grubu</label>
+                  <select
+                    value={newBook.ageGroup}
+                    onChange={(e) => setNewBook({...newBook, ageGroup: e.target.value})}
+                    className="w-full border rounded-lg px-3 py-2"
+                  >
+                    <option value="3-5">3-5 yaş</option>
+                    <option value="4-6">4-6 yaş</option>
+                    <option value="5-7">5-7 yaş</option>
+                    <option value="6-8">6-8 yaş</option>
+                    <option value="6-9">6-9 yaş</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Süre</label>
+                  <input
+                    type="text"
+                    value={newBook.duration}
+                    onChange={(e) => setNewBook({...newBook, duration: e.target.value})}
+                    className="w-full border rounded-lg px-3 py-2"
+                    placeholder="5 dk"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => setShowAddBook(false)}
+                className="flex-1 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                onClick={createBook}
+                disabled={isSaving || !newBook.title}
+                className="flex-1 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                Kaydet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Page Modal */}
+      {showAddPage && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-lg">Yeni Sayfa Ekle</h3>
+              <button onClick={() => setShowAddPage(false)} className="p-1 hover:bg-gray-100 rounded">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sayfa Numarası: {bookPages.length + 1}
+                </label>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Metin</label>
+                <textarea
+                  value={newPage.text}
+                  onChange={(e) => setNewPage({...newPage, text: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                  rows={4}
+                  placeholder="Sayfa metni..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Resim URL</label>
+                <input
+                  type="text"
+                  value={newPage.image}
+                  onChange={(e) => setNewPage({...newPage, image: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                  placeholder="https://images.unsplash.com/..."
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => setShowAddPage(false)}
+                className="flex-1 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                onClick={createPage}
+                disabled={isSaving || !newPage.text}
+                className="flex-1 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                Kaydet
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdminPanel;
