@@ -472,7 +472,7 @@ const AdminPanel = ({ onBack }) => {
                   type="text"
                   value={newBook.title}
                   onChange={(e) => setNewBook({...newBook, title: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="Kitap başlığı"
                 />
               </div>
@@ -482,7 +482,7 @@ const AdminPanel = ({ onBack }) => {
                   type="text"
                   value={newBook.author}
                   onChange={(e) => setNewBook({...newBook, author: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="Yazar adı"
                 />
               </div>
@@ -491,7 +491,7 @@ const AdminPanel = ({ onBack }) => {
                 <select
                   value={newBook.category}
                   onChange={(e) => setNewBook({...newBook, category: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 >
                   {categories.map(cat => (
                     <option key={cat.id} value={cat.slug}>{cat.name}</option>
@@ -504,7 +504,7 @@ const AdminPanel = ({ onBack }) => {
                   type="text"
                   value={newBook.coverImage}
                   onChange={(e) => setNewBook({...newBook, coverImage: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="https://images.unsplash.com/..."
                 />
                 <p className="text-xs text-gray-500 mt-1">Unsplash veya başka bir kaynaktan resim URL'si girin</p>
@@ -514,7 +514,7 @@ const AdminPanel = ({ onBack }) => {
                 <textarea
                   value={newBook.description}
                   onChange={(e) => setNewBook({...newBook, description: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   rows={2}
                   placeholder="Kitap hakkında kısa açıklama"
                 />
@@ -525,7 +525,7 @@ const AdminPanel = ({ onBack }) => {
                   <select
                     value={newBook.ageGroup}
                     onChange={(e) => setNewBook({...newBook, ageGroup: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   >
                     <option value="3-5">3-5 yaş</option>
                     <option value="4-6">4-6 yaş</option>
@@ -540,7 +540,7 @@ const AdminPanel = ({ onBack }) => {
                     type="text"
                     value={newBook.duration}
                     onChange={(e) => setNewBook({...newBook, duration: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="5 dk"
                   />
                 </div>
