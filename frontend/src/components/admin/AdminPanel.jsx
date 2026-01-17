@@ -140,6 +140,97 @@ const AdminPanel = ({ onBack }) => {
     }
   };
 
+  const openEditBook = (book) => {
+    setEditBook({
+      title: book.title || '',
+      author: book.author || '',
+      category: book.category || '',
+      coverImage: book.coverImage || '',
+      description: book.description || '',
+      ageGroup: book.ageGroup || '',
+      duration: book.duration || ''
+    });
+    setShowEditBook(true);
+  };
+
+  const updateBook = async () => {
+    if (!selectedBook) return;
+    setIsSaving(true);
+    try {
+      const response = await axios.put(`${API_URL}/api/books/${selectedBook.id}`, editBook);
+      setBooks(books.map(b => b.id === selectedBook.id ? response.data : b));
+      setSelectedBook(response.data);
+      setShowEditBook(false);
+    } catch (error) {
+      console.error('Error updating book:', error);
+      alert('Kitap güncellenirken hata oluştu');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const deleteBook = async (bookId) => {
+    setIsSaving(true);
+    try {
+      await axios.delete(`${API_URL}/api/books/${bookId}`);
+      setBooks(books.filter(b => b.id !== bookId));
+      if (selectedBook?.id === bookId) {
+        setSelectedBook(null);
+        setBookPages([]);
+      }
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error('Error deleting book:', error);
+      alert('Kitap silinirken hata oluştu');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const openEditPage = (page) => {
+    setEditingPage(page);
+    setEditPage({
+      text: page.text || '',
+      image: page.image || '',
+      pageNumber: page.pageNumber
+    });
+    setShowEditPage(true);
+  };
+
+  const updatePage = async () => {
+    if (!selectedBook || !editingPage) return;
+    setIsSaving(true);
+    try {
+      const response = await axios.put(
+        `${API_URL}/api/books/${selectedBook.id}/pages/${editingPage.id}`,
+        editPage
+      );
+      setBookPages(bookPages.map(p => p.id === editingPage.id ? response.data : p));
+      setShowEditPage(false);
+      setEditingPage(null);
+    } catch (error) {
+      console.error('Error updating page:', error);
+      alert('Sayfa güncellenirken hata oluştu');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const deletePage = async (pageId) => {
+    if (!selectedBook) return;
+    setIsSaving(true);
+    try {
+      await axios.delete(`${API_URL}/api/books/${selectedBook.id}/pages/${pageId}`);
+      setBookPages(bookPages.filter(p => p.id !== pageId));
+      setShowDeleteConfirm(null);
+    } catch (error) {
+      console.error('Error deleting page:', error);
+      alert('Sayfa silinirken hata oluştu');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const generateAudioForBook = async () => {
     if (!selectedBook) return;
     setIsGeneratingAudio(true);
