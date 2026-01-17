@@ -904,12 +904,11 @@ const AdminPanel = ({ onBack }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Resim URL</label>
-                <input
-                  type="text"
+                <ImageUpload
                   value={editPage.image}
-                  onChange={(e) => setEditPage({...editPage, image: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2"
+                  onChange={(url) => setEditPage({...editPage, image: url})}
+                  label="Sayfa Resmi"
+                  placeholder="https://images.unsplash.com/..."
                 />
               </div>
             </div>
