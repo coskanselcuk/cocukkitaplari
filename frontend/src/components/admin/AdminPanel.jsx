@@ -622,6 +622,200 @@ const AdminPanel = ({ onBack }) => {
           </div>
         </div>
       )}
+
+      {/* Edit Book Modal */}
+      {showEditBook && selectedBook && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-lg">Kitabı Düzenle</h3>
+              <button onClick={() => setShowEditBook(false)} className="p-1 hover:bg-gray-100 rounded">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Başlık</label>
+                <input
+                  type="text"
+                  value={editBook.title}
+                  onChange={(e) => setEditBook({...editBook, title: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Yazar</label>
+                <input
+                  type="text"
+                  value={editBook.author}
+                  onChange={(e) => setEditBook({...editBook, author: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                <select
+                  value={editBook.category}
+                  onChange={(e) => setEditBook({...editBook, category: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                >
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.slug}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Kapak Resmi URL</label>
+                <input
+                  type="text"
+                  value={editBook.coverImage}
+                  onChange={(e) => setEditBook({...editBook, coverImage: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
+                <textarea
+                  value={editBook.description}
+                  onChange={(e) => setEditBook({...editBook, description: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                  rows={2}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Yaş Grubu</label>
+                  <select
+                    value={editBook.ageGroup}
+                    onChange={(e) => setEditBook({...editBook, ageGroup: e.target.value})}
+                    className="w-full border rounded-lg px-3 py-2"
+                  >
+                    <option value="3-5">3-5 yaş</option>
+                    <option value="4-6">4-6 yaş</option>
+                    <option value="5-7">5-7 yaş</option>
+                    <option value="6-8">6-8 yaş</option>
+                    <option value="6-9">6-9 yaş</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Süre</label>
+                  <input
+                    type="text"
+                    value={editBook.duration}
+                    onChange={(e) => setEditBook({...editBook, duration: e.target.value})}
+                    className="w-full border rounded-lg px-3 py-2"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => setShowEditBook(false)}
+                className="flex-1 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                onClick={updateBook}
+                disabled={isSaving || !editBook.title}
+                className="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                Güncelle
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Page Modal */}
+      {showEditPage && editingPage && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-bold text-lg">Sayfayı Düzenle (Sayfa {editingPage.pageNumber})</h3>
+              <button onClick={() => { setShowEditPage(false); setEditingPage(null); }} className="p-1 hover:bg-gray-100 rounded">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Metin</label>
+                <textarea
+                  value={editPage.text}
+                  onChange={(e) => setEditPage({...editPage, text: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                  rows={4}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Resim URL</label>
+                <input
+                  type="text"
+                  value={editPage.image}
+                  onChange={(e) => setEditPage({...editPage, image: e.target.value})}
+                  className="w-full border rounded-lg px-3 py-2"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-6">
+              <button
+                onClick={() => { setShowEditPage(false); setEditingPage(null); }}
+                className="flex-1 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                onClick={updatePage}
+                disabled={isSaving || !editPage.text}
+                className="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                Güncelle
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-sm w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="bg-red-100 p-2 rounded-full">
+                <AlertTriangle size={24} className="text-red-600" />
+              </div>
+              <h3 className="font-bold text-lg">Silmek istediğinize emin misiniz?</h3>
+            </div>
+            
+            <p className="text-gray-600 mb-6">
+              <strong>"{showDeleteConfirm.title}"</strong> {showDeleteConfirm.type === 'book' ? 'kitabını ve tüm sayfalarını' : 'sayfasını'} silmek üzeresiniz. Bu işlem geri alınamaz.
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(null)}
+                className="flex-1 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                İptal
+              </button>
+              <button
+                onClick={() => showDeleteConfirm.type === 'book' ? deleteBook(showDeleteConfirm.id) : deletePage(showDeleteConfirm.id)}
+                disabled={isSaving}
+                className="flex-1 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                Sil
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
