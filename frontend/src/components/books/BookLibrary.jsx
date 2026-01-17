@@ -136,44 +136,53 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
       
       {/* Books Grid/List */}
       <div className="px-4 py-4 relative z-10">
-        <p className="text-white/60 text-sm mb-4">{filteredBooks.length} kitap bulundu</p>
-        
-        {viewMode === 'grid' ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {filteredBooks.map(book => (
-              <BookCard 
-                key={book.id} 
-                book={book} 
-                onSelect={onBookSelect}
-                size="medium"
-              />
-            ))}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-12 h-12 text-orange-400 animate-spin mb-4" />
+            <p className="text-white/60">Kitaplar yükleniyor...</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {filteredBooks.map(book => (
-              <button
-                key={book.id}
-                onClick={() => onBookSelect(book)}
-                className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex gap-4 hover:bg-white/15 transition-all duration-300 text-left"
-              >
-                <img 
-                  src={book.coverImage} 
-                  alt={book.title}
-                  className="w-20 h-28 object-cover rounded-xl shadow-lg"
-                />
-                <div className="flex-1">
-                  <h3 className="font-bold text-white mb-1">{book.title}</h3>
-                  <p className="text-white/60 text-sm mb-2">{book.author}</p>
-                  <p className="text-white/50 text-sm mb-2 line-clamp-2">{book.description}</p>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="text-cyan-400 font-semibold">{book.duration}</span>
-                    <span className="text-orange-400 font-semibold">{book.ageGroup} yaş</span>
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
+          <>
+            <p className="text-white/60 text-sm mb-4">{filteredBooks.length} kitap bulundu</p>
+            
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {filteredBooks.map(book => (
+                  <BookCard 
+                    key={book.id} 
+                    book={book} 
+                    onSelect={onBookSelect}
+                    size="medium"
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredBooks.map(book => (
+                  <button
+                    key={book.id}
+                    onClick={() => onBookSelect(book)}
+                    className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex gap-4 hover:bg-white/15 transition-all duration-300 text-left"
+                  >
+                    <img 
+                      src={book.coverImage} 
+                      alt={book.title}
+                      className="w-20 h-28 object-cover rounded-xl shadow-lg"
+                    />
+                    <div className="flex-1">
+                      <h3 className="font-bold text-white mb-1">{book.title}</h3>
+                      <p className="text-white/60 text-sm mb-2">{book.author}</p>
+                      <p className="text-white/50 text-sm mb-2 line-clamp-2">{book.description}</p>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="text-cyan-400 font-semibold">{book.duration}</span>
+                        <span className="text-orange-400 font-semibold">{book.ageGroup} yaş</span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
       
