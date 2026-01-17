@@ -10,8 +10,11 @@ from typing import List
 import uuid
 from datetime import datetime, timezone
 
-# Import TTS routes
+# Import routes
 from routes.tts_routes import router as tts_router
+from routes.book_routes import router as book_router
+from routes.category_routes import router as category_router
+from routes.progress_routes import router as progress_router
 
 
 ROOT_DIR = Path(__file__).parent
