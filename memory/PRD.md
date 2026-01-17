@@ -181,7 +181,7 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 - [x] Test progress sync ✅
 
 ### P2 - Medium Priority
-- [ ] User profile management and authentication
+- [ ] Native in-app purchase integration (Apple StoreKit / Google Play Billing)
 - [ ] Bookshelf-themed loading animation
 - [ ] Add more books to database
 - [ ] Child-friendly profile avatars
