@@ -96,6 +96,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
   // Reset image loaded state when page changes
   useEffect(() => {
     setIsImageLoaded(false);
+    setAudioLoadedForPage(-1); // Reset audio tracking for new page
   }, [currentPage]);
 
   // Play pre-generated audio when image is loaded (if autoPlay)
@@ -104,6 +105,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
     
     if (autoPlay && isImageLoaded && currentPageData?.audioUrl && audioRef.current && !isPlaying) {
       audioRef.current.src = currentPageData.audioUrl;
+      setAudioLoadedForPage(currentPage);
       audioRef.current.play()
         .then(() => setIsPlaying(true))
         .catch(err => {
