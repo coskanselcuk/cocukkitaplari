@@ -58,6 +58,10 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 - **Content Cleanup**: Reorganized to 5 free + 5 premium books
   - Free: Rafadan Tayfa, Ege ile Gaga, Annemin Elleri, Pırıl ve Sihirli Orman, Minik Bulut
   - Premium: Ormanın Şarkısı, Küçük Sincap, Keloğlan ve Altın Elma, Ay Prensesi, Deniz Altı Macerası
+- **Home Page API Integration**: Anasayfa now fetches books from API instead of mock data
+  - Book carousels (Öneriler, Yeni Eklenenler, En Çok Okunanlar) use live database
+  - Admin panel changes now propagate to home page on close
+  - All CRUD operations in admin panel reflect immediately across the app
 
 ### January 17, 2026 - Local Image Upload & Loading Animations
 - **Local Image Upload**: Implemented file upload functionality in admin panel
