@@ -106,20 +106,20 @@ const ProfilePage = ({ profile, onBack, onParentDashboard }) => {
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <h2 className="text-gray-800 font-bold text-lg mb-4">Rozetlerim</h2>
           <div className="flex flex-wrap gap-3">
-            {['📚', '⭐', '🏆', '🌟', '💡', '🌈', '🚀', '🌻'].map((badge, index) => (
+            {['bg-yellow-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-pink-400', 'bg-orange-400', 'bg-teal-400', 'bg-red-400'].map((color, index) => (
               <div 
                 key={index}
-                className="w-12 h-12 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full flex items-center justify-center text-2xl shadow-md"
+                className={`w-12 h-12 ${color} rounded-full flex items-center justify-center shadow-md`}
               >
-                {badge}
+                <Award className="text-white" size={24} />
               </div>
             ))}
             {[1, 2, 3, 4].map((_, index) => (
               <div 
                 key={`locked-${index}`}
-                className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-2xl opacity-40"
+                className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center opacity-50"
               >
-                🔒
+                <Award className="text-gray-400" size={24} />
               </div>
             ))}
           </div>
