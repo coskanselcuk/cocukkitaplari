@@ -46,6 +46,14 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - User Authentication & Premium Content
+- **Google OAuth**: Integrated Emergent-managed Google Auth for user login
+- **User Model**: Created users collection with subscription_tier (free/premium)
+- **Premium Books**: Books 4, 5, 6 marked as premium content
+- **Access Control**: Non-premium users see "Premium İçerik" modal when trying to read premium books
+- **Session Management**: Cookie-based sessions with 7-day expiry
+- **Profile Page**: Shows Google login button, user info, and Premium badge for subscribers
+
 ### January 17, 2026 - Audio Generation & Progress Sync Testing
 - **Generated Audio**: Book 4 "Ormanın Şarkısı" now has audio for all 5 pages
 - **Progress Sync Verified**: Reading progress saves to backend and resumes correctly
