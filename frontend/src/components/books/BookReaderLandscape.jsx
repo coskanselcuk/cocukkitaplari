@@ -345,7 +345,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
     // If image fails to load, still allow audio to play
     setIsImageLoaded(true);
   };
-  };
 
   const currentPageData = pages[currentPage];
 
