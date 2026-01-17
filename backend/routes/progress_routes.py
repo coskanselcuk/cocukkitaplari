@@ -89,7 +89,7 @@ async def complete_book(data: ProgressCompleteRequest):
     now = datetime.now(timezone.utc).isoformat()
     
     # Update progress to completed
-    result = await db.reading_progress.update_one(
+    await db.reading_progress.update_one(
         {"userId": data.userId, "bookId": data.bookId},
         {
             "$set": {
@@ -100,7 +100,8 @@ async def complete_book(data: ProgressCompleteRequest):
         }
     )
     
-    if result.matched_count == 0:
+    # Check if progress exists, if not create it
+    existing = await db.reading_progress.find_one({"userId": data.userId, "bookId": data.bookId})
         # Create new completed entry if doesn't exist
         await db.reading_progress.insert_one({
             "id": f"{data.userId}_{data.bookId}",
