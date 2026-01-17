@@ -42,7 +42,8 @@ const AdminPanel = ({ onBack }) => {
   const [newPage, setNewPage] = useState({
     pageNumber: 1,
     text: '',
-    image: ''
+    image: '',
+    insertPosition: 'end' // 'end', 'start', or specific number
   });
 
   // Edit book form
