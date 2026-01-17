@@ -747,15 +747,12 @@ const AdminPanel = ({ onBack }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Resim URL</label>
-                <input
-                  type="text"
+                <ImageUpload
                   value={newPage.image}
-                  onChange={(e) => setNewPage({...newPage, image: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  onChange={(url) => setNewPage({...newPage, image: url})}
+                  label="Sayfa Resmi"
                   placeholder="https://images.unsplash.com/..."
                 />
-                <p className="text-xs text-gray-500 mt-1">Sayfa için illüstrasyon resmi URLsi</p>
               </div>
             </div>
 
