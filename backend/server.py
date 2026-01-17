@@ -15,6 +15,7 @@ from routes.tts_routes import router as tts_router
 from routes.book_routes import router as book_router
 from routes.category_routes import router as category_router
 from routes.progress_routes import router as progress_router
+from routes.admin_routes import router as admin_router
 
 
 ROOT_DIR = Path(__file__).parent
