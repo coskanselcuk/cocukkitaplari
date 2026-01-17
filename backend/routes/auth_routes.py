@@ -175,6 +175,61 @@ async def logout(request: Request, response: Response):
     return {"success": True, "message": "Logged out"}
 
 
+@router.post("/upgrade-to-premium/{user_id}")
+async def upgrade_to_premium(user_id: str):
+    """Admin endpoint to upgrade a user to premium (for testing/manual upgrades)"""
+    db = get_db()
+    
+    result = await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"subscription_tier": "premium"}}
+    )
+    
+    if result.matched_count == 0:
+        # Try by email
+        result = await db.users.update_one(
+            {"email": user_id},
+            {"$set": {"subscription_tier": "premium"}}
+        )
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"success": True, "message": "User upgraded to premium"}
+
+
+@router.post("/downgrade-to-free/{user_id}")
+async def downgrade_to_free(user_id: str):
+    """Admin endpoint to downgrade a user to free tier"""
+    db = get_db()
+    
+    result = await db.users.update_one(
+        {"user_id": user_id},
+        {"$set": {"subscription_tier": "free"}}
+    )
+    
+    if result.matched_count == 0:
+        result = await db.users.update_one(
+            {"email": user_id},
+            {"$set": {"subscription_tier": "free"}}
+        )
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"success": True, "message": "User downgraded to free"}
+
+
+@router.get("/users")
+async def list_users():
+    """Admin endpoint to list all users"""
+    db = get_db()
+    
+    users = []
+    async for user in db.users.find({}, {"_id": 0}):
+        users.append(user)
+    
+    return {"users": users, "total": len(users)}
+
+
 # Helper function for other routes to get current user
 async def get_current_user_from_request(request: Request):
     """Helper to get current user from request - returns None if not authenticated"""
