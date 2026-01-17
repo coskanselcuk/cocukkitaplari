@@ -83,6 +83,7 @@ app.include_router(book_router, prefix="/api")
 app.include_router(category_router, prefix="/api")
 app.include_router(progress_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
+app.include_router(auth_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
