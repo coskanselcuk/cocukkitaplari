@@ -1,14 +1,41 @@
-import React, { useState } from 'react';
-import { Search, X, Filter } from 'lucide-react';
-import { books, categories } from '../../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { Search, X, Filter, Loader2 } from 'lucide-react';
+import { booksApi, categoriesApi } from '../../services/api';
 import BookCard from '../books/BookCard';
 
 const SearchModal = ({ isOpen, onClose, onBookSelect }) => {
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [books, setBooks] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch books and categories from API
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!isOpen) return;
+      
+      setIsLoading(true);
+      try {
+        const [booksRes, catsRes] = await Promise.all([
+          booksApi.getAll(),
+          categoriesApi.getAll()
+        ]);
+        setBooks(booksRes.books || []);
+        setCategories(catsRes.categories || []);
+      } catch (error) {
+        console.error('Error fetching search data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [isOpen]);
 
   const filteredBooks = books.filter(book => {
-    const matchesQuery = book.title.toLowerCase().includes(query.toLowerCase()) ||
+    const matchesQuery = query.length === 0 || 
+                         book.title.toLowerCase().includes(query.toLowerCase()) ||
                          book.author.toLowerCase().includes(query.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || book.category === selectedCategory;
     return matchesQuery && matchesCategory;
@@ -57,9 +84,9 @@ const SearchModal = ({ isOpen, onClose, onBookSelect }) => {
             {categories.map(cat => (
               <button
                 key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
+                onClick={() => setSelectedCategory(cat.slug)}
                 className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
-                  selectedCategory === cat.id 
+                  selectedCategory === cat.slug 
                     ? 'bg-orange-500 text-white' 
                     : 'bg-white/20 text-white'
                 }`}
@@ -73,10 +100,16 @@ const SearchModal = ({ isOpen, onClose, onBookSelect }) => {
       
       {/* Results */}
       <div className="px-4 py-4 overflow-y-auto" style={{ height: 'calc(100vh - 160px)' }}>
-        {query.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center py-10">
+            <Loader2 className="mx-auto text-white/80 mb-4 animate-spin" size={48} />
+            <p className="text-white/80 text-lg">Yükleniyor...</p>
+          </div>
+        ) : query.length === 0 && selectedCategory === 'all' ? (
           <div className="text-center py-10">
             <Search className="mx-auto text-white/50 mb-4" size={48} />
             <p className="text-white/80 text-lg">Aramak istediğin kitabı yaz</p>
+            <p className="text-white/60 text-sm mt-2">veya kategorilere göz at</p>
           </div>
         ) : filteredBooks.length === 0 ? (
           <div className="text-center py-10">
