@@ -390,10 +390,10 @@ const AdminPanel = ({ onBack }) => {
                       bookPages.map((page, idx) => (
                         <div key={idx} className="p-3 border rounded-lg">
                           <div className="flex items-start gap-3">
-                            <div className="bg-orange-100 text-orange-600 font-bold rounded-full w-8 h-8 flex items-center justify-center text-sm">
+                            <div className="bg-orange-100 text-orange-600 font-bold rounded-full w-8 h-8 flex items-center justify-center text-sm flex-shrink-0">
                               {page.pageNumber}
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                               <p className="text-sm text-gray-700 line-clamp-2">{page.text}</p>
                               <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
                                 <Image size={12} />
@@ -406,6 +406,22 @@ const AdminPanel = ({ onBack }) => {
                                   <span className="text-gray-400">Ses yok</span>
                                 )}
                               </div>
+                            </div>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <button
+                                onClick={() => openEditPage(page)}
+                                className="p-1.5 hover:bg-blue-100 rounded text-blue-600"
+                                title="Düzenle"
+                              >
+                                <Edit size={14} />
+                              </button>
+                              <button
+                                onClick={() => setShowDeleteConfirm({ type: 'page', id: page.id, title: `Sayfa ${page.pageNumber}` })}
+                                className="p-1.5 hover:bg-red-100 rounded text-red-600"
+                                title="Sil"
+                              >
+                                <Trash2 size={14} />
+                              </button>
                             </div>
                           </div>
                         </div>
