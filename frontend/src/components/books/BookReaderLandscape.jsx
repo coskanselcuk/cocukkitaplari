@@ -70,6 +70,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [audioUrl, setAudioUrl] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [pages, setPages] = useState(mockPages);  // Start with mock, load from API
+  const [isLoadingPages, setIsLoadingPages] = useState(true);
   
   // Settings state
   const [autoPlay, setAutoPlay] = useState(() => {
@@ -82,8 +84,31 @@ const BookReaderLandscape = ({ book, onClose }) => {
   });
 
   const audioRef = useRef(null);
-  const pages = bookPages;
   const totalPages = pages.length;
+
+  // Fetch pages from API on mount
+  useEffect(() => {
+    const fetchPages = async () => {
+      if (!book?.id) {
+        setIsLoadingPages(false);
+        return;
+      }
+      
+      try {
+        const response = await booksApi.getPages(book.id);
+        if (response.pages && response.pages.length > 0) {
+          setPages(response.pages);
+        }
+      } catch (error) {
+        console.log('Using mock pages, API not available:', error.message);
+        // Keep using mock pages on error
+      } finally {
+        setIsLoadingPages(false);
+      }
+    };
+    
+    fetchPages();
+  }, [book?.id]);
 
   // Save settings to localStorage
   useEffect(() => {
