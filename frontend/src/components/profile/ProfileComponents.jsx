@@ -59,21 +59,69 @@ const ProfileSelector = ({ onProfileSelect, onCreateProfile }) => {
 };
 
 const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
+  const { user, isAuthenticated, isPremiumUser, login, logout, isLoading } = useAuth();
   const avatarColors = ['bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-orange-400'];
   
   return (
     <div className="min-h-screen pb-24">
       {/* Profile Header */}
       <div className="bg-gradient-to-b from-orange-400 to-orange-500 px-4 py-8 text-center">
-        <div className="w-28 h-28 bg-white rounded-full mx-auto flex items-center justify-center shadow-xl mb-4">
-          <span className="text-orange-500 text-5xl font-bold">{profile.name.charAt(0).toUpperCase()}</span>
+        <div className="w-28 h-28 bg-white rounded-full mx-auto flex items-center justify-center shadow-xl mb-4 overflow-hidden">
+          {isAuthenticated && user?.picture ? (
+            <img src={user.picture} alt={user.name} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-orange-500 text-5xl font-bold">{profile.name.charAt(0).toUpperCase()}</span>
+          )}
         </div>
-        <h1 className="text-white text-2xl font-bold">{profile.name}</h1>
-        <p className="text-white/80">{profile.age} yaşında</p>
+        <h1 className="text-white text-2xl font-bold">
+          {isAuthenticated ? user?.name : profile.name}
+        </h1>
+        <p className="text-white/80">
+          {isAuthenticated ? user?.email : `${profile.age} yaşında`}
+        </p>
+        {isAuthenticated && isPremiumUser && (
+          <div className="inline-flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold mt-2">
+            <Crown size={14} /> Premium Üye
+          </div>
+        )}
+      </div>
+
+      {/* Auth Section */}
+      <div className="px-4 -mt-6 mb-4">
+        <div className="bg-white rounded-2xl shadow-xl p-4">
+          {isLoading ? (
+            <div className="text-center py-2 text-gray-500">Yükleniyor...</div>
+          ) : isAuthenticated ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                  <Check className="text-green-600" size={20} />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800">Giriş Yapıldı</p>
+                  <p className="text-sm text-gray-500">{user?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={logout}
+                className="flex items-center gap-2 text-red-500 hover:text-red-600 font-medium"
+              >
+                <LogOut size={18} /> Çıkış
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={login}
+              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-xl font-semibold hover:opacity-90"
+            >
+              <LogIn size={20} /> Google ile Giriş Yap
+            </button>
+          )}
+        </div>
       </div>
       
       {/* Stats */}
-      <div className="px-4 -mt-6">
+      <div className="px-4">
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <h2 className="text-gray-800 font-bold text-lg mb-4">Başarılarım</h2>
           <div className="grid grid-cols-3 gap-4">
