@@ -97,18 +97,25 @@ const BookReaderLandscape = ({ book, onClose }) => {
       .catch(() => setIsPlaying(false));
   }, [autoPlay, isImageLoaded, currentPageData?.audioUrl]);
 
-  // AUDIO ENDED HANDLER - called directly via onEnded prop
-  const handleAudioEnded = () => {
+  // AUDIO ENDED HANDLER - uses refs to access latest state values
+  const handleAudioEnded = useCallback(() => {
+    console.log('Audio ended - autoPlay:', autoPlayRef.current, 'currentPage:', currentPageRef.current, 'totalPages:', pagesRef.current.length);
     setIsPlaying(false);
     
-    if (autoPlay) {
-      if (currentPage < totalPages - 1) {
-        setCurrentPage(prev => prev + 1);
+    // Use refs to get the latest values, not stale closure values
+    if (autoPlayRef.current) {
+      const total = pagesRef.current.length;
+      const current = currentPageRef.current;
+      
+      if (current < total - 1) {
+        console.log('Auto-advancing to page:', current + 1);
+        setCurrentPage(current + 1);
       } else {
+        console.log('Book complete, showing celebration');
         setShowCelebration(true);
       }
     }
-  };
+  }, []); // Empty deps - function uses refs, not state directly
 
   const goNext = () => {
     if (currentPage < totalPages - 1) {
