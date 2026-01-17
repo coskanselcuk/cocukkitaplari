@@ -1,7 +1,10 @@
 import React from 'react';
 import { Play, Clock, Star, Headphones, Crown, Lock } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
-const BookCard = ({ book, onSelect, size = 'medium', showPremiumLock = false }) => {
+const BookCard = ({ book, onSelect, size = 'medium' }) => {
+  const { isPremiumUser, isAuthenticated } = useAuth();
+  
   const sizeClasses = {
     small: 'w-32',
     medium: 'w-40',
@@ -9,11 +12,14 @@ const BookCard = ({ book, onSelect, size = 'medium', showPremiumLock = false }) 
   };
 
   const isPremium = book.isPremium;
+  // Show lock if book is premium AND user is either not logged in or not premium
+  const showLock = isPremium && (!isAuthenticated || !isPremiumUser);
 
   return (
     <button
       onClick={() => onSelect(book)}
       className={`book-card ${sizeClasses[size]} flex-shrink-0 text-left`}
+      data-testid={`book-card-${book.id}`}
     >
       <div className="relative rounded-2xl overflow-hidden shadow-xl bg-white">
         {/* Book Cover */}
@@ -21,7 +27,7 @@ const BookCard = ({ book, onSelect, size = 'medium', showPremiumLock = false }) 
           <img
             src={book.coverImage}
             alt={book.title}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${showLock ? 'filter brightness-75' : ''}`}
           />
           
           {/* Overlay gradient */}
@@ -49,19 +55,21 @@ const BookCard = ({ book, onSelect, size = 'medium', showPremiumLock = false }) 
             </div>
           )}
           
-          {/* Premium Lock Overlay */}
-          {isPremium && showPremiumLock && (
-            <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-              <div className="bg-white/90 rounded-full p-2">
-                <Lock size={20} className="text-gray-600" />
+          {/* Premium Lock Overlay - shows for non-premium users on premium content */}
+          {showLock && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <div className="bg-white/95 rounded-full p-3 shadow-lg">
+                <Lock size={24} className="text-yellow-500" />
               </div>
             </div>
           )}
           
-          {/* Play button */}
-          <div className="absolute bottom-3 right-3 bg-orange-500 rounded-full p-2 shadow-lg hover:bg-orange-600 transition-colors">
-            <Play size={16} className="text-white fill-white" />
-          </div>
+          {/* Play button - only show if not locked */}
+          {!showLock && (
+            <div className="absolute bottom-3 right-3 bg-orange-500 rounded-full p-2 shadow-lg hover:bg-orange-600 transition-colors">
+              <Play size={16} className="text-white fill-white" />
+            </div>
+          )}
           
           {/* Duration */}
           <div className="absolute bottom-3 left-3 flex items-center gap-1 text-white text-xs">
