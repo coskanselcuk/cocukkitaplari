@@ -5,41 +5,46 @@ export const categories = [
     id: 'bizim-kahramanlar',
     name: 'Bizim Kahramanlar',
     description: 'TRT Çocuk karakterlerinin maceraları',
-    icon: '🦸',
+    icon: 'hero',
     color: '#FF6B6B',
-    islandImage: 'volcano'
+    gradient: 'from-red-400 to-orange-400',
+    islandImage: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=200&h=200&fit=crop'
   },
   {
     id: 'doganin-masali',
     name: 'Doğanın Masalı',
     description: 'Doğa ve hayvan hikayeleri',
-    icon: '🌿',
+    icon: 'nature',
     color: '#4ECDC4',
-    islandImage: 'nature'
+    gradient: 'from-green-400 to-teal-400',
+    islandImage: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=200&h=200&fit=crop'
   },
   {
     id: 'bizim-masallar',
     name: 'Bizim Masallar',
     description: 'Geleneksel Türk masalları',
-    icon: '📖',
+    icon: 'fairytale',
     color: '#FFE66D',
-    islandImage: 'castle'
+    gradient: 'from-yellow-400 to-amber-400',
+    islandImage: 'https://images.unsplash.com/photo-1598618137594-8e7657a6ef6a?w=200&h=200&fit=crop'
   },
   {
     id: 'merakli-bilgin',
     name: 'Meraklı Bilgin',
     description: 'Bilim ve keşif hikayeleri',
-    icon: '🔬',
+    icon: 'science',
     color: '#95E1D3',
-    islandImage: 'science'
+    gradient: 'from-blue-400 to-cyan-400',
+    islandImage: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=200&h=200&fit=crop'
   },
   {
     id: 'hayatin-icinden',
     name: 'Hayatın İçinden',
     description: 'Günlük yaşam hikayeleri',
-    icon: '🏠',
+    icon: 'life',
     color: '#F38181',
-    islandImage: 'house'
+    gradient: 'from-pink-400 to-rose-400',
+    islandImage: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=200&h=200&fit=crop'
   }
 ];
 
