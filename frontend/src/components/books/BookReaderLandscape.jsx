@@ -162,13 +162,21 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   // Actually start playing audio
   const startPlayback = useCallback(async () => {
+    // Prevent duplicate play attempts
+    if (playbackInProgressRef.current) {
+      return;
+    }
+    
     if (audioRef.current && audioRef.current.src) {
+      playbackInProgressRef.current = true;
       try {
         await audioRef.current.play();
         setIsPlaying(true);
       } catch (error) {
         console.log('Audio play prevented:', error);
         setIsPlaying(false);
+      } finally {
+        playbackInProgressRef.current = false;
       }
     }
   }, []);
@@ -180,6 +188,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
     setIsAudioReady(false);
     setIsPlaying(false);
     audioPreparingRef.current = false;  // Allow new preparation
+    playbackInProgressRef.current = false;  // Reset playback tracking
     
     // Prepare audio for the new page (if autoPlay is on)
     if (autoPlay) {
