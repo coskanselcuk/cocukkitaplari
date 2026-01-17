@@ -124,15 +124,31 @@ const AdminPanel = ({ onBack }) => {
     if (!selectedBook) return;
     setIsSaving(true);
     try {
+      // Calculate page number based on insert position
+      let pageNumber;
+      if (newPage.insertPosition === 'end') {
+        pageNumber = bookPages.length + 1;
+      } else if (newPage.insertPosition === 'start') {
+        pageNumber = 1;
+      } else {
+        pageNumber = parseInt(newPage.insertPosition) + 1;
+      }
+      
       const pageData = {
-        ...newPage,
-        bookId: selectedBook.id,
-        pageNumber: bookPages.length + 1
+        pageNumber,
+        text: newPage.text,
+        image: newPage.image,
+        bookId: selectedBook.id
       };
+      
       const response = await axios.post(`${API_URL}/api/books/${selectedBook.id}/pages`, pageData);
-      setBookPages([...bookPages, response.data]);
+      
+      // Refresh pages to get updated order
+      const pagesRes = await booksApi.getPages(selectedBook.id);
+      setBookPages(pagesRes.pages || []);
+      
       setShowAddPage(false);
-      setNewPage({ pageNumber: 1, text: '', image: '' });
+      setNewPage({ pageNumber: 1, text: '', image: '', insertPosition: 'end' });
     } catch (error) {
       console.error('Error creating page:', error);
       alert('Sayfa oluşturulurken hata oluştu');
