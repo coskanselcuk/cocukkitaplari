@@ -63,9 +63,9 @@ async def generate_tts_audio(text: str, voice_id: str = None) -> dict:
     if not client:
         raise Exception("ElevenLabs client not initialized")
     
-    # Use Valory voice by default (Intimate, Warm and Inviting)
+    # Use Irem voice by default (Young Turkish girl, ideal for audiobooks and storytelling)
     if not voice_id:
-        voice_id = VALORY_VOICE_ID
+        voice_id = IREM_VOICE_ID
     
     try:
         # Generate audio using multilingual model for Turkish support
