@@ -40,8 +40,15 @@ const BookReaderLandscape = ({ book, onClose }) => {
   });
 
   const audioRef = useRef(null);
+  const audioPreparingRef = useRef(false);  // Track if audio is being prepared
+  const currentPageRef = useRef(currentPage);  // Track current page for async operations
   const pages = bookPages;
   const totalPages = pages.length;
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
 
   // Save settings to localStorage
   useEffect(() => {
