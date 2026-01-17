@@ -276,9 +276,11 @@ const BookReaderLandscape = ({ book, onClose }) => {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      // If no audio loaded yet, generate and play
+      // If no audio loaded yet, prepare and play
       if (!audioRef.current.src || audioRef.current.src === '') {
-        await playCurrentPageAudio();
+        await preparePageAudio();
+        // Wait a moment for audio to be ready, then play
+        setTimeout(() => startPlayback(), 100);
       } else {
         try {
           await audioRef.current.play();
