@@ -27,7 +27,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
   const [isLoadingAudio, setIsLoadingAudio] = useState(false);
   const [audioCache, setAudioCache] = useState({});
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [isAudioReady, setIsAudioReady] = useState(false);
+  const [audioUrl, setAudioUrl] = useState(null);
   
   // Settings state
   const [autoPlay, setAutoPlay] = useState(() => {
@@ -40,16 +40,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
   });
 
   const audioRef = useRef(null);
-  const audioPreparingRef = useRef(false);  // Track if audio is being prepared
-  const playbackInProgressRef = useRef(false);  // Track if playback is in progress
-  const currentPageRef = useRef(currentPage);  // Track current page for async operations
   const pages = bookPages;
   const totalPages = pages.length;
-  
-  // Keep ref in sync with state
-  useEffect(() => {
-    currentPageRef.current = currentPage;
-  }, [currentPage]);
 
   // Save settings to localStorage
   useEffect(() => {
@@ -97,15 +89,15 @@ const BookReaderLandscape = ({ book, onClose }) => {
         text: pageData.text
       });
       
-      const audioUrl = response.data.audio_url;
+      const url = response.data.audio_url;
       
       // Cache the audio
       setAudioCache(prev => ({
         ...prev,
-        [pageIndex]: audioUrl
+        [pageIndex]: url
       }));
       
-      return audioUrl;
+      return url;
     } catch (error) {
       console.error('Error generating TTS:', error);
       return null;
@@ -121,103 +113,36 @@ const BookReaderLandscape = ({ book, onClose }) => {
     }
   }, [totalPages, audioCache, generatePageAudio]);
 
-  // Play audio for current page - prepares audio but doesn't play yet
-  const preparePageAudio = useCallback(async (pageIndex) => {
-    // Prevent duplicate preparation
-    if (audioPreparingRef.current) {
-      return false;
-    }
-    
-    audioPreparingRef.current = true;
-    
-    try {
-      const audioUrl = await generatePageAudio(pageIndex);
-      
-      // Check if we're still on the same page (might have changed during async fetch)
-      if (pageIndex !== currentPageRef.current) {
-        audioPreparingRef.current = false;
-        return false;
-      }
-      
-      if (audioUrl && audioRef.current) {
-        // Set up the audio - for base64 data URLs, don't call load() as it can interrupt playback
-        audioRef.current.src = audioUrl;
-        // load() is not needed for base64 URLs and can cause AbortError
-        
-        // Pre-fetch next page
-        prefetchNextAudio(pageIndex);
-        
-        // For base64 data URLs, mark as ready immediately since they're fully loaded
-        setIsAudioReady(true);
-        audioPreparingRef.current = false;
-        return true;
-      }
-    } catch (error) {
-      console.error('Error preparing audio:', error);
-    }
-    
-    audioPreparingRef.current = false;
-    return false;
-  }, [generatePageAudio, prefetchNextAudio]);
-
-  // Actually start playing audio
-  const startPlayback = useCallback(async () => {
-    // Prevent duplicate play attempts
-    if (playbackInProgressRef.current) {
-      return;
-    }
-    
-    if (audioRef.current && audioRef.current.src) {
-      playbackInProgressRef.current = true;
-      try {
-        await audioRef.current.play();
-        setIsPlaying(true);
-      } catch (error) {
-        console.log('Audio play prevented:', error);
-        setIsPlaying(false);
-      } finally {
-        playbackInProgressRef.current = false;
-      }
-    }
-  }, []);
-
-  // When page changes: reset states and prepare new audio
+  // Reset image loaded state when page changes
   useEffect(() => {
-    // Reset readiness states
     setIsImageLoaded(false);
-    setIsAudioReady(false);
-    setIsPlaying(false);
-    audioPreparingRef.current = false;  // Allow new preparation
-    playbackInProgressRef.current = false;  // Reset playback tracking
-    
-    // Prepare audio for the new page (if autoPlay is on)
-    if (autoPlay) {
-      preparePageAudio(currentPage);
-    }
-  }, [currentPage, autoPlay, preparePageAudio]);
-
-  // Separate effect for image loading timeout (only depends on currentPage)
-  useEffect(() => {
-    const imageTimeout = setTimeout(() => {
-      setIsImageLoaded(prev => {
-        // Only set if not already loaded
-        if (!prev) {
-          console.log('Image load timeout - proceeding with audio');
-          return true;
-        }
-        return prev;
-      });
-    }, 3000);  // Reduced to 3 seconds
-    
-    return () => clearTimeout(imageTimeout);
+    setAudioUrl(null);
   }, [currentPage]);
 
-  // Start playback ONLY when both image and audio are ready
+  // Fetch audio when page changes (if autoPlay)
   useEffect(() => {
-    if (autoPlay && isImageLoaded && isAudioReady && !isPlaying) {
-      startPlayback();
+    if (autoPlay) {
+      generatePageAudio(currentPage).then(url => {
+        if (url) {
+          setAudioUrl(url);
+          prefetchNextAudio(currentPage);
+        }
+      });
     }
-  }, [autoPlay, isImageLoaded, isAudioReady, isPlaying, startPlayback]);
+  }, [currentPage, autoPlay, generatePageAudio, prefetchNextAudio]);
+
+  // Play audio when BOTH image is loaded AND audio is ready
+  useEffect(() => {
+    if (autoPlay && isImageLoaded && audioUrl && audioRef.current && !isPlaying) {
+      audioRef.current.src = audioUrl;
+      audioRef.current.play()
+        .then(() => setIsPlaying(true))
+        .catch(err => {
+          console.log('Audio play prevented:', err);
+          setIsPlaying(false);
+        });
+    }
+  }, [autoPlay, isImageLoaded, audioUrl, isPlaying]);
 
   // Handle audio ended
   useEffect(() => {
@@ -277,7 +202,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
         setTurnDirection(null);
       }, 300);
     } else {
-      // End of book - close reader and return to library
+      // End of book - close reader
       handleClose();
     }
   };
@@ -312,14 +237,10 @@ const BookReaderLandscape = ({ book, onClose }) => {
     const touchEnd = e.changedTouches[0].clientX;
     const diff = touchStart - touchEnd;
     
-    // Swipe right to left = next page
-    // Swipe left to right = previous page
     if (Math.abs(diff) > 50) {
       if (diff > 0) {
-        // Swiped left (right to left) - go to next page
         goToNextPage();
       } else {
-        // Swiped right (left to right) - go to previous page
         goToPrevPage();
       }
     }
@@ -333,10 +254,19 @@ const BookReaderLandscape = ({ book, onClose }) => {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      // If no audio loaded yet, prepare and play
-      if (!audioRef.current.src || audioRef.current.src === '') {
-        await preparePageAudio(currentPage);
-        startPlayback();
+      // If no audio loaded yet, generate and play
+      if (!audioUrl) {
+        const url = await generatePageAudio(currentPage);
+        if (url) {
+          setAudioUrl(url);
+          audioRef.current.src = url;
+          try {
+            await audioRef.current.play();
+            setIsPlaying(true);
+          } catch (error) {
+            console.log('Play prevented:', error);
+          }
+        }
       } else {
         try {
           await audioRef.current.play();
@@ -350,11 +280,9 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   // Clear progress when book is finished
   const handleClose = () => {
-    // Stop audio
     if (audioRef.current) {
       audioRef.current.pause();
     }
-    // Clear reading progress when book is completed
     if (book && currentPage >= totalPages - 1) {
       localStorage.removeItem(`book_progress_${book.id}`);
     }
@@ -368,7 +296,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   // Handle image error - proceed anyway
   const handleImageError = () => {
-    // If image fails to load, still allow audio to play
     setIsImageLoaded(true);
   };
 
