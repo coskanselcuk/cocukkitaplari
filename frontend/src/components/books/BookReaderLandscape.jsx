@@ -38,6 +38,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
   useEffect(() => { autoPlayRef.current = autoPlay; }, [autoPlay]);
   useEffect(() => { currentPageRef.current = currentPage; }, [currentPage]);
   useEffect(() => { pagesRef.current = pages; }, [pages]);
+  // Derived values - also need refs for use in callbacks
   const totalPages = pages.length;
   const currentPageData = pages[currentPage];
 
