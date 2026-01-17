@@ -615,7 +615,7 @@ const AdminPanel = ({ onBack }) => {
                   <option value="end">Sona Ekle (Sayfa {bookPages.length + 1})</option>
                   <option value="start">Başa Ekle (Sayfa 1)</option>
                   {bookPages.map((_, idx) => (
-                    <option key={idx} value={String(idx + 1)}>Sayfa {idx + 1}'den sonra</option>
+                    <option key={idx} value={String(idx + 1)}>Sayfa {idx + 1} sonrasına</option>
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1">Sayfa numaraları otomatik güncellenecek</p>
