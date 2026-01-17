@@ -110,49 +110,66 @@ const IslandMap = ({ onCategorySelect }) => {
         <div className="absolute inset-1 bg-yellow-200 rounded-full" />
       </div>
       
+      {/* Loading state */}
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-white text-lg animate-pulse">Adalar yükleniyor...</div>
+        </div>
+      )}
+      
       {/* Islands */}
-      {categories.map((category, index) => (
-        <button
-          key={category.id}
-          onClick={() => onCategorySelect(category)}
-          className="island absolute cursor-pointer group focus:outline-none"
-          style={{
-            top: islandConfigs[index]?.top,
-            left: islandConfigs[index]?.left,
-            right: islandConfigs[index]?.right,
-            transform: islandConfigs[index]?.transform,
-          }}
-        >
-          <div className="relative animate-float" style={{ animationDelay: `${index * 0.5}s`, animationDuration: `${3 + index * 0.3}s` }}>
-            {/* Island decoration */}
-            {getIslandDecoration(islandConfigs[index]?.decoration, category.gradient)}
-            
-            {/* Island base with grass top */}
-            <div className={`relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-b ${category.gradient} shadow-2xl flex flex-col items-center justify-center overflow-visible group-hover:scale-110 group-active:scale-95 transition-transform duration-300`}>
-              {/* Grass ring on top */}
-              <div className="absolute -top-1 w-full h-4 bg-gradient-to-b from-green-400 to-transparent rounded-t-full" />
+      {!isLoading && categories.map((category, index) => {
+        const config = islandConfigs[index];
+        if (!config) return null; // Skip if no position defined
+        
+        return (
+          <button
+            key={category.id}
+            onClick={() => onCategorySelect(category)}
+            className="island absolute cursor-pointer group focus:outline-none"
+            style={{
+              top: config.top,
+              left: config.left,
+              right: config.right,
+              transform: config.transform,
+            }}
+          >
+            <div className="relative animate-float" style={{ animationDelay: `${index * 0.5}s`, animationDuration: `${3 + index * 0.3}s` }}>
+              {/* Island decoration */}
+              {getIslandDecoration(config.decoration, category.gradient)}
               
-              {/* Shine effect */}
-              <div className="absolute top-3 left-3 w-6 h-6 bg-white/40 rounded-full blur-sm" />
+              {/* Island base with grass top */}
+              <div className={`relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-gradient-to-b ${category.gradient || 'from-orange-400 to-orange-600'} shadow-2xl flex flex-col items-center justify-center overflow-visible group-hover:scale-110 group-active:scale-95 transition-transform duration-300`}>
+                {/* Grass ring on top */}
+                <div className="absolute -top-1 w-full h-4 bg-gradient-to-b from-green-400 to-transparent rounded-t-full" />
+                
+                {/* Shine effect */}
+                <div className="absolute top-3 left-3 w-6 h-6 bg-white/40 rounded-full blur-sm" />
+                
+                {/* Category Icon */}
+                {category.icon && (
+                  <span className="text-2xl mb-1">{category.icon}</span>
+                )}
+                
+                {/* Island Label */}
+                <span className="text-white font-bold text-xs sm:text-sm text-center leading-tight px-3 drop-shadow-lg z-10">
+                  {category.name}
+                </span>
+                
+                {/* Hover glow */}
+                <div className="absolute inset-0 bg-white/0 group-hover:bg-white/20 rounded-full transition-colors duration-300" />
+              </div>
               
-              {/* Island Label */}
-              <span className="text-white font-bold text-xs sm:text-sm text-center leading-tight px-3 drop-shadow-lg z-10 mt-2">
-                {category.name}
-              </span>
+              {/* Shadow beneath island */}
+              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-20 h-4 bg-cyan-700/30 rounded-full blur-md" />
               
-              {/* Hover glow */}
-              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/20 rounded-full transition-colors duration-300" />
+              {/* Floating particles */}
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-300 rounded-full animate-bounce-slow shadow-lg" style={{ animationDelay: `${index * 0.2}s` }} />
+              <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-white rounded-full animate-bounce-slow opacity-80" style={{ animationDelay: `${0.5 + index * 0.2}s` }} />
             </div>
-            
-            {/* Shadow beneath island */}
-            <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-20 h-4 bg-cyan-700/30 rounded-full blur-md" />
-            
-            {/* Floating particles */}
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-300 rounded-full animate-bounce-slow shadow-lg" style={{ animationDelay: `${index * 0.2}s` }} />
-            <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-white rounded-full animate-bounce-slow opacity-80" style={{ animationDelay: `${0.5 + index * 0.2}s` }} />
-          </div>
-        </button>
-      ))}
+          </button>
+        );
+      })}
       
       {/* Birds */}
       <div className="absolute top-16 left-[40%] text-gray-600 text-xl animate-float" style={{ animationDelay: '2s' }}>
