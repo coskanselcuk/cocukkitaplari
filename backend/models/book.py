@@ -89,6 +89,8 @@ class Page(PageBase):
 
 
 class PageResponse(BaseModel):
+    id: str
+    bookId: str
     pageNumber: int
     text: str
     image: str
