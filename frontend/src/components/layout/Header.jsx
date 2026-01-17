@@ -10,8 +10,8 @@ const Header = ({ onSearchClick, onMenuClick, showBack, onBack, title }) => {
           <div className="flex items-center gap-2">
             <div className="bg-white rounded-2xl p-2 shadow-lg">
               <div className="flex items-center">
-                <span className="text-cyan-500 font-black text-lg">TRT</span>
-                <span className="text-orange-500 font-black text-lg ml-1">Çocuk</span>
+                <span className="text-cyan-500 font-black text-lg">Çocuk</span>
+                <span className="text-orange-500 font-black text-lg ml-1">Kitapları</span>
               </div>
             </div>
           </div>

@@ -1,11 +1,10 @@
 import React from 'react';
-import { Home, BookOpen, Gamepad2, User, Settings } from 'lucide-react';
+import { Home, BookOpen, User } from 'lucide-react';
 
 const BottomNav = ({ activeTab, onTabChange }) => {
   const tabs = [
     { id: 'home', icon: Home, label: 'Ana Sayfa' },
     { id: 'library', icon: BookOpen, label: 'Kitaplık' },
-    { id: 'games', icon: Gamepad2, label: 'Oyunlar' },
     { id: 'profile', icon: User, label: 'Profil' },
   ];
 
