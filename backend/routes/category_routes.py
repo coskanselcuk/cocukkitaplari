@@ -1,10 +1,21 @@
 from fastapi import APIRouter, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
+from pydantic import BaseModel
+from typing import Optional
 import os
 
 from models.category import (
     Category, CategoryCreate, CategoryResponse, CategoriesListResponse
 )
+
+
+class CategoryUpdate(BaseModel):
+    name: Optional[str] = None
+    slug: Optional[str] = None
+    icon: Optional[str] = None
+    ageGroup: Optional[str] = None
+    sortOrder: Optional[int] = None
+
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 
