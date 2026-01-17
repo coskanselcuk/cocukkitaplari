@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Star, BookOpen, Home, RotateCcw } from 'lucide-react';
 
 const CompletionCelebration = ({ book, onClose, onRestart }) => {
@@ -11,16 +11,32 @@ const CompletionCelebration = ({ book, onClose, onRestart }) => {
     setTimeout(() => setShowContent(true), 500);
   }, []);
 
-  // Generate confetti particles
+  // Generate confetti particles with useMemo to avoid re-rendering issues
   const confettiColors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181', '#A8E6CF', '#FFD93D'];
-  const confetti = Array.from({ length: 50 }, (_, i) => ({
-    id: i,
-    color: confettiColors[i % confettiColors.length],
-    left: `${Math.random() * 100}%`,
-    delay: Math.random() * 2,
-    duration: 3 + Math.random() * 2,
-    size: 8 + Math.random() * 8
-  }));
+  
+  const confetti = useMemo(() => 
+    Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      color: confettiColors[i % confettiColors.length],
+      left: `${(i * 2) % 100}%`,
+      delay: (i % 10) * 0.2,
+      duration: 3 + (i % 5) * 0.5,
+      size: 8 + (i % 4) * 4,
+      isCircle: i % 2 === 0
+    }))
+  , []);
+
+  // Generate stars with useMemo
+  const stars = useMemo(() =>
+    Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      size: 12 + (i % 4) * 4,
+      left: `${(i * 5) % 100}%`,
+      top: `${(i * 7) % 100}%`,
+      delay: (i % 5) * 0.4,
+      opacity: 0.6 + (i % 4) * 0.1
+    }))
+  , []);
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-b from-purple-600 via-purple-500 to-indigo-600 flex items-center justify-center overflow-hidden">
@@ -37,7 +53,7 @@ const CompletionCelebration = ({ book, onClose, onRestart }) => {
                 width: particle.size,
                 height: particle.size,
                 backgroundColor: particle.color,
-                borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+                borderRadius: particle.isCircle ? '50%' : '2px',
                 animationDelay: `${particle.delay}s`,
                 animationDuration: `${particle.duration}s`,
               }}
@@ -48,16 +64,16 @@ const CompletionCelebration = ({ book, onClose, onRestart }) => {
 
       {/* Stars Background */}
       <div className="absolute inset-0 pointer-events-none">
-        {Array.from({ length: 20 }, (_, i) => (
+        {stars.map((star) => (
           <Star
-            key={i}
+            key={star.id}
             className="absolute text-yellow-300 animate-pulse"
-            size={12 + Math.random() * 16}
+            size={star.size}
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              opacity: 0.6 + Math.random() * 0.4
+              left: star.left,
+              top: star.top,
+              animationDelay: `${star.delay}s`,
+              opacity: star.opacity
             }}
             fill="currentColor"
           />
@@ -113,6 +129,7 @@ const CompletionCelebration = ({ book, onClose, onRestart }) => {
           <button
             onClick={onRestart}
             className="bg-white/20 hover:bg-white/30 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2 backdrop-blur-sm"
+            data-testid="restart-book-btn"
           >
             <RotateCcw size={20} />
             Tekrar Oku
@@ -120,6 +137,7 @@ const CompletionCelebration = ({ book, onClose, onRestart }) => {
           <button
             onClick={onClose}
             className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
+            data-testid="go-home-btn"
           >
             <Home size={20} />
             Ana Sayfaya Dön
