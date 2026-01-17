@@ -3,6 +3,9 @@ import { authApi } from '../services/api';
 
 const AuthContext = createContext(null);
 
+// Admin email - only this user can access admin panel
+const ADMIN_EMAIL = 'coskanselcuk@gmail.com';
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -85,6 +88,9 @@ export const AuthProvider = ({ children }) => {
   // Check if user has premium access
   const isPremiumUser = user?.subscription_tier === 'premium';
 
+  // Check if user is admin (coskanselcuk@gmail.com)
+  const isAdmin = user?.email === ADMIN_EMAIL;
+
   // Check if user can access a book
   const canAccessBook = useCallback((book) => {
     if (!book.isPremium) return true; // Free books
@@ -97,6 +103,7 @@ export const AuthProvider = ({ children }) => {
     isLoading,
     isAuthenticated,
     isPremiumUser,
+    isAdmin,
     login,
     logout,
     canAccessBook
