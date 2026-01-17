@@ -41,6 +41,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   const audioRef = useRef(null);
   const audioPreparingRef = useRef(false);  // Track if audio is being prepared
+  const playbackInProgressRef = useRef(false);  // Track if playback is in progress
   const currentPageRef = useRef(currentPage);  // Track current page for async operations
   const pages = bookPages;
   const totalPages = pages.length;
