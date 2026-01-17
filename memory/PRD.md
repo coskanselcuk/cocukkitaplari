@@ -150,9 +150,10 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ### P1 - High Priority
 - [ ] Wire up reading progress API to frontend (sync across devices)
-- [ ] User profile management and authentication
+- [ ] Add CRUD for categories in admin panel
 
 ### P2 - Medium Priority
+- [ ] User profile management and authentication
 - [ ] Bookshelf-themed loading animation
 - [ ] Add more books to database
 - [ ] Child-friendly profile avatars
