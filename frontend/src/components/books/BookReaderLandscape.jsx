@@ -11,7 +11,8 @@ import {
   Loader2,
   Volume2
 } from 'lucide-react';
-import { bookPages } from '../../data/mockData';
+import { booksApi } from '../../services/api';
+import { bookPages as mockPages } from '../../data/mockData';
 import ReaderSettings from './ReaderSettings';
 import CompletionCelebration from './CompletionCelebration';
 import axios from 'axios';
