@@ -208,8 +208,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
     // If book is completed, mark it as complete in backend and clear progress
     if (book && currentPage >= totalPages - 1) {
       try {
-        await progressApi.markComplete(DEFAULT_USER_ID, book.id);
-        await progressApi.deleteProgress(DEFAULT_USER_ID, book.id);
+        await progressApi.markComplete(userId, book.id);
+        await progressApi.deleteProgress(userId, book.id);
       } catch (error) {
         console.log('Error marking complete:', error);
       }
@@ -222,7 +222,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
     // Mark book as complete in backend
     if (book) {
       try {
-        await progressApi.markComplete(DEFAULT_USER_ID, book.id);
+        await progressApi.markComplete(userId, book.id);
       } catch (error) {
         console.log('Error marking complete:', error);
       }
