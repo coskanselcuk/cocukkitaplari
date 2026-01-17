@@ -3,7 +3,8 @@ import { categoriesApi } from '../../services/api';
 import { categories as mockCategories } from '../../data/mockData';
 
 const IslandMap = ({ onCategorySelect }) => {
-  const [categories, setCategories] = useState(mockCategories);
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     const fetchCategories = async () => {
@@ -11,47 +12,37 @@ const IslandMap = ({ onCategorySelect }) => {
         const response = await categoriesApi.getAll();
         if (response.categories && response.categories.length > 0) {
           setCategories(response.categories);
+        } else {
+          setCategories(mockCategories);
         }
       } catch (error) {
         console.log('Using mock categories:', error.message);
+        setCategories(mockCategories);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchCategories();
   }, []);
 
-  const islandConfigs = [
-    { 
-      top: '5%', 
-      left: '50%', 
-      transform: 'translateX(-50%)',
-      size: 'large',
-      decoration: 'volcano'
-    },
-    { 
-      top: '30%', 
-      left: '8%',
-      size: 'medium',
-      decoration: 'trees'
-    },
-    { 
-      top: '25%', 
-      right: '8%',
-      size: 'medium',
-      decoration: 'castle'
-    },
-    { 
-      top: '55%', 
-      left: '15%',
-      size: 'medium',
-      decoration: 'lab'
-    },
-    { 
-      top: '55%', 
-      right: '15%',
-      size: 'medium',
-      decoration: 'house'
-    },
-  ];
+  // Dynamic island positions based on number of categories
+  const getIslandConfigs = (count) => {
+    // Default positions for up to 7 islands
+    const positions = [
+      { top: '5%', left: '50%', transform: 'translateX(-50%)', size: 'large', decoration: 'volcano' },
+      { top: '30%', left: '8%', size: 'medium', decoration: 'trees' },
+      { top: '25%', right: '8%', size: 'medium', decoration: 'castle' },
+      { top: '55%', left: '15%', size: 'medium', decoration: 'lab' },
+      { top: '55%', right: '15%', size: 'medium', decoration: 'house' },
+      { top: '75%', left: '35%', size: 'small', decoration: 'trees' },
+      { top: '75%', right: '35%', size: 'small', decoration: 'castle' },
+    ];
+    return positions.slice(0, count);
+  };
+
+  const decorations = ['volcano', 'trees', 'castle', 'lab', 'house'];
+  
+  const islandConfigs = getIslandConfigs(categories.length);
 
   const getIslandDecoration = (type, color) => {
     switch (type) {
