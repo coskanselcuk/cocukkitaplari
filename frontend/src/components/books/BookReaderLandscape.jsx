@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   ChevronLeft, ChevronRight, X, Settings, Play, Pause, Loader2
 } from 'lucide-react';
@@ -28,6 +28,16 @@ const BookReaderLandscape = ({ book, onClose }) => {
   });
 
   const audioRef = useRef(null);
+  
+  // Refs to hold latest state values - prevents stale closure issues
+  const autoPlayRef = useRef(autoPlay);
+  const currentPageRef = useRef(currentPage);
+  const pagesRef = useRef(pages);
+  
+  // Keep refs in sync with state
+  useEffect(() => { autoPlayRef.current = autoPlay; }, [autoPlay]);
+  useEffect(() => { currentPageRef.current = currentPage; }, [currentPage]);
+  useEffect(() => { pagesRef.current = pages; }, [pages]);
   const totalPages = pages.length;
   const currentPageData = pages[currentPage];
 
