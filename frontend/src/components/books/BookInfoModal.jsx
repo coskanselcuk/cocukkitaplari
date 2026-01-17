@@ -47,7 +47,7 @@ const BookInfoModal = ({ book, isOpen, onClose, onStart }) => {
             {/* Illustrator */}
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-500">Çizer</span>
-              <span className="text-gray-800 font-medium">TRT Çocuk</span>
+              <span className="text-gray-800 font-medium">Çocuk Kitapları</span>
             </div>
             
             {/* Age Group */}
