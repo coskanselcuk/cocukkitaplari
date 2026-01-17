@@ -33,7 +33,7 @@ DEFAULT_VOICE_SETTINGS = VoiceSettings(
 # Irem - Young Turkish girl, ideal for audiobooks and storytelling
 IREM_VOICE_ID = "NsFK0aDGLbVusA7tQfOB"
 
-# Fallback voices if Valory is not available
+# Fallback voices if Irem is not available
 FALLBACK_VOICES = [
     "EXAVITQu4vr4xnSDxMaL",  # Sarah - Mature, Reassuring
     "cgSgspJ2msm6clMCkdW9",  # Jessica - Playful, Bright, Warm
