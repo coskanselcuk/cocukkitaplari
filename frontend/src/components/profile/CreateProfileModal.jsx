@@ -4,18 +4,22 @@ import { X, User, Lock, Mail, ArrowRight } from 'lucide-react';
 const CreateProfileModal = ({ isOpen, onClose, onSave }) => {
   const [name, setName] = React.useState('');
   const [age, setAge] = React.useState('');
-  const [selectedAvatar, setSelectedAvatar] = React.useState('👧');
+  const [selectedColor, setSelectedColor] = React.useState('bg-pink-400');
 
-  const avatarOptions = ['👧', '👦', '🧒', '👶', '🧑', '👸', '🤴', '🦸', '🧜', '🧙', '🤖', '🦄'];
+  const colorOptions = [
+    'bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 
+    'bg-orange-400', 'bg-teal-400', 'bg-red-400', 'bg-yellow-400',
+    'bg-indigo-400', 'bg-cyan-400', 'bg-rose-400', 'bg-emerald-400'
+  ];
 
   if (!isOpen) return null;
 
   const handleSubmit = () => {
     if (name && age) {
-      onSave({ name, age: parseInt(age), avatar: selectedAvatar });
+      onSave({ name, age: parseInt(age), avatarColor: selectedColor });
       setName('');
       setAge('');
-      setSelectedAvatar('👧');
+      setSelectedColor('bg-pink-400');
       onClose();
     }
   };
@@ -33,23 +37,30 @@ const CreateProfileModal = ({ isOpen, onClose, onSave }) => {
           </button>
         </div>
         
-        {/* Avatar Selection */}
+        {/* Avatar Color Selection */}
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">Avatar Seç</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">Renk Seç</label>
           <div className="flex flex-wrap gap-3">
-            {avatarOptions.map((avatar, index) => (
+            {colorOptions.map((color, index) => (
               <button
                 key={index}
-                onClick={() => setSelectedAvatar(avatar)}
-                className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all duration-300 ${
-                  selectedAvatar === avatar 
-                    ? 'bg-orange-100 ring-2 ring-orange-500 scale-110' 
-                    : 'bg-gray-100 hover:bg-gray-200'
+                onClick={() => setSelectedColor(color)}
+                className={`w-10 h-10 rounded-full ${color} transition-all duration-300 ${
+                  selectedColor === color 
+                    ? 'ring-2 ring-offset-2 ring-orange-500 scale-110' 
+                    : 'hover:scale-105'
                 }`}
-              >
-                {avatar}
-              </button>
+              />
             ))}
+          </div>
+          
+          {/* Preview */}
+          <div className="mt-4 flex justify-center">
+            <div className={`w-20 h-20 ${selectedColor} rounded-full flex items-center justify-center shadow-lg`}>
+              <span className="text-white text-2xl font-bold">
+                {name ? name.charAt(0).toUpperCase() : '?'}
+              </span>
+            </div>
           </div>
         </div>
         
