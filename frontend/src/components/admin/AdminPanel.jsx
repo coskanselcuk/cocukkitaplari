@@ -312,23 +312,43 @@ const AdminPanel = ({ onBack }) => {
 
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {books.map(book => (
-                  <button
+                  <div
                     key={book.id}
-                    onClick={() => selectBook(book)}
-                    className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                    className={`p-3 rounded-lg border transition-colors ${
                       selectedBook?.id === book.id 
                         ? 'border-orange-500 bg-orange-50' 
                         : 'border-gray-200 hover:bg-gray-50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <img src={book.coverImage} alt="" className="w-12 h-16 object-cover rounded" />
-                      <div>
-                        <p className="font-medium text-gray-800">{book.title}</p>
-                        <p className="text-sm text-gray-500">{book.author} • {book.totalPages} sayfa</p>
+                      <button
+                        onClick={() => selectBook(book)}
+                        className="flex items-center gap-3 flex-1 text-left"
+                      >
+                        <img src={book.coverImage} alt="" className="w-12 h-16 object-cover rounded" />
+                        <div>
+                          <p className="font-medium text-gray-800">{book.title}</p>
+                          <p className="text-sm text-gray-500">{book.author} • {book.totalPages || 0} sayfa</p>
+                        </div>
+                      </button>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); selectBook(book); openEditBook(book); }}
+                          className="p-2 hover:bg-blue-100 rounded-lg text-blue-600"
+                          title="Düzenle"
+                        >
+                          <Edit size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowDeleteConfirm({ type: 'book', id: book.id, title: book.title }); }}
+                          className="p-2 hover:bg-red-100 rounded-lg text-red-600"
+                          title="Sil"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </div>
-                  </button>
+                  </div>
                 ))}
               </div>
             </div>
