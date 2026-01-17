@@ -9,6 +9,7 @@ import BookInfoModal from './components/books/BookInfoModal';
 import LoadingScreen from './components/common/LoadingScreen';
 import { ProfileSelector, ProfilePage } from './components/profile/ProfileComponents';
 import ParentDashboard from './components/profile/ParentDashboard';
+import AdminPanel from './components/admin/AdminPanel';
 import SearchModal from './components/search/SearchModal';
 import CreateProfileModal from './components/profile/CreateProfileModal';
 import { books, categories, profiles } from './data/mockData';
@@ -25,6 +26,7 @@ function App() {
   const [showParentDashboard, setShowParentDashboard] = useState(false);
   const [showCreateProfile, setShowCreateProfile] = useState(false);
   const [showBookInfo, setShowBookInfo] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingBook, setIsLoadingBook] = useState(false);
 
