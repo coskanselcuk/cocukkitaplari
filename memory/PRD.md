@@ -22,10 +22,10 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 - ✅ Settings modal with "Auto-Play" and "Resume/Continue" toggles
 
 ### Audio Features
-- ✅ Each page has own TTS audio (ElevenLabs Valory voice)
+- ✅ Each page has pre-generated TTS audio (Irem - Turkish Audiobook Narrator)
+- ✅ Audio stored in database - no loading delays
 - ✅ Auto-play turns page when audio finishes
 - ✅ Audio waits for image to load before playing
-- ✅ Visual audio loading indicator with progress
 - ✅ Image error fallback - audio plays even if image fails
 
 ### Celebration & Engagement
