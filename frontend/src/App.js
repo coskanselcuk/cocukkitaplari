@@ -12,8 +12,10 @@ import ParentDashboard from './components/profile/ParentDashboard';
 import AdminPanel from './components/admin/AdminPanel';
 import SearchModal from './components/search/SearchModal';
 import CreateProfileModal from './components/profile/CreateProfileModal';
+import SubscriptionModal from './components/subscription/SubscriptionModal';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { booksApi } from './services/api';
+import { initializeStore, isNativeApp } from './services/iapService';
 import { profiles } from './data/mockData';
 import './App.css';
 
