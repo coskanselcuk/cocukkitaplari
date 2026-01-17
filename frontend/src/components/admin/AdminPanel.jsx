@@ -644,15 +644,12 @@ const AdminPanel = ({ onBack }) => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Kapak Resmi URL</label>
-                <input
-                  type="text"
+                <ImageUpload
                   value={newBook.coverImage}
-                  onChange={(e) => setNewBook({...newBook, coverImage: e.target.value})}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  onChange={(url) => setNewBook({...newBook, coverImage: url})}
+                  label="Kapak Resmi"
                   placeholder="https://images.unsplash.com/..."
                 />
-                <p className="text-xs text-gray-500 mt-1">Unsplash veya başka bir kaynaktan resim URLsi girin</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
