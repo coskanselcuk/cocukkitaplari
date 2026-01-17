@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Music, 
   VolumeX,
@@ -8,53 +8,12 @@ import {
   Settings,
   Play,
   Pause,
-  Loader2,
-  Volume2
+  Loader2
 } from 'lucide-react';
 import { booksApi } from '../../services/api';
 import { bookPages as mockPages } from '../../data/mockData';
 import ReaderSettings from './ReaderSettings';
 import CompletionCelebration from './CompletionCelebration';
-import axios from 'axios';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-
-// Audio Loading Indicator Component
-const AudioLoadingIndicator = ({ isLoading, progress }) => {
-  if (!isLoading) return null;
-  
-  return (
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30">
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl flex flex-col items-center gap-3 animate-fade-in">
-        <div className="relative">
-          <div className="w-16 h-16 rounded-full border-4 border-orange-200 flex items-center justify-center">
-            <Volume2 className="text-orange-500 animate-pulse" size={28} />
-          </div>
-          <div className="absolute inset-0">
-            <svg className="w-16 h-16 -rotate-90">
-              <circle
-                cx="32"
-                cy="32"
-                r="28"
-                stroke="#f97316"
-                strokeWidth="4"
-                fill="none"
-                strokeDasharray={`${progress * 1.76} 176`}
-                className="transition-all duration-300"
-              />
-            </svg>
-          </div>
-        </div>
-        <p className="text-gray-700 font-medium text-sm">Ses hazırlanıyor...</p>
-        <div className="flex gap-1">
-          <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-          <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const BookReaderLandscape = ({ book, onClose }) => {
   const [currentPage, setCurrentPage] = useState(0);
@@ -64,13 +23,9 @@ const BookReaderLandscape = ({ book, onClose }) => {
   const [turnDirection, setTurnDirection] = useState(null);
   const [touchStart, setTouchStart] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
-  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
-  const [audioLoadProgress, setAudioLoadProgress] = useState(0);
-  const [audioCache, setAudioCache] = useState({});
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [audioUrl, setAudioUrl] = useState(null);
   const [showCelebration, setShowCelebration] = useState(false);
-  const [pages, setPages] = useState(mockPages);  // Start with mock, load from API
+  const [pages, setPages] = useState(mockPages);
   const [isLoadingPages, setIsLoadingPages] = useState(true);
   
   // Settings state
@@ -86,7 +41,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
   const audioRef = useRef(null);
   const totalPages = pages.length;
 
-  // Fetch pages from API on mount
+  // Fetch pages from API on mount (includes pre-generated audio)
   useEffect(() => {
     const fetchPages = async () => {
       if (!book?.id) {
@@ -100,8 +55,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
           setPages(response.pages);
         }
       } catch (error) {
-        console.log('Using mock pages, API not available:', error.message);
-        // Keep using mock pages on error
+        console.log('Using mock pages:', error.message);
       } finally {
         setIsLoadingPages(false);
       }
@@ -139,82 +93,17 @@ const BookReaderLandscape = ({ book, onClose }) => {
     }
   }, [book, currentPage, resumeContinue]);
 
-  // Generate TTS audio for a page with progress tracking
-  const generatePageAudio = useCallback(async (pageIndex) => {
-    const pageData = pages[pageIndex];
-    if (!pageData) return null;
-    
-    // Check cache first
-    if (audioCache[pageIndex]) {
-      return audioCache[pageIndex];
-    }
-    
-    setIsLoadingAudio(true);
-    setAudioLoadProgress(0);
-    
-    // Simulate progress for better UX
-    const progressInterval = setInterval(() => {
-      setAudioLoadProgress(prev => Math.min(prev + 10, 90));
-    }, 200);
-    
-    try {
-      const response = await axios.post(`${BACKEND_URL}/api/tts/generate`, {
-        text: pageData.text
-      });
-      
-      clearInterval(progressInterval);
-      setAudioLoadProgress(100);
-      
-      const url = response.data.audio_url;
-      
-      // Cache the audio
-      setAudioCache(prev => ({
-        ...prev,
-        [pageIndex]: url
-      }));
-      
-      return url;
-    } catch (error) {
-      console.error('Error generating TTS:', error);
-      clearInterval(progressInterval);
-      return null;
-    } finally {
-      setTimeout(() => {
-        setIsLoadingAudio(false);
-        setAudioLoadProgress(0);
-      }, 300);
-    }
-  }, [pages, audioCache]);
-
-  // Pre-fetch next page audio
-  const prefetchNextAudio = useCallback(async (currentIdx) => {
-    if (currentIdx < totalPages - 1 && !audioCache[currentIdx + 1]) {
-      generatePageAudio(currentIdx + 1);
-    }
-  }, [totalPages, audioCache, generatePageAudio]);
-
   // Reset image loaded state when page changes
   useEffect(() => {
     setIsImageLoaded(false);
-    setAudioUrl(null);
   }, [currentPage]);
 
-  // Fetch audio when page changes (if autoPlay)
+  // Play pre-generated audio when image is loaded (if autoPlay)
   useEffect(() => {
-    if (autoPlay) {
-      generatePageAudio(currentPage).then(url => {
-        if (url) {
-          setAudioUrl(url);
-          prefetchNextAudio(currentPage);
-        }
-      });
-    }
-  }, [currentPage, autoPlay, generatePageAudio, prefetchNextAudio]);
-
-  // Play audio when BOTH image is loaded AND audio is ready
-  useEffect(() => {
-    if (autoPlay && isImageLoaded && audioUrl && audioRef.current && !isPlaying && !isLoadingAudio) {
-      audioRef.current.src = audioUrl;
+    const currentPageData = pages[currentPage];
+    
+    if (autoPlay && isImageLoaded && currentPageData?.audioUrl && audioRef.current && !isPlaying) {
+      audioRef.current.src = currentPageData.audioUrl;
       audioRef.current.play()
         .then(() => setIsPlaying(true))
         .catch(err => {
@@ -222,7 +111,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
           setIsPlaying(false);
         });
     }
-  }, [autoPlay, isImageLoaded, audioUrl, isPlaying, isLoadingAudio]);
+  }, [autoPlay, isImageLoaded, currentPage, pages, isPlaying]);
 
   // Handle audio ended
   useEffect(() => {
@@ -232,16 +121,10 @@ const BookReaderLandscape = ({ book, onClose }) => {
     const handleEnded = () => {
       setIsPlaying(false);
       
-      // If autoPlay is on, go to next page automatically
       if (autoPlay) {
         if (currentPage < totalPages - 1) {
-          // Navigate to next page
           setTurnDirection('next');
           setIsPageTurning(true);
-          
-          if (audioRef.current) {
-            audioRef.current.pause();
-          }
           
           setTimeout(() => {
             setCurrentPage(prev => prev + 1);
@@ -249,10 +132,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
             setTurnDirection(null);
           }, 300);
         } else {
-          // End of book - show celebration!
-          if (audioRef.current) {
-            audioRef.current.pause();
-          }
           setShowCelebration(true);
         }
       }
@@ -267,7 +146,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
       setTurnDirection('next');
       setIsPageTurning(true);
       
-      // Stop current audio
       if (audioRef.current) {
         audioRef.current.pause();
         setIsPlaying(false);
@@ -279,7 +157,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
         setTurnDirection(null);
       }, 300);
     } else {
-      // End of book - show celebration
       setShowCelebration(true);
     }
   };
@@ -289,7 +166,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
       setTurnDirection('prev');
       setIsPageTurning(true);
       
-      // Stop current audio
       if (audioRef.current) {
         audioRef.current.pause();
         setIsPlaying(false);
@@ -303,7 +179,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
     }
   };
 
-  // Touch handlers for swipe gesture
   const handleTouchStart = (e) => {
     setTouchStart(e.touches[0].clientX);
   };
@@ -324,63 +199,47 @@ const BookReaderLandscape = ({ book, onClose }) => {
     setTouchStart(null);
   };
 
-  const togglePlayPause = async () => {
+  const togglePlayPause = () => {
     if (!audioRef.current) return;
+    
+    const currentPageData = pages[currentPage];
     
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      // If no audio loaded yet, generate and play
-      if (!audioUrl) {
-        const url = await generatePageAudio(currentPage);
-        if (url) {
-          setAudioUrl(url);
-          audioRef.current.src = url;
-          try {
-            await audioRef.current.play();
-            setIsPlaying(true);
-          } catch (error) {
-            console.log('Play prevented:', error);
-          }
+      if (currentPageData?.audioUrl) {
+        if (!audioRef.current.src || audioRef.current.src !== currentPageData.audioUrl) {
+          audioRef.current.src = currentPageData.audioUrl;
         }
-      } else {
-        try {
-          await audioRef.current.play();
-          setIsPlaying(true);
-        } catch (error) {
-          console.log('Play prevented:', error);
-        }
+        audioRef.current.play()
+          .then(() => setIsPlaying(true))
+          .catch(err => console.log('Play prevented:', err));
       }
     }
   };
 
-  // Handle closing from celebration
   const handleClose = () => {
     if (audioRef.current) {
       audioRef.current.pause();
     }
-    if (book) {
+    if (book && currentPage >= totalPages - 1) {
       localStorage.removeItem(`book_progress_${book.id}`);
     }
     onClose();
   };
 
-  // Handle restart from celebration
   const handleRestart = () => {
     setShowCelebration(false);
     setCurrentPage(0);
     setIsPlaying(false);
-    setAudioUrl(null);
     setIsImageLoaded(false);
   };
 
-  // Handle image load event
   const handleImageLoad = () => {
     setIsImageLoaded(true);
   };
 
-  // Handle image error - proceed anyway
   const handleImageError = () => {
     setIsImageLoaded(true);
   };
@@ -396,6 +255,18 @@ const BookReaderLandscape = ({ book, onClose }) => {
     );
   }
 
+  // Show loading while fetching pages
+  if (isLoadingPages) {
+    return (
+      <div className="fixed inset-0 z-50 bg-amber-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 size={48} className="animate-spin text-orange-500 mx-auto mb-4" />
+          <p className="text-gray-700">Kitap yükleniyor...</p>
+        </div>
+      </div>
+    );
+  }
+
   const currentPageData = pages[currentPage];
 
   return (
@@ -408,9 +279,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
       {/* Hidden Audio Element */}
       <audio ref={audioRef} preload="auto" />
 
-      {/* Audio Loading Indicator */}
-      <AudioLoadingIndicator isLoading={isLoadingAudio} progress={audioLoadProgress} />
-
       {/* Header Controls */}
       <div className={`absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-center transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <button 
@@ -422,7 +290,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
         </button>
         
         <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
-          {isLoadingAudio && <Loader2 size={16} className="animate-spin text-orange-500" />}
           <span className="text-gray-700 font-semibold" data-testid="page-counter">
             {currentPage + 1} / {totalPages}
           </span>
@@ -469,15 +336,14 @@ const BookReaderLandscape = ({ book, onClose }) => {
               )}
               
               {/* Interactive Hotspots */}
-              <div 
-                className="absolute top-1/4 left-1/4 w-12 h-12 border-2 border-orange-400 rounded-full cursor-pointer animate-pulse hover:bg-orange-400/30 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-              />
-              <div 
-                className="absolute bottom-1/3 right-1/4 w-10 h-10 border-2 border-orange-400 rounded-full cursor-pointer animate-pulse hover:bg-orange-400/30 transition-colors"
-                onClick={(e) => e.stopPropagation()}
-                style={{ animationDelay: '0.5s' }}
-              />
+              {currentPageData.hotspots?.map((hotspot, idx) => (
+                <div 
+                  key={idx}
+                  className="absolute w-12 h-12 border-2 border-orange-400 rounded-full cursor-pointer animate-pulse hover:bg-orange-400/30 transition-colors"
+                  style={{ top: `${hotspot.y}%`, left: `${hotspot.x}%` }}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ))}
               
               {/* Page turn indicator */}
               <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-20 bg-gradient-to-l from-red-400 to-red-500 rounded-l-full opacity-60" />
@@ -525,13 +391,10 @@ const BookReaderLandscape = ({ book, onClose }) => {
             {/* Play/Pause Button */}
             <button 
               onClick={(e) => { e.stopPropagation(); togglePlayPause(); }}
-              disabled={isLoadingAudio}
-              className="bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50"
+              className="bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               data-testid="play-pause-btn"
             >
-              {isLoadingAudio ? (
-                <Loader2 size={28} className="animate-spin" />
-              ) : isPlaying ? (
+              {isPlaying ? (
                 <Pause size={28} fill="white" />
               ) : (
                 <Play size={28} fill="white" />
@@ -566,17 +429,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
         resumeContinue={resumeContinue}
         setResumeContinue={setResumeContinue}
       />
-
-      {/* Custom animations */}
-      <style>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: scale(0.9); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out;
-        }
-      `}</style>
     </div>
   );
 };
