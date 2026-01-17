@@ -292,28 +292,28 @@ export const miniGames = [
     id: 1,
     type: 'puzzle',
     name: 'Yapboz',
-    icon: '🧩',
+    icon: 'puzzle',
     description: 'Resmi tamamla'
   },
   {
     id: 2,
     type: 'matching',
     name: 'Eşleştirme',
-    icon: '🎴',
+    icon: 'grid',
     description: 'Kartları eşleştir'
   },
   {
     id: 3,
     type: 'quiz',
     name: 'Bilgi Yarışması',
-    icon: '❓',
+    icon: 'help',
     description: 'Soruları cevapla'
   },
   {
     id: 4,
     type: 'coloring',
     name: 'Boyama',
-    icon: '🎨',
+    icon: 'palette',
     description: 'Resmi boya'
   }
 ];
