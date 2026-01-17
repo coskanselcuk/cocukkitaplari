@@ -140,9 +140,9 @@ const BookReaderLandscape = ({ book, onClose }) => {
       }
       
       if (audioUrl && audioRef.current) {
-        // Set up the audio
+        // Set up the audio - for base64 data URLs, don't call load() as it can interrupt playback
         audioRef.current.src = audioUrl;
-        audioRef.current.load();
+        // load() is not needed for base64 URLs and can cause AbortError
         
         // Pre-fetch next page
         prefetchNextAudio(pageIndex);
