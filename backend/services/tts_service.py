@@ -30,12 +30,13 @@ DEFAULT_VOICE_SETTINGS = VoiceSettings(
     use_speaker_boost=True
 )
 
-# Available Turkish-compatible voices (multilingual)
-# These work well with Turkish using eleven_multilingual_v2 model
-TURKISH_FRIENDLY_VOICES = [
-    "21m00Tcm4TlvDq8ikWAM",  # Rachel - warm female voice
-    "EXAVITQu4vr4xnSDxMaL",  # Bella - young female voice  
-    "MF3mGyEYCl7XYWbV9V6O",  # Elli - friendly female voice
+# Valory - Intimate, Warm and Inviting voice (perfect for children's stories)
+VALORY_VOICE_ID = "VhxAIIZM8IRmnl5fyeyk"
+
+# Fallback voices if Valory is not available
+FALLBACK_VOICES = [
+    "EXAVITQu4vr4xnSDxMaL",  # Sarah - Mature, Reassuring
+    "cgSgspJ2msm6clMCkdW9",  # Jessica - Playful, Bright, Warm
 ]
 
 async def get_available_voices():
