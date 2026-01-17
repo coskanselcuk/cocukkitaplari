@@ -122,20 +122,40 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   // Play audio for current page - prepares audio but doesn't play yet
   const preparePageAudio = useCallback(async (pageIndex) => {
-    const audioUrl = await generatePageAudio(pageIndex);
-    
-    if (audioUrl && audioRef.current) {
-      // Set up the audio
-      audioRef.current.src = audioUrl;
-      audioRef.current.load();
-      
-      // Pre-fetch next page
-      prefetchNextAudio(pageIndex);
-      
-      // For base64 data URLs, mark as ready immediately since they're fully loaded
-      setIsAudioReady(true);
-      return true;
+    // Prevent duplicate preparation
+    if (audioPreparingRef.current) {
+      return false;
     }
+    
+    audioPreparingRef.current = true;
+    
+    try {
+      const audioUrl = await generatePageAudio(pageIndex);
+      
+      // Check if we're still on the same page (might have changed during async fetch)
+      if (pageIndex !== currentPageRef.current) {
+        audioPreparingRef.current = false;
+        return false;
+      }
+      
+      if (audioUrl && audioRef.current) {
+        // Set up the audio
+        audioRef.current.src = audioUrl;
+        audioRef.current.load();
+        
+        // Pre-fetch next page
+        prefetchNextAudio(pageIndex);
+        
+        // For base64 data URLs, mark as ready immediately since they're fully loaded
+        setIsAudioReady(true);
+        audioPreparingRef.current = false;
+        return true;
+      }
+    } catch (error) {
+      console.error('Error preparing audio:', error);
+    }
+    
+    audioPreparingRef.current = false;
     return false;
   }, [generatePageAudio, prefetchNextAudio]);
 
@@ -154,19 +174,16 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   // When page changes: reset states and prepare new audio
   useEffect(() => {
-    let isMounted = true;
-    
     // Reset readiness states
     setIsImageLoaded(false);
     setIsAudioReady(false);
     setIsPlaying(false);
+    audioPreparingRef.current = false;  // Allow new preparation
     
     // Prepare audio for the new page (if autoPlay is on)
     if (autoPlay) {
       preparePageAudio(currentPage);
     }
-    
-    return () => { isMounted = false; };
   }, [currentPage, autoPlay, preparePageAudio]);
 
   // Start playback ONLY when both image and audio are ready
