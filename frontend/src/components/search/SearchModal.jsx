@@ -80,7 +80,9 @@ const SearchModal = ({ isOpen, onClose, onBookSelect }) => {
           </div>
         ) : filteredBooks.length === 0 ? (
           <div className="text-center py-10">
-            <span className="text-6xl block mb-4">😔</span>
+            <div className="w-16 h-16 bg-white/20 rounded-full mx-auto flex items-center justify-center mb-4">
+              <Search className="text-white/60" size={32} />
+            </div>
             <p className="text-white/80 text-lg">Sonuç bulunamadı</p>
           </div>
         ) : (
