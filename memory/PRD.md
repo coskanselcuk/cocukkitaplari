@@ -46,6 +46,13 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Subscription Management UI
+- **Profile Page**: Added subscription status section (shows only when authenticated)
+- **Free User View**: Shows benefits list and "Premium'a Yükselt" upgrade button
+- **Premium User View**: Shows active benefits with checkmarks
+- **Pricing**: Displayed as "Aylık ₺29.99" (placeholder for App Store pricing)
+- **OAuth Flow Tested**: Login redirects to Emergent Auth → Google → back to app
+
 ### January 17, 2026 - User Authentication & Premium Content
 - **Google OAuth**: Integrated Emergent-managed Google Auth for user login
 - **User Model**: Created users collection with subscription_tier (free/premium)
