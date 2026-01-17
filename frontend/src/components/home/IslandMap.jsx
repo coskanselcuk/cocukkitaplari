@@ -1,7 +1,24 @@
-import React from 'react';
-import { categories } from '../../data/mockData';
+import React, { useState, useEffect } from 'react';
+import { categoriesApi } from '../../services/api';
+import { categories as mockCategories } from '../../data/mockData';
 
 const IslandMap = ({ onCategorySelect }) => {
+  const [categories, setCategories] = useState(mockCategories);
+  
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await categoriesApi.getAll();
+        if (response.categories && response.categories.length > 0) {
+          setCategories(response.categories);
+        }
+      } catch (error) {
+        console.log('Using mock categories:', error.message);
+      }
+    };
+    fetchCategories();
+  }, []);
+
   const islandConfigs = [
     { 
       top: '5%', 
