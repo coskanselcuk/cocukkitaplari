@@ -46,6 +46,31 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Capacitor Integration & In-App Purchases
+- **Capacitor Setup**: Integrated Capacitor 6 for iOS/Android native app builds
+  - Configured `capacitor.config.json` with app settings
+  - Added iOS and Android platform support
+  - Created splash screen and status bar configuration
+- **In-App Purchase Service**: Created `iapService.js` for native subscriptions
+  - Monthly subscription: `cocukkitaplari_premium_monthly` (₺29.99)
+  - Yearly subscription: `cocukkitaplari_premium_yearly` (₺214.99 - 40% discount)
+  - Uses `cordova-plugin-purchase` for Apple StoreKit & Google Play Billing
+- **Subscription Modal**: Beautiful new subscription UI with plan selection
+  - Benefits list, plan comparison, restore purchases
+  - Web fallback message for non-native users
+- **Build Documentation**: Created `MOBILE_BUILD_GUIDE.md` with complete instructions
+  - iOS setup (Xcode, signing, App Store Connect)
+  - Android setup (Android Studio, keystore, Play Console)
+  - In-app purchase configuration guide
+
+### January 17, 2026 - New Book Content
+- **4 New Books with Stories**: Added pages and TTS audio for newly created books
+  - Pırıl ve Sihirli Orman (Free) - Firefly's magical adventure
+  - Minik Bulut (Free) - Little cloud learning to make rain
+  - Ay Prensesi (Premium) - Moon princess granting wishes
+  - Deniz Altı Macerası (Premium) - Underwater ocean adventure
+- All 10 books now have 5 pages each with ElevenLabs TTS audio
+
 ### January 17, 2026 - Premium Content UI & Admin Access Control
 - **Premium Content Visibility**: Non-premium users now clearly see locked content
   - Lock icon overlay on premium book covers with darkened image
