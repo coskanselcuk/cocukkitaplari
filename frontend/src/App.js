@@ -3,8 +3,10 @@ import Header from './components/layout/Header';
 import BottomNav from './components/layout/BottomNav';
 import IslandMap from './components/home/IslandMap';
 import BookCarousel from './components/books/BookCarousel';
-import BookReader from './components/books/BookReader';
+import BookReaderLandscape from './components/books/BookReaderLandscape';
 import BookLibrary from './components/books/BookLibrary';
+import BookInfoModal from './components/books/BookInfoModal';
+import LoadingScreen from './components/common/LoadingScreen';
 import GamesPage from './components/games/GamesPage';
 import { ProfileSelector, ProfilePage } from './components/profile/ProfileComponents';
 import ParentDashboard from './components/profile/ParentDashboard';
@@ -23,28 +25,46 @@ function App() {
   const [showLibrary, setShowLibrary] = useState(false);
   const [showParentDashboard, setShowParentDashboard] = useState(false);
   const [showCreateProfile, setShowCreateProfile] = useState(false);
+  const [showBookInfo, setShowBookInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingBook, setIsLoadingBook] = useState(false);
 
   // Simulate splash screen
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 2000);
+    const timer = setTimeout(() => setIsLoading(false), 2500);
     return () => clearTimeout(timer);
   }, []);
 
   const newBooks = books.filter(book => book.isNew);
-  const popularBooks = books.sort((a, b) => b.readCount - a.readCount).slice(0, 6);
+  const popularBooks = [...books].sort((a, b) => b.readCount - a.readCount).slice(0, 6);
   const recommendedBooks = books.filter(book => 
     book.ageGroup.includes(currentProfile?.age?.toString())
   ).slice(0, 6);
 
   const handleBookSelect = (book) => {
     setSelectedBook(book);
-    setShowReader(true);
+    setShowBookInfo(true);
+  };
+
+  const handleStartReading = (book) => {
+    setShowBookInfo(false);
+    setIsLoadingBook(true);
+    
+    // Simulate loading
+    setTimeout(() => {
+      setIsLoadingBook(false);
+      setShowReader(true);
+    }, 2000);
   };
 
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-    setShowLibrary(true);
+    setIsLoadingBook(true);
+    
+    setTimeout(() => {
+      setIsLoadingBook(false);
+      setShowLibrary(true);
+    }, 1000);
   };
 
   // Splash Screen
@@ -71,10 +91,15 @@ function App() {
     );
   }
 
+  // Book Loading Screen
+  if (isLoadingBook) {
+    return <LoadingScreen type="bookshelf" message="Kitap yükleniyor..." />;
+  }
+
   // Book Reader View
   if (showReader && selectedBook) {
     return (
-      <BookReader 
+      <BookReaderLandscape 
         book={selectedBook} 
         onClose={() => {
           setShowReader(false);
@@ -94,14 +119,27 @@ function App() {
   // Library View
   if (showLibrary) {
     return (
-      <BookLibrary 
-        category={selectedCategory}
-        onBack={() => {
-          setShowLibrary(false);
-          setSelectedCategory(null);
-        }}
-        onBookSelect={handleBookSelect}
-      />
+      <>
+        <BookLibrary 
+          category={selectedCategory}
+          onBack={() => {
+            setShowLibrary(false);
+            setSelectedCategory(null);
+          }}
+          onBookSelect={handleBookSelect}
+        />
+        
+        {/* Book Info Modal */}
+        <BookInfoModal
+          book={selectedBook}
+          isOpen={showBookInfo}
+          onClose={() => {
+            setShowBookInfo(false);
+            setSelectedBook(null);
+          }}
+          onStart={handleStartReading}
+        />
+      </>
     );
   }
 
@@ -120,7 +158,7 @@ function App() {
             <IslandMap onCategorySelect={handleCategorySelect} />
             
             {/* Book Carousels */}
-            <div className="mt-4">
+            <div className="mt-2">
               {/* Personalized */}
               <BookCarousel 
                 title={`${currentProfile?.name || 'Sana'} İçin Öneriler`}
@@ -128,7 +166,11 @@ function App() {
                 onBookSelect={handleBookSelect}
                 onSeeAll={() => {
                   setSelectedCategory(null);
-                  setShowLibrary(true);
+                  setIsLoadingBook(true);
+                  setTimeout(() => {
+                    setIsLoadingBook(false);
+                    setShowLibrary(true);
+                  }, 1000);
                 }}
               />
               
@@ -139,7 +181,11 @@ function App() {
                 onBookSelect={handleBookSelect}
                 onSeeAll={() => {
                   setSelectedCategory(null);
-                  setShowLibrary(true);
+                  setIsLoadingBook(true);
+                  setTimeout(() => {
+                    setIsLoadingBook(false);
+                    setShowLibrary(true);
+                  }, 1000);
                 }}
               />
               
@@ -150,7 +196,11 @@ function App() {
                 onBookSelect={handleBookSelect}
                 onSeeAll={() => {
                   setSelectedCategory(null);
-                  setShowLibrary(true);
+                  setIsLoadingBook(true);
+                  setTimeout(() => {
+                    setIsLoadingBook(false);
+                    setShowLibrary(true);
+                  }, 1000);
                 }}
               />
             </div>
@@ -186,6 +236,17 @@ function App() {
         isOpen={showSearch} 
         onClose={() => setShowSearch(false)}
         onBookSelect={handleBookSelect}
+      />
+      
+      {/* Book Info Modal */}
+      <BookInfoModal
+        book={selectedBook}
+        isOpen={showBookInfo}
+        onClose={() => {
+          setShowBookInfo(false);
+          setSelectedBook(null);
+        }}
+        onStart={handleStartReading}
       />
       
       {/* Create Profile Modal */}
