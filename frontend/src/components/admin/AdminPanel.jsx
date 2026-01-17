@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Trash2, Edit, Save, X, BookOpen, 
-  FileText, Image, Volume2, Loader2, Check
+  FileText, Image, Volume2, Loader2, Check, AlertTriangle
 } from 'lucide-react';
 import { booksApi, categoriesApi } from '../../services/api';
 import axios from 'axios';
@@ -18,8 +18,12 @@ const AdminPanel = ({ onBack }) => {
   const [activeTab, setActiveTab] = useState('books');
   const [showAddBook, setShowAddBook] = useState(false);
   const [showAddPage, setShowAddPage] = useState(false);
+  const [showEditBook, setShowEditBook] = useState(false);
+  const [showEditPage, setShowEditPage] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [audioGenProgress, setAudioGenProgress] = useState('');
+  const [editingPage, setEditingPage] = useState(null);
 
   // New book form
   const [newBook, setNewBook] = useState({
