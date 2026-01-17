@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, 
   Music, 
-  MusicOff,
+  VolumeX,
   ChevronLeft,
   ChevronRight,
   X
