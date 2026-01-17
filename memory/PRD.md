@@ -44,6 +44,12 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Content Management & New Story
+- **Fixed**: Pause button now properly pauses/resumes instead of restarting
+- **Admin Panel**: Content management UI accessible from Profile → İçerik Yönetimi
+- **New Book**: "Annemin Elleri" - heartwarming story with Kıvanç (11), Ela (9), and Saide (38)
+- **Audio pre-generation**: Admin can generate audio for books via UI (saves credits)
+
 ### January 17, 2026 - Backend & Enhancements
 - **Backend with MongoDB**: Full API implementation for books, categories, and progress
 - **API Contracts**: Created `/app/contracts.md` with complete API documentation
