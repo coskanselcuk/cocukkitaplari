@@ -28,7 +28,6 @@ const BookReaderLandscape = ({ book, onClose }) => {
   const [pages, setPages] = useState(mockPages);
   const [isLoadingPages, setIsLoadingPages] = useState(true);
   
-  // Settings state
   const [autoPlay, setAutoPlay] = useState(() => {
     const saved = localStorage.getItem('reading_autoPlay');
     return saved !== null ? JSON.parse(saved) : true;
@@ -39,19 +38,26 @@ const BookReaderLandscape = ({ book, onClose }) => {
   });
 
   const audioRef = useRef(null);
+  const currentPageRef = useRef(currentPage);
+  const hasAutoStartedRef = useRef(false);
+  
   const totalPages = pages.length;
 
-  // Fetch pages from API on mount (includes pre-generated audio)
+  // Keep ref in sync
+  useEffect(() => {
+    currentPageRef.current = currentPage;
+  }, [currentPage]);
+
+  // Fetch pages from API
   useEffect(() => {
     const fetchPages = async () => {
       if (!book?.id) {
         setIsLoadingPages(false);
         return;
       }
-      
       try {
         const response = await booksApi.getPages(book.id);
-        if (response.pages && response.pages.length > 0) {
+        if (response.pages?.length > 0) {
           setPages(response.pages);
         }
       } catch (error) {
@@ -60,11 +66,10 @@ const BookReaderLandscape = ({ book, onClose }) => {
         setIsLoadingPages(false);
       }
     };
-    
     fetchPages();
   }, [book?.id]);
 
-  // Save settings to localStorage
+  // Save settings
   useEffect(() => {
     localStorage.setItem('reading_autoPlay', JSON.stringify(autoPlay));
   }, [autoPlay]);
@@ -73,49 +78,52 @@ const BookReaderLandscape = ({ book, onClose }) => {
     localStorage.setItem('reading_resumeContinue', JSON.stringify(resumeContinue));
   }, [resumeContinue]);
 
-  // Load saved progress on mount
+  // Load saved progress
   useEffect(() => {
     if (resumeContinue && book) {
-      const savedProgress = localStorage.getItem(`book_progress_${book.id}`);
-      if (savedProgress) {
-        const { page } = JSON.parse(savedProgress);
+      const saved = localStorage.getItem(`book_progress_${book.id}`);
+      if (saved) {
+        const { page } = JSON.parse(saved);
         setCurrentPage(page);
       }
     }
   }, [book, resumeContinue]);
 
-  // Save progress when page changes
+  // Save progress
   useEffect(() => {
     if (resumeContinue && book) {
-      localStorage.setItem(`book_progress_${book.id}`, JSON.stringify({
-        page: currentPage
-      }));
+      localStorage.setItem(`book_progress_${book.id}`, JSON.stringify({ page: currentPage }));
     }
   }, [book, currentPage, resumeContinue]);
 
-  // Reset image loaded state when page changes
+  // CRITICAL: Stop audio and reset state when page changes
   useEffect(() => {
+    // Stop any playing audio immediately
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current.src = '';
+    }
+    setIsPlaying(false);
     setIsImageLoaded(false);
-    setAudioLoadedForPage(-1); // Reset audio tracking for new page
+    hasAutoStartedRef.current = false;
   }, [currentPage]);
 
-  // Play pre-generated audio when image is loaded (if autoPlay)
+  // Auto-start audio when image loads (only if autoPlay is ON and hasn't auto-started yet)
   useEffect(() => {
-    const currentPageData = pages[currentPage];
+    if (!autoPlay || !isImageLoaded || hasAutoStartedRef.current) return;
     
-    if (autoPlay && isImageLoaded && currentPageData?.audioUrl && audioRef.current && !isPlaying) {
-      audioRef.current.src = currentPageData.audioUrl;
-      setAudioLoadedForPage(currentPage);
-      audioRef.current.play()
-        .then(() => setIsPlaying(true))
-        .catch(err => {
-          console.log('Audio play prevented:', err);
-          setIsPlaying(false);
-        });
-    }
-  }, [autoPlay, isImageLoaded, currentPage, pages, isPlaying]);
+    const pageData = pages[currentPage];
+    if (!pageData?.audioUrl || !audioRef.current) return;
 
-  // Handle audio ended
+    hasAutoStartedRef.current = true;
+    audioRef.current.src = pageData.audioUrl;
+    audioRef.current.play()
+      .then(() => setIsPlaying(true))
+      .catch(() => setIsPlaying(false));
+  }, [autoPlay, isImageLoaded, currentPage, pages]);
+
+  // Handle audio ended - auto advance if autoPlay is on
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -123,41 +131,43 @@ const BookReaderLandscape = ({ book, onClose }) => {
     const handleEnded = () => {
       setIsPlaying(false);
       
-      if (autoPlay) {
-        if (currentPage < totalPages - 1) {
-          setTurnDirection('next');
-          setIsPageTurning(true);
-          
-          setTimeout(() => {
-            setCurrentPage(prev => prev + 1);
-            setIsPageTurning(false);
-            setTurnDirection(null);
-          }, 300);
-        } else {
-          setShowCelebration(true);
-        }
+      if (autoPlay && currentPageRef.current < totalPages - 1) {
+        // Auto advance to next page
+        changePage(currentPageRef.current + 1, 'next');
+      } else if (currentPageRef.current >= totalPages - 1) {
+        setShowCelebration(true);
       }
     };
 
     audio.addEventListener('ended', handleEnded);
     return () => audio.removeEventListener('ended', handleEnded);
-  }, [autoPlay, currentPage, totalPages]);
+  }, [autoPlay, totalPages]);
+
+  // Unified page change function - ALWAYS stops audio first
+  const changePage = (newPage, direction) => {
+    if (newPage < 0 || newPage >= totalPages) return;
+    
+    // Stop current audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setIsPlaying(false);
+    
+    // Animate transition
+    setTurnDirection(direction);
+    setIsPageTurning(true);
+    
+    setTimeout(() => {
+      setCurrentPage(newPage);
+      setIsPageTurning(false);
+      setTurnDirection(null);
+    }, 250);
+  };
 
   const goToNextPage = () => {
     if (currentPage < totalPages - 1) {
-      setTurnDirection('next');
-      setIsPageTurning(true);
-      
-      if (audioRef.current) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      }
-      
-      setTimeout(() => {
-        setCurrentPage(prev => prev + 1);
-        setIsPageTurning(false);
-        setTurnDirection(null);
-      }, 300);
+      changePage(currentPage + 1, 'next');
     } else {
       setShowCelebration(true);
     }
@@ -165,64 +175,41 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   const goToPrevPage = () => {
     if (currentPage > 0) {
-      setTurnDirection('prev');
-      setIsPageTurning(true);
-      
-      if (audioRef.current) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      }
-      
-      setTimeout(() => {
-        setCurrentPage(prev => prev - 1);
-        setIsPageTurning(false);
-        setTurnDirection(null);
-      }, 300);
+      changePage(currentPage - 1, 'prev');
     }
   };
 
-  const handleTouchStart = (e) => {
-    setTouchStart(e.touches[0].clientX);
-  };
-
-  const handleTouchEnd = (e) => {
-    if (!touchStart) return;
-    
-    const touchEnd = e.changedTouches[0].clientX;
-    const diff = touchStart - touchEnd;
-    
-    if (Math.abs(diff) > 50) {
-      if (diff > 0) {
-        goToNextPage();
-      } else {
-        goToPrevPage();
-      }
-    }
-    setTouchStart(null);
-  };
-
-  const [audioLoadedForPage, setAudioLoadedForPage] = useState(-1);
-
+  // Toggle play/pause - works regardless of autoPlay setting
   const togglePlayPause = () => {
     if (!audioRef.current) return;
-    
-    const currentPageData = pages[currentPage];
+    const pageData = pages[currentPage];
     
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
     } else {
-      if (currentPageData?.audioUrl) {
-        // Only set src if we haven't loaded audio for this page yet
-        if (audioLoadedForPage !== currentPage) {
-          audioRef.current.src = currentPageData.audioUrl;
-          setAudioLoadedForPage(currentPage);
+      if (pageData?.audioUrl) {
+        // If src is empty or different, set it
+        if (!audioRef.current.src || !audioRef.current.src.startsWith('data:')) {
+          audioRef.current.src = pageData.audioUrl;
         }
         audioRef.current.play()
           .then(() => setIsPlaying(true))
-          .catch(err => console.log('Play prevented:', err));
+          .catch(() => setIsPlaying(false));
       }
     }
+  };
+
+  // Touch handlers
+  const handleTouchStart = (e) => setTouchStart(e.touches[0].clientX);
+  
+  const handleTouchEnd = (e) => {
+    if (!touchStart) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? goToNextPage() : goToPrevPage();
+    }
+    setTouchStart(null);
   };
 
   const handleClose = () => {
@@ -238,37 +225,16 @@ const BookReaderLandscape = ({ book, onClose }) => {
   const handleRestart = () => {
     setShowCelebration(false);
     setCurrentPage(0);
-    setIsPlaying(false);
-    setIsImageLoaded(false);
   };
 
-  const handleImageLoad = () => {
-    setIsImageLoaded(true);
-  };
-
-  const handleImageError = () => {
-    setIsImageLoaded(true);
-  };
-
-  // Show celebration screen
   if (showCelebration) {
-    return (
-      <CompletionCelebration 
-        book={book} 
-        onClose={handleClose} 
-        onRestart={handleRestart}
-      />
-    );
+    return <CompletionCelebration book={book} onClose={handleClose} onRestart={handleRestart} />;
   }
 
-  // Show loading while fetching pages
   if (isLoadingPages) {
     return (
       <div className="fixed inset-0 z-50 bg-amber-50 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 size={48} className="animate-spin text-orange-500 mx-auto mb-4" />
-          <p className="text-gray-700">Kitap yükleniyor...</p>
-        </div>
+        <Loader2 size={48} className="animate-spin text-orange-500" />
       </div>
     );
   }
@@ -277,94 +243,72 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-amber-50"
+      className="fixed inset-0 z-50 bg-amber-50 flex flex-col"
       onClick={() => setShowControls(!showControls)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Hidden Audio Element */}
       <audio ref={audioRef} preload="auto" />
 
-      {/* Header Controls */}
-      <div className={`absolute top-0 left-0 right-0 z-20 p-4 flex justify-between items-center transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      {/* Header */}
+      <div className={`flex-shrink-0 p-4 flex justify-between items-center transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <button 
           onClick={(e) => { e.stopPropagation(); handleClose(); }}
-          className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-white transition-colors"
-          data-testid="close-reader-btn"
+          className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg"
         >
           <X size={24} className="text-gray-700" />
         </button>
         
-        <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg flex items-center gap-2">
-          <span className="text-gray-700 font-semibold" data-testid="page-counter">
-            {currentPage + 1} / {totalPages}
-          </span>
+        <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
+          <span className="text-gray-700 font-semibold">{currentPage + 1} / {totalPages}</span>
         </div>
         
         <div className="flex gap-2">
           <button 
             onClick={(e) => { e.stopPropagation(); setShowSettings(true); }}
-            className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg hover:bg-white transition-colors"
-            data-testid="settings-btn"
+            className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg"
           >
             <Settings size={24} className="text-gray-700" />
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); togglePlayPause(); }}
-            className={`rounded-full p-3 shadow-lg transition-colors ${isPlaying ? 'bg-orange-500 text-white' : 'bg-white/90 text-gray-700'}`}
-            data-testid="audio-toggle-btn"
+            className={`rounded-full p-3 shadow-lg ${isPlaying ? 'bg-orange-500 text-white' : 'bg-white/90 text-gray-700'}`}
           >
             {isPlaying ? <Music size={24} /> : <VolumeX size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Book Content */}
-      <div className="h-full flex flex-col pt-20 pb-32 px-4">
+      {/* Content Area - flex-1 to fill remaining space */}
+      <div className="flex-1 px-4 pb-4 overflow-hidden">
         {currentPageData && (
-          <div className={`flex-1 flex flex-col transition-all duration-300 ${isPageTurning ? (turnDirection === 'next' ? 'translate-x-[-20px] opacity-50' : 'translate-x-[20px] opacity-50') : ''}`}>
-            {/* Page Image */}
-            <div className="flex-1 relative rounded-2xl overflow-hidden shadow-xl mb-4">
+          <div className={`h-full flex flex-col transition-all duration-250 ${isPageTurning ? (turnDirection === 'next' ? '-translate-x-4 opacity-50' : 'translate-x-4 opacity-50') : ''}`}>
+            {/* Image */}
+            <div className="flex-1 relative rounded-2xl overflow-hidden shadow-xl mb-3 min-h-0">
               <img 
                 src={currentPageData.image} 
                 alt={`Sayfa ${currentPage + 1}`}
                 className="w-full h-full object-cover"
-                onLoad={handleImageLoad}
-                onError={handleImageError}
-                data-testid="page-image"
+                onLoad={() => setIsImageLoaded(true)}
+                onError={() => setIsImageLoaded(true)}
               />
-              
-              {/* Loading overlay while image loads */}
               {!isImageLoaded && (
                 <div className="absolute inset-0 bg-amber-100 flex items-center justify-center">
                   <Loader2 size={48} className="animate-spin text-orange-500" />
                 </div>
               )}
               
-              {/* Interactive Hotspots */}
-              {currentPageData.hotspots?.map((hotspot, idx) => (
-                <div 
-                  key={idx}
-                  className="absolute w-12 h-12 border-2 border-orange-400 rounded-full cursor-pointer animate-pulse hover:bg-orange-400/30 transition-colors"
-                  style={{ top: `${hotspot.y}%`, left: `${hotspot.x}%` }}
-                  onClick={(e) => e.stopPropagation()}
-                />
-              ))}
-              
-              {/* Page turn indicator */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-20 bg-gradient-to-l from-red-400 to-red-500 rounded-l-full opacity-60" />
-              
               {/* Swipe hint */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full flex items-center gap-2 opacity-60">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/40 text-white text-xs px-3 py-1 rounded-full flex items-center gap-2 opacity-60">
                 <ChevronLeft size={14} />
                 <span>Kaydır</span>
                 <ChevronRight size={14} />
               </div>
             </div>
             
-            {/* Page Text */}
-            <div className="bg-white rounded-2xl p-4 shadow-lg">
-              <p className="text-gray-800 text-lg leading-relaxed text-center" data-testid="page-text">
+            {/* Text */}
+            <div className="flex-shrink-0 bg-white rounded-2xl p-4 shadow-lg">
+              <p className="text-gray-800 text-base leading-relaxed text-center">
                 {currentPageData.text}
               </p>
             </div>
@@ -372,55 +316,49 @@ const BookReaderLandscape = ({ book, onClose }) => {
         )}
       </div>
 
-      {/* Navigation Arrows (for desktop) */}
-      <button 
-        onClick={(e) => { e.stopPropagation(); goToPrevPage(); }}
-        disabled={currentPage === 0}
-        className={`absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg transition-all duration-300 ${currentPage === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white hover:scale-110'} ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'} hidden sm:flex`}
-        data-testid="prev-page-btn"
-      >
-        <ChevronLeft size={28} className="text-gray-700" />
-      </button>
-      
-      <button 
-        onClick={(e) => { e.stopPropagation(); goToNextPage(); }}
-        className={`absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg transition-all duration-300 hover:bg-white hover:scale-110 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'} hidden sm:flex`}
-        data-testid="next-page-btn"
-      >
-        <ChevronRight size={28} className="text-gray-700" />
-      </button>
-
-      {/* Bottom Audio Controls */}
-      <div className={`absolute bottom-0 left-0 right-0 p-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <div className="bg-white rounded-2xl shadow-2xl p-4">
-          <div className="flex items-center justify-center gap-4">
-            {/* Play/Pause Button */}
+      {/* Bottom Controls - fixed height, no overlap */}
+      <div className={`flex-shrink-0 p-4 pt-0 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div className="bg-white rounded-2xl shadow-xl p-3">
+          <div className="flex items-center justify-center gap-6">
+            {/* Prev */}
+            <button 
+              onClick={(e) => { e.stopPropagation(); goToPrevPage(); }}
+              disabled={currentPage === 0}
+              className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-30"
+            >
+              <ChevronLeft size={28} className="text-gray-700" />
+            </button>
+            
+            {/* Play/Pause */}
             <button 
               onClick={(e) => { e.stopPropagation(); togglePlayPause(); }}
-              className="bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-              data-testid="play-pause-btn"
+              className="bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-full p-4 shadow-lg"
             >
-              {isPlaying ? (
-                <Pause size={28} fill="white" />
-              ) : (
-                <Play size={28} fill="white" />
-              )}
+              {isPlaying ? <Pause size={28} fill="white" /> : <Play size={28} fill="white" />}
+            </button>
+            
+            {/* Next */}
+            <button 
+              onClick={(e) => { e.stopPropagation(); goToNextPage(); }}
+              className="p-2 rounded-full hover:bg-gray-100"
+            >
+              <ChevronRight size={28} className="text-gray-700" />
             </button>
           </div>
           
-          {/* Status indicators */}
-          <div className="mt-3 flex items-center justify-center gap-4 text-xs">
+          {/* Status */}
+          <div className="mt-2 flex items-center justify-center gap-4 text-xs">
             {autoPlay && (
-              <div className="flex items-center gap-2 text-orange-500">
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
-                <span>Otomatik Oynatma Açık</span>
-              </div>
+              <span className="flex items-center gap-1 text-orange-500">
+                <span className="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse" />
+                Otomatik
+              </span>
             )}
             {isPlaying && (
-              <div className="flex items-center gap-2 text-green-500">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                <span>Ses Çalıyor</span>
-              </div>
+              <span className="flex items-center gap-1 text-green-500">
+                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                Çalıyor
+              </span>
             )}
           </div>
         </div>
