@@ -12,10 +12,14 @@ import ParentDashboard from './components/profile/ParentDashboard';
 import AdminPanel from './components/admin/AdminPanel';
 import SearchModal from './components/search/SearchModal';
 import CreateProfileModal from './components/profile/CreateProfileModal';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { books, categories, profiles } from './data/mockData';
 import './App.css';
 
-function App() {
+// Main App Content (wrapped by AuthProvider)
+function AppContent() {
+  const { user, isAuthenticated, isLoading: authLoading, login, logout, canAccessBook, isPremiumUser } = useAuth();
+  
   const [activeTab, setActiveTab] = useState('home');
   const [currentProfile, setCurrentProfile] = useState(profiles[0]);
   const [selectedBook, setSelectedBook] = useState(null);
@@ -29,6 +33,7 @@ function App() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingBook, setIsLoadingBook] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   // Simulate splash screen
   useEffect(() => {
@@ -48,6 +53,18 @@ function App() {
   };
 
   const handleStartReading = (book) => {
+    // Check if user can access this book
+    if (book.isPremium && !canAccessBook(book)) {
+      setShowPremiumModal(true);
+      return;
+    }
+    setShowBookInfo(false);
+    setIsLoadingBook(true);
+    setTimeout(() => {
+      setShowReader(true);
+      setIsLoadingBook(false);
+    }, 500);
+  };
     setShowBookInfo(false);
     setIsLoadingBook(true);
     
