@@ -75,8 +75,11 @@ async def get_status_checks():
 # Include the router in the main app
 app.include_router(api_router)
 
-# Include TTS router
+# Include all routers
 app.include_router(tts_router, prefix="/api")
+app.include_router(book_router, prefix="/api")
+app.include_router(category_router, prefix="/api")
+app.include_router(progress_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
