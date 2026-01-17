@@ -7,7 +7,6 @@ import BookReaderLandscape from './components/books/BookReaderLandscape';
 import BookLibrary from './components/books/BookLibrary';
 import BookInfoModal from './components/books/BookInfoModal';
 import LoadingScreen from './components/common/LoadingScreen';
-import GamesPage from './components/games/GamesPage';
 import { ProfileSelector, ProfilePage } from './components/profile/ProfileComponents';
 import ParentDashboard from './components/profile/ParentDashboard';
 import SearchModal from './components/search/SearchModal';
