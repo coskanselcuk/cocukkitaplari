@@ -58,6 +58,7 @@ class BookResponse(BaseModel):
     duration: str
     hasAudio: bool
     isNew: bool
+    isPremium: bool = False
     rating: float
     readCount: int
     totalPages: int
