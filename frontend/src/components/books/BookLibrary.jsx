@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Grid, List, Filter } from 'lucide-react';
+import { ArrowLeft, Grid, List, Filter, BookOpen } from 'lucide-react';
 import { books, categories } from '../../data/mockData';
 import BookCard from './BookCard';
 
