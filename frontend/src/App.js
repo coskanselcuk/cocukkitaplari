@@ -52,24 +52,6 @@ function AppContent() {
     fetchBooks();
   }, []);
 
-  // Refetch books when returning from admin panel
-  useEffect(() => {
-    if (!showAdmin && books.length > 0) {
-      // Refetch books when admin panel closes
-      const fetchBooks = async () => {
-        try {
-          const response = await booksApi.getAll();
-          if (response.books) {
-            setBooks(response.books);
-          }
-        } catch (error) {
-          console.error('Error fetching books:', error);
-        }
-      };
-      fetchBooks();
-    }
-  }, [showAdmin]);
-
   // Simulate splash screen
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 2500);
