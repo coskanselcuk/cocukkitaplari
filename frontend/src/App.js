@@ -117,6 +117,13 @@ function App() {
     );
   }
 
+  // Admin Panel View
+  if (showAdmin) {
+    return (
+      <AdminPanel onBack={() => setShowAdmin(false)} />
+    );
+  }
+
   // Library View
   if (showLibrary) {
     return (
