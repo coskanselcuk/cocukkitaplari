@@ -113,23 +113,25 @@ const BookReaderLandscape = ({ book, onClose }) => {
     }
   }, [totalPages, audioCache, generatePageAudio]);
 
-  // Play audio for current page
-  const playCurrentPageAudio = useCallback(async () => {
+  // Play audio for current page - prepares audio but doesn't play yet
+  const preparePageAudio = useCallback(async () => {
     const audioUrl = await generatePageAudio(currentPage);
     
     if (audioUrl && audioRef.current) {
       audioRef.current.src = audioUrl;
       audioRef.current.load();
-      setIsAudioReady(true);
       
       // Pre-fetch next page
       prefetchNextAudio(currentPage);
+      
+      // Mark audio as ready after it's loaded
+      setIsAudioReady(true);
     }
   }, [currentPage, generatePageAudio, prefetchNextAudio]);
 
-  // Actually start playing audio when BOTH image and audio are ready
+  // Actually start playing audio
   const startPlayback = useCallback(async () => {
-    if (audioRef.current && isImageLoaded && isAudioReady) {
+    if (audioRef.current && audioRef.current.src) {
       try {
         await audioRef.current.play();
         setIsPlaying(true);
@@ -138,27 +140,27 @@ const BookReaderLandscape = ({ book, onClose }) => {
         setIsPlaying(false);
       }
     }
-  }, [isImageLoaded, isAudioReady]);
+  }, []);
 
-  // Reset readiness states when page changes
+  // When page changes: reset states and prepare new audio
   useEffect(() => {
+    // Reset readiness states
     setIsImageLoaded(false);
     setIsAudioReady(false);
-  }, [currentPage]);
-
-  // Prepare audio when page changes (if autoPlay)
-  useEffect(() => {
+    setIsPlaying(false);
+    
+    // Prepare audio for the new page (if autoPlay is on)
     if (autoPlay) {
-      playCurrentPageAudio();
+      preparePageAudio();
     }
-  }, [currentPage, autoPlay, playCurrentPageAudio]);
+  }, [currentPage, autoPlay, preparePageAudio]);
 
-  // Start playback only when both image and audio are ready
+  // Start playback ONLY when both image and audio are ready
   useEffect(() => {
-    if (autoPlay && isImageLoaded && isAudioReady) {
+    if (autoPlay && isImageLoaded && isAudioReady && !isPlaying) {
       startPlayback();
     }
-  }, [autoPlay, isImageLoaded, isAudioReady, startPlayback]);
+  }, [autoPlay, isImageLoaded, isAudioReady, isPlaying, startPlayback]);
 
   // Handle audio ended
   useEffect(() => {
