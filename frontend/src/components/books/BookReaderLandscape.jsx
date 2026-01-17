@@ -199,6 +199,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
     setTouchStart(null);
   };
 
+  const [audioLoadedForPage, setAudioLoadedForPage] = useState(-1);
+
   const togglePlayPause = () => {
     if (!audioRef.current) return;
     
@@ -209,8 +211,10 @@ const BookReaderLandscape = ({ book, onClose }) => {
       setIsPlaying(false);
     } else {
       if (currentPageData?.audioUrl) {
-        if (!audioRef.current.src || audioRef.current.src !== currentPageData.audioUrl) {
+        // Only set src if we haven't loaded audio for this page yet
+        if (audioLoadedForPage !== currentPage) {
           audioRef.current.src = currentPageData.audioUrl;
+          setAudioLoadedForPage(currentPage);
         }
         audioRef.current.play()
           .then(() => setIsPlaying(true))
