@@ -77,7 +77,7 @@ class PageBase(BaseModel):
 
 
 class PageCreate(PageBase):
-    bookId: str
+    bookId: Optional[str] = None  # Optional since it comes from URL path
 
 
 class Page(PageBase):
