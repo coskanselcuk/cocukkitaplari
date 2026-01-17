@@ -57,7 +57,7 @@ const ProfileSelector = ({ onProfileSelect, onCreateProfile }) => {
   );
 };
 
-const ProfilePage = ({ profile, onBack, onParentDashboard }) => {
+const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
   const avatarColors = ['bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-orange-400'];
   
   return (
