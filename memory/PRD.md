@@ -44,6 +44,12 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Auto-Play Bug Fix
+- **Fixed**: Critical auto-play bug where pages wouldn't advance after audio ended
+- **Root Cause**: React closure issue - `handleAudioEnded` captured stale state values
+- **Solution**: Used `useRef` pattern to always access latest state (autoPlayRef, currentPageRef, pagesRef)
+- **Verified**: All auto-play tests passed - pages advance correctly, pause/resume works, celebration shows
+
 ### January 17, 2026 - Content Management & New Story
 - **Fixed**: Pause button now properly pauses/resumes instead of restarting
 - **Admin Panel**: Content management UI accessible from Profile → İçerik Yönetimi
