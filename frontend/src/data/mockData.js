@@ -1,4 +1,4 @@
-// Mock Data for Çocuk Kitapları Kitaplık Clone
+// Mock Data for Çocuk Kitapları Clone
 
 export const categories = [
   {
@@ -62,7 +62,9 @@ export const books = [
     isNew: true,
     rating: 4.8,
     description: 'Pırıl sihirli ormanda yeni arkadaşlar ediniyor.',
-    readCount: 1250
+    readCount: 1250,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+    totalAudioDuration: 40 // seconds for demo
   },
   {
     id: 2,
@@ -77,7 +79,9 @@ export const books = [
     isNew: false,
     rating: 4.9,
     description: 'Tayfa piknikte eğlenceli bir gün geçiriyor.',
-    readCount: 3420
+    readCount: 3420,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+    totalAudioDuration: 36
   },
   {
     id: 3,
@@ -92,7 +96,9 @@ export const books = [
     isNew: true,
     rating: 4.7,
     description: 'Ege ve Gaga denizde yeni keşifler yapıyor.',
-    readCount: 890
+    readCount: 890,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+    totalAudioDuration: 30
   },
   {
     id: 4,
@@ -107,7 +113,9 @@ export const books = [
     isNew: false,
     rating: 4.6,
     description: 'Orman hayvanlarının müzikal macerası.',
-    readCount: 2100
+    readCount: 2100,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+    totalAudioDuration: 42
   },
   {
     id: 5,
@@ -122,7 +130,9 @@ export const books = [
     isNew: true,
     rating: 4.9,
     description: 'Küçük sincabın kış hazırlıkları.',
-    readCount: 1560
+    readCount: 1560,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+    totalAudioDuration: 24
   },
   {
     id: 6,
@@ -137,7 +147,9 @@ export const books = [
     isNew: false,
     rating: 4.8,
     description: 'Keloğlanın altın elma arayışı.',
-    readCount: 4500
+    readCount: 4500,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+    totalAudioDuration: 60
   },
   {
     id: 7,
@@ -152,7 +164,9 @@ export const books = [
     isNew: false,
     rating: 5.0,
     description: 'Nasrettin Hocanın eğlenceli hikayeleri.',
-    readCount: 5200
+    readCount: 5200,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
+    totalAudioDuration: 72
   },
   {
     id: 8,
@@ -167,7 +181,9 @@ export const books = [
     isNew: true,
     rating: 4.7,
     description: 'Güneş sistemini keşfeden bir yolculuk.',
-    readCount: 1890
+    readCount: 1890,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+    totalAudioDuration: 54
   },
   {
     id: 9,
@@ -182,7 +198,9 @@ export const books = [
     isNew: false,
     rating: 4.9,
     description: 'Dinozorların yaşadığı çağa yolculuk.',
-    readCount: 3100
+    readCount: 3100,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3',
+    totalAudioDuration: 48
   },
   {
     id: 10,
@@ -197,7 +215,9 @@ export const books = [
     isNew: false,
     rating: 4.6,
     description: 'Okula ilk gün heyecanı.',
-    readCount: 2800
+    readCount: 2800,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3',
+    totalAudioDuration: 30
   },
   {
     id: 11,
@@ -212,7 +232,9 @@ export const books = [
     isNew: true,
     rating: 4.8,
     description: 'Yeni kardeşe hazırlık.',
-    readCount: 1400
+    readCount: 1400,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3',
+    totalAudioDuration: 36
   },
   {
     id: 12,
@@ -227,7 +249,9 @@ export const books = [
     isNew: false,
     rating: 4.9,
     description: 'Momonun matematik maceraları.',
-    readCount: 3800
+    readCount: 3800,
+    audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3',
+    totalAudioDuration: 42
   }
 ];
 
@@ -254,36 +278,42 @@ export const profiles = [
   }
 ];
 
+// Book pages with audio timestamps for synchronization
 export const bookPages = [
   {
     pageNumber: 1,
     text: 'Bir varmış, bir yokmuş. Güzel bir bahar gününde, küçük Pırıl ormana doğru yola çıkmış.',
     image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=600&h=400&fit=crop',
-    audioTimestamp: 0
+    audioStartTime: 0,
+    audioEndTime: 8
   },
   {
     pageNumber: 2,
     text: 'Ormanın derinliklerinde rengârenk çiçekler ve şarkı söyleyen kuşlar varmış.',
     image: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=600&h=400&fit=crop',
-    audioTimestamp: 8
+    audioStartTime: 8,
+    audioEndTime: 16
   },
   {
     pageNumber: 3,
     text: 'Pırıl, bir sincap ile karşılaşmış. "Merhaba küçük sincap, adın ne?" diye sormuş.',
     image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop',
-    audioTimestamp: 16
+    audioStartTime: 16,
+    audioEndTime: 24
   },
   {
     pageNumber: 4,
     text: '"Benim adım Fındık!" demiş sincap. "Sen kimsin?"',
     image: 'https://images.unsplash.com/photo-1474511320723-9a56873571b7?w=600&h=400&fit=crop',
-    audioTimestamp: 24
+    audioStartTime: 24,
+    audioEndTime: 32
   },
   {
     pageNumber: 5,
     text: 'Pırıl ve Fındık birlikte ormanda maceraya atılmışlar. Çok güzel bir dostluk başlamış.',
     image: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600&h=400&fit=crop',
-    audioTimestamp: 32
+    audioStartTime: 32,
+    audioEndTime: 40
   }
 ];
 
@@ -338,4 +368,10 @@ export const parentStats = {
     { category: 'Meraklı Bilgin', count: 10, percentage: 15 },
     { category: 'Hayatın İçinden', count: 9, percentage: 14 }
   ]
+};
+
+// Reading settings defaults
+export const defaultReadingSettings = {
+  autoPlay: true,
+  resumeContinue: true
 };
