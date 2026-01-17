@@ -93,6 +93,7 @@ class PageResponse(BaseModel):
     text: str
     image: str
     hotspots: List[Hotspot]
+    audioUrl: Optional[str] = None
 
 
 class BookPagesResponse(BaseModel):
