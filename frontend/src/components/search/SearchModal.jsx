@@ -1,0 +1,109 @@
+import React, { useState } from 'react';
+import { Search, X, Filter } from 'lucide-react';
+import { books, categories } from '../../data/mockData';
+import BookCard from '../books/BookCard';
+
+const SearchModal = ({ isOpen, onClose, onBookSelect }) => {
+  const [query, setQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+
+  const filteredBooks = books.filter(book => {
+    const matchesQuery = book.title.toLowerCase().includes(query.toLowerCase()) ||
+                         book.author.toLowerCase().includes(query.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || book.category === selectedCategory;
+    return matchesQuery && matchesCategory;
+  });
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-gradient-to-b from-cyan-500 to-cyan-600">
+      {/* Header */}
+      <div className="px-4 py-4 safe-area-top">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={onClose}
+            className="bg-white/20 rounded-full p-2 text-white"
+          >
+            <X size={24} />
+          </button>
+          
+          <div className="flex-1 relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Kitap veya yazar ara..."
+              className="w-full pl-12 pr-4 py-3 rounded-full bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-400 shadow-lg"
+              autoFocus
+            />
+          </div>
+        </div>
+        
+        {/* Category Filter */}
+        <div className="overflow-x-auto mt-4 scrollbar-hide">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
+                selectedCategory === 'all' 
+                  ? 'bg-orange-500 text-white' 
+                  : 'bg-white/20 text-white'
+              }`}
+            >
+              Tümü
+            </button>
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-300 ${
+                  selectedCategory === cat.id 
+                    ? 'bg-orange-500 text-white' 
+                    : 'bg-white/20 text-white'
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+      
+      {/* Results */}
+      <div className="px-4 py-4 overflow-y-auto" style={{ height: 'calc(100vh - 160px)' }}>
+        {query.length === 0 ? (
+          <div className="text-center py-10">
+            <Search className="mx-auto text-white/50 mb-4" size={48} />
+            <p className="text-white/80 text-lg">Aramak istediğin kitabı yaz</p>
+          </div>
+        ) : filteredBooks.length === 0 ? (
+          <div className="text-center py-10">
+            <span className="text-6xl block mb-4">😔</span>
+            <p className="text-white/80 text-lg">Sonuç bulunamadı</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-white/80 mb-4">{filteredBooks.length} kitap bulundu</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {filteredBooks.map(book => (
+                <BookCard 
+                  key={book.id} 
+                  book={book} 
+                  onSelect={(book) => {
+                    onBookSelect(book);
+                    onClose();
+                  }}
+                  size="medium"
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default SearchModal;
