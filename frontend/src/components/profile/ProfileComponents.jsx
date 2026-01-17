@@ -127,12 +127,21 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
       </div>
       
       {/* Parent Dashboard Button */}
-      <div className="px-4 mt-6">
+      <div className="px-4 mt-6 space-y-3">
         <button 
           onClick={onParentDashboard}
           className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-2xl py-4 font-bold shadow-lg hover:shadow-xl transition-all duration-300"
         >
           Ebeveyn Paneli
+        </button>
+        
+        {/* Admin Panel Button */}
+        <button 
+          onClick={onAdminPanel}
+          className="w-full bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-2xl py-4 font-bold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
+        >
+          <Settings size={20} />
+          İçerik Yönetimi
         </button>
       </div>
     </div>
