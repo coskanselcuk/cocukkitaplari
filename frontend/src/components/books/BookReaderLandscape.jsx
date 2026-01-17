@@ -194,14 +194,23 @@ const BookReaderLandscape = ({ book, onClose }) => {
     if (autoPlay) {
       preparePageAudio(currentPage);
     }
-    
-    // Fallback timeout for image loading - if image doesn't load in 5 seconds, proceed anyway
+  }, [currentPage, autoPlay, preparePageAudio]);
+
+  // Separate effect for image loading timeout (only depends on currentPage)
+  useEffect(() => {
     const imageTimeout = setTimeout(() => {
-      setIsImageLoaded(true);
-    }, 5000);
+      setIsImageLoaded(prev => {
+        // Only set if not already loaded
+        if (!prev) {
+          console.log('Image load timeout - proceeding with audio');
+          return true;
+        }
+        return prev;
+      });
+    }, 3000);  // Reduced to 3 seconds
     
     return () => clearTimeout(imageTimeout);
-  }, [currentPage, autoPlay, preparePageAudio]);
+  }, [currentPage]);
 
   // Start playback ONLY when both image and audio are ready
   useEffect(() => {
