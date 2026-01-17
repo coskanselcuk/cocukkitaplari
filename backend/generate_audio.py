@@ -3,13 +3,14 @@ Pre-generate TTS audio for all book pages and store in MongoDB.
 This eliminates loading time during reading since all audio is pre-cached.
 
 Run with: python generate_audio.py
+To regenerate all: python generate_audio.py --regenerate
 """
 import asyncio
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
-from services.tts_service import generate_tts
+from services.tts_service import generate_tts_audio
 
 # Load environment variables
 ROOT_DIR = Path(__file__).parent
@@ -36,16 +37,13 @@ async def generate_all_page_audio():
     
     if not pages:
         print("All pages already have audio!")
-        # Check if there are any pages at all
         total = await db.pages.count_documents({})
         print(f"Total pages in database: {total}")
-        
-        # List pages with audio
         with_audio = await db.pages.count_documents({"audioUrl": {"$ne": None, "$exists": True}})
         print(f"Pages with audio: {with_audio}")
         return
     
-    print(f"Found {len(pages)} pages without audio. Generating...")
+    print(f"Found {len(pages)} pages without audio. Generating with Irem voice...")
     
     for i, page in enumerate(pages):
         page_id = page.get('id')
@@ -57,16 +55,15 @@ async def generate_all_page_audio():
             print(f"  Skipping page {page_id} - no text")
             continue
         
-        print(f"  [{i+1}/{len(pages)}] Generating audio for Book {book_id}, Page {page_num}...")
+        print(f"  [{i+1}/{len(pages)}] Book {book_id}, Page {page_num}...")
         print(f"    Text: {text[:50]}...")
         
         try:
-            # Generate TTS audio
-            result = generate_tts(text)
+            # Generate TTS audio (async)
+            result = await generate_tts_audio(text)
             audio_url = result.get('audio_url')
             
             if audio_url:
-                # Update page with audio URL
                 await db.pages.update_one(
                     {"id": page_id},
                     {"$set": {"audioUrl": audio_url}}
@@ -94,12 +91,15 @@ async def regenerate_all_audio():
     client = AsyncIOMotorClient(mongo_url)
     db = client[db_name]
     
-    print("Regenerating audio for ALL pages with new Irem voice...")
+    print("=== Regenerating ALL audio with Irem voice ===\n")
     
     cursor = db.pages.find({})
     pages = await cursor.to_list(length=1000)
     
-    print(f"Found {len(pages)} pages. Generating audio...")
+    print(f"Found {len(pages)} pages. Generating audio...\n")
+    
+    success_count = 0
+    error_count = 0
     
     for i, page in enumerate(pages):
         page_id = page.get('id')
@@ -111,10 +111,11 @@ async def regenerate_all_audio():
             print(f"  Skipping page {page_id} - no text")
             continue
         
-        print(f"  [{i+1}/{len(pages)}] Generating audio for Book {book_id}, Page {page_num}...")
+        print(f"  [{i+1}/{len(pages)}] Book {book_id}, Page {page_num}")
+        print(f"    \"{text[:60]}...\"")
         
         try:
-            result = generate_tts(text)
+            result = await generate_tts_audio(text)
             audio_url = result.get('audio_url')
             
             if audio_url:
@@ -122,14 +123,19 @@ async def regenerate_all_audio():
                     {"id": page_id},
                     {"$set": {"audioUrl": audio_url}}
                 )
-                print(f"    ✓ Audio saved")
+                print(f"    ✓ Saved\n")
+                success_count += 1
             else:
-                print(f"    ✗ No audio generated")
+                print(f"    ✗ No audio\n")
+                error_count += 1
                 
         except Exception as e:
-            print(f"    ✗ Error: {str(e)}")
+            print(f"    ✗ Error: {str(e)}\n")
+            error_count += 1
     
-    print("\nDone! All pages regenerated with Irem voice.")
+    print(f"\n=== Complete ===")
+    print(f"Success: {success_count}")
+    print(f"Errors: {error_count}")
     client.close()
 
 
@@ -137,8 +143,6 @@ if __name__ == "__main__":
     import sys
     
     if len(sys.argv) > 1 and sys.argv[1] == "--regenerate":
-        print("=== REGENERATE ALL AUDIO ===")
         asyncio.run(regenerate_all_audio())
     else:
-        print("=== GENERATE MISSING AUDIO ===")
         asyncio.run(generate_all_page_audio())
