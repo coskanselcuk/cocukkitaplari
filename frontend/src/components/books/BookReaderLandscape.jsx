@@ -340,6 +340,13 @@ const BookReaderLandscape = ({ book, onClose }) => {
     setIsImageLoaded(true);
   };
 
+  // Handle image error - proceed anyway
+  const handleImageError = () => {
+    // If image fails to load, still allow audio to play
+    setIsImageLoaded(true);
+  };
+  };
+
   const currentPageData = pages[currentPage];
 
   return (
