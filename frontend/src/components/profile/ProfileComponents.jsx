@@ -13,15 +13,15 @@ const ProfileSelector = ({ onProfileSelect, onCreateProfile }) => {
       <p className="text-white/80 text-center mb-8">Profilini seç ve okumaya başla</p>
       
       <div className="flex flex-wrap justify-center gap-6 mb-8">
-        {profiles.map((profile) => (
+        {profiles.map((profile, index) => (
           <button
             key={profile.id}
             onClick={() => onProfileSelect(profile)}
             className="group flex flex-col items-center"
           >
             <div className="relative">
-              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center text-5xl shadow-xl group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110">
-                {profile.avatar}
+              <div className={`w-24 h-24 ${avatarColors[index % avatarColors.length]} rounded-full flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110`}>
+                <span className="text-white text-4xl font-bold">{profile.name.charAt(0).toUpperCase()}</span>
               </div>
               {isEditing && (
                 <button className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1">
