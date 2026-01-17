@@ -25,6 +25,7 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 - ✅ Each page has own TTS audio (ElevenLabs Valory voice)
 - ✅ Auto-play turns page when audio finishes
 - ✅ Audio waits for image to load before playing (bug fixed Jan 2026)
+- ✅ Image error fallback - audio plays even if image fails to load
 
 ### Branding & Content
 - ✅ Rebranded to "Çocuk Kitapları" (removed TRT Çocuk references)
@@ -35,9 +36,10 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ### January 17, 2026 - Bug Fixes Session
 - **Fixed**: Audio restart bug - audio now waits for page image to load before playing
+- **Fixed**: Added `onError` handler for images so audio plays even if image fails
 - **Removed**: BookQuiz.jsx and all quiz functionality
 - **Verified**: Valory voice (ID: VhxAIIZM8IRmnl5fyeyk) working in TTS service
-- **Testing**: All backend tests pass (9/9), frontend verified working
+- **Simplified**: Cleaned up BookReaderLandscape.jsx with simpler state management
 
 ### Previous Implementation
 - Frontend-only React clone with mock data
@@ -94,3 +96,8 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 ## Test Reports
 - Backend tests: `/app/tests/test_backend_api.py` (9 tests passing)
 - Test results: `/app/test_reports/iteration_1.json`
+
+## Testing Notes
+- Playwright/automated testing has issues with external Unsplash images (ORB blocking)
+- Audio playback testing should be done in a real browser for accurate results
+- TTS backend API is verified working via curl tests
