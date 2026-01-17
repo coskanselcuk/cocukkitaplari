@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { booksApi, categoriesApi } from '../../services/api';
 import axios from 'axios';
+import ImageUpload from './ImageUpload';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
