@@ -167,7 +167,7 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 ### P4 - Enhancement Ideas (Backlog)
 - [ ] Bulk audio generation - select multiple books and generate TTS for all at once
 - [ ] Reading streak feature - show consecutive reading days with star rewards
-- [ ] Local image upload for book covers and pages (instead of URL only)
+- [ ] **Local image upload for book covers and pages** (instead of URL only) - HIGH PRIORITY for CMS usability
 - [ ] Drag-and-drop page reordering in admin panel
 - [ ] Book preview mode in admin before publishing
 
