@@ -533,7 +533,7 @@ const AdminPanel = ({ onBack }) => {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   placeholder="https://images.unsplash.com/..."
                 />
-                <p className="text-xs text-gray-500 mt-1">Unsplash veya başka bir kaynaktan resim URL'si girin</p>
+                <p className="text-xs text-gray-500 mt-1">Unsplash veya başka bir kaynaktan resim URLsi girin</p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
