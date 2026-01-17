@@ -46,6 +46,11 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 17, 2026 - Category CRUD
+- **Full CRUD for Categories**: Create, Read, Update, Delete categories via Admin Panel
+- **Updated model**: Made optional fields (description, color, gradient, islandImage) have defaults
+- **UI improvements**: Categories tab shows name, slug, age group with edit/delete buttons
+
 ### January 17, 2026 - Backend Progress Sync & Book Pages Seeding
 - **Progress API Integration**: BookReaderLandscape now saves/loads progress from backend
 - **Debounced Saving**: Progress saves 1 second after page changes (avoids excessive API calls)
