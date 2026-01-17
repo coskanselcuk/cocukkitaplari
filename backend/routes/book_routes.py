@@ -129,6 +129,15 @@ async def create_page(book_id: str, page_data: PageCreate):
     if not book:
         raise HTTPException(status_code=404, detail="Book not found")
     
+    # Get the target page number
+    target_page_num = page_data.pageNumber
+    
+    # Shift existing pages if inserting in the middle
+    await db.pages.update_many(
+        {"bookId": book_id, "pageNumber": {"$gte": target_page_num}},
+        {"$inc": {"pageNumber": 1}}
+    )
+    
     page = Page(bookId=book_id, **page_data.model_dump(exclude={"bookId"}))
     doc = page.model_dump()
     
