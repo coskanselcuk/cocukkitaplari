@@ -1,29 +1,55 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Grid, List, BookOpen, Search } from 'lucide-react';
-import { books, categories } from '../../data/mockData';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ArrowLeft, Grid, List, BookOpen, Search, Loader2 } from 'lucide-react';
+import { booksApi, categoriesApi } from '../../services/api';
+import { books as mockBooks, categories as mockCategories } from '../../data/mockData';
 import BookCard from './BookCard';
 
 const BookLibrary = ({ category, onBack, onBookSelect }) => {
   const [viewMode, setViewMode] = useState('grid');
   const [selectedAge, setSelectedAge] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [books, setBooks] = useState(mockBooks);
+  const [isLoading, setIsLoading] = useState(true);
   
-  let filteredBooks = category 
-    ? books.filter(book => book.category === category.id)
-    : books;
+  // Fetch books from API
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const params = category ? { category: category.slug } : {};
+        const response = await booksApi.getAll(params);
+        if (response.books && response.books.length > 0) {
+          setBooks(response.books);
+        }
+      } catch (error) {
+        console.log('Using mock books:', error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBooks();
+  }, [category]);
 
-  // Filter by age
-  if (selectedAge !== 'all') {
-    filteredBooks = filteredBooks.filter(book => book.ageGroup === selectedAge);
-  }
+  // Filter books
+  const filteredBooks = useMemo(() => {
+    let result = category 
+      ? books.filter(book => book.category === category.slug || book.category === category.id)
+      : books;
 
-  // Filter by search
-  if (searchQuery) {
-    filteredBooks = filteredBooks.filter(book => 
-      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }
+    // Filter by age
+    if (selectedAge !== 'all') {
+      result = result.filter(book => book.ageGroup === selectedAge);
+    }
+
+    // Filter by search
+    if (searchQuery) {
+      result = result.filter(book => 
+        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    return result;
+  }, [books, category, selectedAge, searchQuery]);
 
   const ageGroups = ['all', '3-5', '4-6', '5-7', '6-8', '6-9', '7-10'];
 
