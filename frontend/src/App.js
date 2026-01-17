@@ -269,6 +269,8 @@ function AppContent() {
           setSelectedBook(null);
         }}
         onStart={handleStartReading}
+        isPremium={selectedBook?.isPremium}
+        canAccess={selectedBook ? canAccessBook(selectedBook) : true}
       />
       
       {/* Create Profile Modal */}
@@ -280,7 +282,56 @@ function AppContent() {
           setShowCreateProfile(false);
         }}
       />
+
+      {/* Premium Subscription Modal */}
+      {showPremiumModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center">
+            <div className="text-5xl mb-4">👑</div>
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Premium İçerik</h2>
+            <p className="text-gray-600 mb-6">
+              Bu hikayeye erişmek için Premium üyelik gerekiyor. 
+              Tüm hikayelere sınırsız erişim için abone olun!
+            </p>
+            
+            {!isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => { setShowPremiumModal(false); login(); }}
+                  className="w-full bg-orange-500 text-white py-3 rounded-xl font-semibold mb-3 hover:bg-orange-600"
+                >
+                  Giriş Yap
+                </button>
+                <p className="text-sm text-gray-500 mb-3">Giriş yaptıktan sonra abone olabilirsiniz</p>
+              </>
+            ) : (
+              <button
+                onClick={() => { setShowPremiumModal(false); /* TODO: Open subscription flow */ }}
+                className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 rounded-xl font-semibold mb-3 hover:opacity-90"
+              >
+                Premium&apos;a Abone Ol
+              </button>
+            )}
+            
+            <button
+              onClick={() => setShowPremiumModal(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              Daha sonra
+            </button>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+// Wrap with AuthProvider
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 
