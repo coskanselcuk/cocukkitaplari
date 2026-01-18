@@ -3,6 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import os
 
 from services.tts_service import generate_tts_audio
+from routes.notification_routes import notify_new_book, notify_new_category
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
