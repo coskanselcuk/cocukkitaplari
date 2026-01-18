@@ -124,7 +124,7 @@ const AdminPanel = ({ onBack }) => {
   const fetchVoices = async () => {
     setVoicesLoading(true);
     try {
-      const response = await ttsApi.getVoices();
+      const response = await voicesApi.getAll();
       setVoices(response.voices || []);
     } catch (error) {
       console.error('Error fetching voices:', error);
