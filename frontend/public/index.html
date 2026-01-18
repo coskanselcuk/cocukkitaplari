@@ -21,6 +21,11 @@
         <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
         <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
         
+        <!-- Hide Emergent badge for production app -->
+        <style>
+            #emergent-badge { display: none !important; }
+        </style>
+        
         <title>Çocuk Kitapları - Sesli Hikayeler ve Masallar</title>
         <script src="https://assets.emergent.sh/scripts/emergent-main.js"></script>
         <!--
