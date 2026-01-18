@@ -9,6 +9,7 @@ from models.book import (
     Book, BookCreate, BookResponse, BooksListResponse,
     Page, PageCreate, PageResponse, BookPagesResponse
 )
+from routes.notification_routes import notify_new_book
 
 
 class BookUpdate(BaseModel):
