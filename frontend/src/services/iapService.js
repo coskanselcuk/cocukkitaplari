@@ -400,6 +400,8 @@ export default {
   restorePurchases,
   hasActiveSubscription,
   getSubscriptionStatus,
+  startFreeTrial,
+  getTrialStatus,
   manageSubscription,
   setUserId,
   clearUserId
