@@ -158,32 +158,48 @@ const BookReaderLandscape = ({ book, onClose }) => {
     audioStartedForPageRef.current = -1;
     // Record when page changed for delay calculation
     pageChangeTimeRef.current = Date.now();
+    console.log('Page changed to:', currentPage, 'at:', pageChangeTimeRef.current);
   }, [currentPage]);
 
-  // Auto-start audio when image loads (only once per page)
+  // Auto-start audio after delay when image loads (only once per page)
   useEffect(() => {
     // Skip if autoPlay is off, image not loaded, or no audio
-    if (!autoPlay || !isImageLoaded || !currentPageData?.audioUrl) return;
+    if (!autoPlay || !isImageLoaded || !currentPageData?.audioUrl) {
+      console.log('Audio start skipped - autoPlay:', autoPlay, 'isImageLoaded:', isImageLoaded, 'hasAudio:', !!currentPageData?.audioUrl);
+      return;
+    }
     
     // Skip if audio was already started for this page (prevents restart on re-render)
     if (audioStartedForPageRef.current === currentPage) {
+      console.log('Audio already started for page:', currentPage);
       return;
     }
     
     const audio = audioRef.current;
     if (!audio) return;
     
+    // Calculate remaining delay to ensure 3 seconds from page change
+    const timeSincePageChange = Date.now() - pageChangeTimeRef.current;
+    const remainingDelay = Math.max(0, 3000 - timeSincePageChange);
+    
+    console.log('Starting audio with delay:', remainingDelay, 'ms (time since page change:', timeSincePageChange, 'ms)');
+    
     // Mark that we're starting audio for this page
     audioStartedForPageRef.current = currentPage;
     
-    audio.src = currentPageData.audioUrl;
-    audio.play()
-      .then(() => setIsPlaying(true))
-      .catch(() => {
-        setIsPlaying(false);
-        // Reset tracker if play failed so user can manually retry
-        audioStartedForPageRef.current = -1;
-      });
+    // Start audio after remaining delay
+    const timeoutId = setTimeout(() => {
+      audio.src = currentPageData.audioUrl;
+      audio.play()
+        .then(() => setIsPlaying(true))
+        .catch(() => {
+          setIsPlaying(false);
+          // Reset tracker if play failed so user can manually retry
+          audioStartedForPageRef.current = -1;
+        });
+    }, remainingDelay);
+    
+    return () => clearTimeout(timeoutId);
   }, [autoPlay, isImageLoaded, currentPageData?.audioUrl, currentPage]);
 
   // AUDIO ENDED HANDLER - uses refs to access latest state values
