@@ -948,11 +948,11 @@ const AdminPanel = ({ onBack }) => {
               <div className="bg-red-100 p-2 rounded-full">
                 <AlertTriangle size={24} className="text-red-600" />
               </div>
-              <h3 className="font-bold text-lg">Silmek istediğinize emin misiniz?</h3>
+              <h3 className="font-bold text-lg text-gray-800">Silmek istediğinize emin misiniz?</h3>
             </div>
             
             <p className="text-gray-600 mb-6">
-              <strong>&quot;{showDeleteConfirm.title}&quot;</strong> {
+              <strong className="text-gray-800">&quot;{showDeleteConfirm.title}&quot;</strong> {
                 showDeleteConfirm.type === 'book' ? 'kitabını ve tüm sayfalarını' : 
                 showDeleteConfirm.type === 'category' ? 'kategorisini' : 'sayfasını'
               } silmek üzeresiniz. Bu işlem geri alınamaz.
@@ -961,7 +961,7 @@ const AdminPanel = ({ onBack }) => {
             <div className="flex gap-2">
               <button
                 onClick={() => setShowDeleteConfirm(null)}
-                className="flex-1 py-2 border rounded-lg hover:bg-gray-50"
+                className="flex-1 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
               >
                 İptal
               </button>
@@ -972,7 +972,7 @@ const AdminPanel = ({ onBack }) => {
                   else deletePage(showDeleteConfirm.id);
                 }}
                 disabled={isSaving}
-                className="flex-1 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
               >
                 {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
                 Sil
