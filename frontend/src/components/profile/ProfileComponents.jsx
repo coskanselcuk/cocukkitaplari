@@ -62,6 +62,10 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
   const { user, isAuthenticated, isPremiumUser, isAdmin, login, logout, isLoading } = useAuth();
   const avatarColors = ['bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-orange-400'];
   
+  // Get display name - use authenticated user or show "Misafir" (Guest)
+  const displayName = isAuthenticated && user?.name ? user.name : 'Misafir';
+  const displayInitial = isAuthenticated && user?.name ? user.name.charAt(0).toUpperCase() : 'M';
+  
   return (
     <div className="min-h-screen pb-24">
       {/* Profile Header */}
@@ -70,14 +74,14 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
           {isAuthenticated && user?.picture ? (
             <img src={user.picture} alt={user.name} className="w-full h-full object-cover" />
           ) : (
-            <span className="text-orange-500 text-5xl font-bold">{profile.name.charAt(0).toUpperCase()}</span>
+            <span className="text-orange-500 text-5xl font-bold">{displayInitial}</span>
           )}
         </div>
         <h1 className="text-white text-2xl font-bold">
-          {isAuthenticated ? user?.name : profile.name}
+          {displayName}
         </h1>
         <p className="text-white/80">
-          {isAuthenticated ? user?.email : `${profile.age} yaşında`}
+          {isAuthenticated ? user?.email : 'Giriş yaparak ilerlemenizi kaydedin'}
         </p>
         {isAuthenticated && isPremiumUser && (
           <div className="inline-flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-semibold mt-2">
