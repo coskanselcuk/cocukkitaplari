@@ -19,6 +19,7 @@ from routes.admin_routes import router as admin_router
 from routes.auth_routes import router as auth_router
 from routes.upload_routes import router as upload_router
 from routes.subscription_routes import router as subscription_router
+from routes.notification_routes import router as notification_router
 
 
 ROOT_DIR = Path(__file__).parent
