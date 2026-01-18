@@ -101,6 +101,7 @@ const AdminPanel = ({ onBack }) => {
 
   useEffect(() => {
     fetchData();
+    fetchVoices();
   }, []);
 
   const fetchData = async () => {
@@ -116,6 +117,19 @@ const AdminPanel = ({ onBack }) => {
       console.error('Error fetching data:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchVoices = async () => {
+    setVoicesLoading(true);
+    try {
+      const response = await ttsApi.getVoices();
+      setVoices(response.voices || []);
+    } catch (error) {
+      console.error('Error fetching voices:', error);
+      setVoices([]);
+    } finally {
+      setVoicesLoading(false);
     }
   };
 
