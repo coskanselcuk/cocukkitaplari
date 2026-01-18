@@ -280,7 +280,11 @@ const BookReaderLandscape = ({ book, onClose }) => {
       audio.pause();
       setIsPlaying(false);
     } else {
-      if (!audio.src) audio.src = currentPageData.audioUrl;
+      // Always set the correct audio source for the current page
+      // This ensures we play the right audio even after page changes
+      if (audio.src !== currentPageData.audioUrl) {
+        audio.src = currentPageData.audioUrl;
+      }
       audio.play()
         .then(() => setIsPlaying(true))
         .catch(() => setIsPlaying(false));
