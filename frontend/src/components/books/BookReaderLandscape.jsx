@@ -313,6 +313,18 @@ const BookReaderLandscape = ({ book, onClose }) => {
                   <Loader2 size={48} className="animate-spin text-orange-500" />
                 </div>
               )}
+              {/* Finish Book Button - shows on last page after audio ends */}
+              {showFinishButton && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                  <button
+                    onClick={handleFinishBook}
+                    className="bg-gradient-to-r from-orange-400 to-pink-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 hover:scale-105 transition-transform animate-pulse"
+                  >
+                    <span className="text-2xl">🎉</span>
+                    <span className="text-xl font-bold">Kitabı Bitir</span>
+                  </button>
+                </div>
+              )}
             </div>
             <div className="flex-shrink-0 bg-white rounded-2xl p-4 shadow-lg">
               <p className="text-gray-800 text-base leading-relaxed text-center">{currentPageData.text}</p>
