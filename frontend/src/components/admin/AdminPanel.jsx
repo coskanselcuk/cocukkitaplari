@@ -877,6 +877,30 @@ const AdminPanel = ({ onBack }) => {
                   placeholder="https://images.unsplash.com/..."
                 />
               </div>
+              
+              {/* Voice Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                  <Mic size={16} />
+                  Ses (Seslendirme)
+                </label>
+                <select
+                  value={newPage.voiceId || ''}
+                  onChange={(e) => setNewPage({...newPage, voiceId: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  disabled={voicesLoading}
+                >
+                  <option value="">Varsayılan (Irem - Audiobook)</option>
+                  {voices.map((voice) => (
+                    <option key={voice.voice_id} value={voice.voice_id}>
+                      {voice.name} {voice.category ? `(${voice.category})` : ''}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  {voicesLoading ? 'Sesler yükleniyor...' : 'Boş bırakılırsa varsayılan ses kullanılır.'}
+                </p>
+              </div>
             </div>
 
             <div className="flex gap-3 mt-6 pt-4 border-t">
