@@ -155,9 +155,12 @@ const BookReaderLandscape = ({ book, onClose }) => {
     if (audio) {
       audio.pause();
       audio.currentTime = 0;
+      // CRITICAL: Clear the audio source so manual play loads the correct page's audio
+      audio.src = '';
     }
     setIsPlaying(false);
     setIsImageLoaded(false);
+    setShowFinishButton(false);
     // Reset the audio started tracker when page changes
     audioStartedForPageRef.current = -1;
     // Record when page changed for delay calculation
