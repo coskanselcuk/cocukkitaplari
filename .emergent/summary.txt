@@ -4,80 +4,107 @@ The user wants to build a pixel-perfect clone of the TRT Çocuk Kitaplık mobile
 **PRODUCT REQUIREMENTS:**
 -   **UI/UX:** Clone the design from the user-provided screen recording. A starry night background for the book library view.
 -   **Book Reader:** Landscape mode with swipe gestures. Audio for each page that plays automatically. When Auto-Play is on, the page should turn automatically when the audio finishes.
--   **Audio:** Use pre-generated audio stored in the database. The chosen voice is Irem - Audiobook Narrator from ElevenLabs.
--   **Content & Monetization:** Brand name is Çocuk Kitapları. The app will have free and premium books, with access controlled by a monthly subscription.
--   **Content Management:** An admin panel is required for the user to manage books, pages, and categories.
+-   **Audio:** Use pre-generated audio. The user should be able to manage a list of custom ElevenLabs voices and assign a specific voice to each page.
+-   **Content & Monetization:** Brand name is Çocuk Kitapları. The app will have free and premium books, with access controlled by a monthly subscription. A free trial should be available.
+-   **Content Management:** An admin panel is required for the user to manage books, pages, categories, and notifications.
 -   **Authentication:** User authentication is required to manage subscriptions and sync reading progress.
--   **Mobile Deployment:** The app must be easily deployable to iOS and Android app stores.
+-   **Mobile Deployment:** The app must be easily deployable to iOS and Android app stores using Capacitor.
+-   **Notifications:** An in-app notification system to inform users about new books, categories, or custom announcements, manageable from the admin panel.
 
 **User's preferred language**: The user communicates in English. However, the application's content and UI text are in **Turkish**. The next agent must continue to use Turkish for all user-facing text in the app.
 
 **what currently exists?**
-A full-stack application with a React frontend and a FastAPI backend connected to a MongoDB database. The application is now a hybrid mobile app using **Capacitor**.
-
--   **Content:** All content (10 books, categories) is served from the API. All books have 5 pages each with pre-generated audio.
--   **Admin Panel:** A comprehensive admin panel () allows full CRUD for books and categories. For pages, it supports CRUD, reordering, and features to manage audio content (clearing audio on text change, per-page regeneration). Image uploads are now required for pages.
--   **Authentication & Authorization:** A complete user authentication system using Emergent-managed Google Social Login is in place. Admin panel access is restricted to the user .
--   **Subscription & Monetization:** A free/premium model is fully implemented. The UI clearly distinguishes premium content with badges and lock overlays. The admin panel supports toggling a book's premium status. The foundation for native in-app purchases via Capacitor is in place.
--   **Core App:** The home page, library, and search are all dynamic and synced with the backend. User reading progress is saved to the database. The UI correctly reflects the user's logged-in/logged-out state.
--   **Mobile Readiness:** Capacitor is integrated into the frontend, and a guide (), app icon, and store listing templates () have been created.
+A full-stack hybrid mobile application built with React (and Capacitor), FastAPI, and MongoDB. The app is feature-rich and nearing completion of its core functionality.
+-   **Core App:** The main screens (Home, Library, Search) are dynamic. The book reader's critical audio-sync bug has been fixed and verified.
+-   **Authentication:** Emergent-managed Google Social Login is integrated.
+-   **Monetization:** A premium book model is in place. The foundation for native in-app purchases (iOS/Android) has been built on both backend and frontend, including a 7-day free trial system that requires user login.
+-   **Admin Panel:** A comprehensive  panel allows full CRUD for Books, Pages, and Categories.
+    -   **Notifications:** A Bildirimler tab allows creating/deleting custom announcements. New books/categories automatically generate notifications.
+    -   **Custom Voices:** A Sesler tab allows the user to add, verify against ElevenLabs, and delete custom voice IDs.
+    -   **Per-Page Voice:** The page editor in the admin panel now includes a dropdown to select a custom voice for audio generation.
+    -   **Image Uploads:** Categories and Pages support custom image uploads.
+-   **Mobile Readiness:** Capacitor is integrated, with guides for building and store submission.
 
 **Last working item**:
--   Last item agent was working: Fixing a critical and recurring audio synchronization bug in the book reader (). The user provided detailed logs of multiple scenarios where the audio would play for the wrong page, fail to start, or desynchronize after pausing, toggling auto-play, or changing books.
+-   Last item agent was working: Fixing an issue where changing a page's voice in the admin panel did not invalidate the existing audio file. The user would change the voice, but the old audio would still play.
 -   Status: IN PROGRESS
 -   Agent Testing Done: N
--   Which testing method agent to use? The agent must first ask the user to verify the latest fix against the scenarios they described. If the bug persists, use the  with a detailed plan covering all the user's reported edge cases (pausing, toggling auto-play, re-reading, etc.).
+-   Which testing method agent to use? Manual testing. The user should verify the complete flow:
+    1.  Log in as admin.
+    2.  Go to the admin panel, select a book, and edit a page that has audio.
+    3.  Change the voice from the dropdown and click Güncelle (Update).
+    4.  **Crucially, verify that the UI updates to show Ses Yok (No Audio) or a similar indicator for that page, signifying the old audio was cleared.**
+    5.  Regenerate the audio for that page.
+    6.  Open the book as a user and confirm the new voice is playing on that page.
 -   User Testing Done: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Book Reader Audio Synchronization Bug (P0 - CRITICAL)**
-    -   **Description:** The audio in the book reader gets out of sync with the displayed page under complex user interactions. Logs show race conditions and stale state issues, particularly with timeouts and state updates. This is a major regression that makes the core feature unusable.
-    -   **Attempted fixes:** The last agent implemented a significant refactor of the audio start effect in . The fix involves passing the current page data directly into the  to prevent stale closures and moving the  update inside the timeout to ensure it's only marked as started right before playing. It also handles pages without images gracefully and adds validation in the CMS to prevent them.
+-   **Issue 1: Category Icon Persistence (P0 - CRITICAL)**
+    -   **Description:** User reported that after editing a category to replace an emoji icon with an uploaded image, the change did not persist. The backend  model was missing the  field, and the update logic was incorrectly filtering out empty strings meant to clear the emoji field.
+    -   **Attempted fixes:** The agent added  to the Pydantic model and adjusted the backend update logic to correctly handle empty strings. The frontend  reset logic was also fixed.
+    -   **Next debug checklist:** The user needs to verify the fix by editing a category, uploading an image icon, saving, and then reloading the admin panel to confirm the change is persistent.
+    -   **Why fix this issue and what will be achieved with the fix?** This is a core CMS functionality regression. Fixing it ensures admins can reliably manage category appearance.
+    -   **Status:** USER VERIFICATION PENDING
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Both
+    -   **Blocked on other issue:** None.
+-   **Issue 2: Notification Modal CSS (P2)**
+    -   **Description:** The user reported that the New Notification modal in the admin panel has CSS issues, likely a z-index conflict, causing it to render incorrectly or behind other elements.
+    -   **Attempted fixes:** The agent attempted a fix by increasing the z-index of the modal in .
     -   **Next debug checklist:**
-        1.  Guide the user to re-test the scenarios from their last message to see if the new fix works.
-        2.  If it fails, meticulously analyze the user's console logs again.
-        3.  Focus on the  hooks in , especially the one responsible for starting audio. Pay close attention to the dependency array and how state variables like , , , and  interact.
-        4.  Verify the logic for handling cached images vs. slow-loading new images.
-    -   **Why fix this issue and what will be achieved with the fix?** This is the most critical bug in the application. Fixing it will make the book reader reliable and deliver the core value proposition to the end-user.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** Y
+        1.  Log in as admin.
+        2.  Navigate to the Bildirimler (Notifications) tab.
+        3.  Click Yeni Bildirim Ekle (Add New Notification).
+        4.  Verify the modal appears correctly on top of all other content.
+    -   **Why fix this issue and what will be achieved with the fix?** Improves usability of the admin panel.
+    -   **Status:** USER VERIFICATION PENDING
+    -   **Is recurring issue?** N
     -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** None. This is the main blocker for the project.
+    -   **Blocked on other issue:** None.
 
 **In progress Task List**:
-There are no other tasks in progress. The sole focus is on the critical audio bug.
+-   **Task 1: Complete Audio Invalidation UI Feedback (P0)**
+    -   **Where to resume:** The backend logic to clear  when  changes in  is complete. The missing piece is the frontend feedback. In , the  function needs to be modified to re-fetch or locally update the book's pages after a successful update. This will refresh the page list and correctly show the Ses Yok status, prompting the user to regenerate the audio.
+    -   **What will be achieved with this?** This will complete the per-page voice change feature by providing a clear and correct workflow for the admin user.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks:**
--   **Task 1 (P1):** Fully implement native in-app purchases. The Capacitor plugin is installed, and placeholder components (, ) exist. This task involves wiring them up to the Apple/Google billing services.
+-   **Task 1 (P1):** Fully implement and test the native in-app purchase flow. The backend routes and frontend services are in place but require end-to-end testing with sandbox accounts for Apple/Google. This includes purchase, restore, and subscription status syncing.
 -   **Task 2 (P2):** Generate screenshots for the app stores using the provided script ().
 
 **Future Tasks:**
 -   Add a Bulk Audio Generation feature to the admin panel.
 -   Implement a reading streak feature to encourage user engagement.
--   Add a Profile Settings page where users can edit their name (currently non-editable and pulled from Google).
+-   Add a Profile Settings page where users can edit their name.
+-   Implement trial expiration push notifications.
+-   Implement an offline mode for downloaded books.
+-   Implement a night mode / dark theme.
 
 **Completed work in this session**
--   **Feature: Skeleton Loading States:** Implemented for the book library and search modal.
--   **Feature: Local Image Uploads:** Added a backend endpoint and a frontend drag-and-drop component () to the admin panel for all image fields.
--   **Feature: Admin Access Control:** Restricted admin panel access to a specific user email.
--   **Feature: Premium Content Management:** Added toggles in the admin panel to set books as premium. The UI now clearly shows locked content for non-subscribed users.
--   **Bug Fix: Data Sync:** Fixed the home page to use live API data instead of mock data, ensuring consistency with the database.
--   **Feature: Capacitor Integration:** Successfully integrated Capacitor, turning the web app into a mobile-ready project with plugins for in-app purchases, splash screen, and app icon. Created a mobile build guide.
--   **Feature: Store Assets:** Generated a professional app icon and created templates for App Store/Google Play descriptions.
--   **Bug Fix: Admin Panel UX:** Fixed UI styling issues in modals and corrected the page deletion logic to re-fetch data and prevent broken states.
--   **Feature: Book Reader UX:**
-    -   Implemented a Finish Book button on the last page to prevent abruptly ending the experience.
-    -   Implemented a system to automatically invalidate audio when a page's text is edited in the CMS, with a UI button to regenerate it.
--   **Bug Fix: Audio Start Delay:** Multiple attempts were made to enforce a delay between image load and audio start, culminating in the current logic being debugged.
+-   **Critical Bug Fix:** Resolved the recurring audio synchronization bug in the book reader (), which was the primary blocker.
+-   **Branding:** Removed the Made with Emergent badge.
+-   **Feature: In-App Purchases:** Implemented the backend () and frontend (, ) foundation for handling IAPs and subscriptions.
+-   **Feature: Free Trial:** Implemented a 7-day free trial, including backend logic to track trial status and frontend UI updates in the subscription modal.
+-   **Feature: In-App Notifications:** Built a complete notification system:
+    -   Backend routes () for CRUD and fetching.
+    -   Frontend UI () to display notifications to users.
+    -   Admin UI () to create and manage custom notifications.
+    -   Automatic notification generation when new books or categories are created.
+-   **Feature: Custom Category Icons:** Enabled image uploads for category icons, replacing the static emoji picker, and fixed the associated persistence bug.
+-   **Feature: Custom Voice Management:** Implemented a Sesler (Voices) tab in the admin panel for users to manage a list of ElevenLabs voice IDs.
+-   **Feature: Per-Page Voice Selection:** Updated the admin panel to allow assigning a specific custom voice to each book page, which is then used for audio generation.
+-   **Bug Fix:** Fixed the backend logic to automatically invalidate a page's audio when its assigned voice is changed.
 
 **Earlier issues found/mentioned but not fixed**
-There are no outstanding issues apart from the critical audio bug.
+-   The notification modal CSS issue is still pending user verification.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** The book reader's audio-visual synchronization has been a persistent problem.
--   **Recurrence count:** High. The complexity of state interactions (, , refs, user actions) has led to multiple fixes that were later broken by different edge cases.
--   **Status:** IN PROGRESS
+-   **Issue recurrence in previous fork:** Book reader audio-visual synchronization.
+-   **Recurrence count:** High.
+-   **Status:** RESOLVED. The agent successfully debugged and fixed the complex state management and race conditions in , and the user confirmed the fix.
 
 **Code Architecture**
 
@@ -87,78 +114,82 @@ There are no outstanding issues apart from the critical audio bug.
 -   **Backend:** FastAPI, Pydantic, Motor (async MongoDB driver).
 -   **Database:** MongoDB.
 -   **Authentication:** Emergent-managed Google Social Login (OAuth2).
--   **File Handling:** Local file storage on the backend via a new  endpoint using .
--   **State Management:** Heavy use of , , and  for complex component logic, especially in .
+-   **File Handling:** Local file storage on the backend via a  endpoint.
+-   **State Management:** Heavy use of ,  in React, especially within the monolithic .
 
 **key DB schema**
 -   **users**: 
 -   **categories**: 
--   **books**:  (Pages are embedded within book documents).
+-   **books**: 
 -   **progress**: 
+-   **notifications**: 
+-   **voices**: 
 
 **changes in tech stack**
--    added to the backend for file uploads.
--   **Capacitor** and its related plugins (, , , etc.) were added to the frontend to enable mobile deployment.
+-   No new technologies added.  was already present and has now been built upon.
 
 **All files of reference**
--   : **CRITICAL FILE.** The source of the main audio synchronization bug.
--   : Core CMS component, heavily modified for new features (image upload, premium toggles, audio regeneration).
--   : Contains backend logic for updating books/pages, including  and clearing .
--   : New file with instructions for building the native app.
--   : New service for handling native in-app purchases.
+-   : Heavily modified to add notifications tab, voices tab, and voice selectors. The  function needs to be fixed here.
+-   : Modified to invalidate audio when  changes.
+-   : New file for handling IAP and trials.
+-   : New file for handling notifications.
+-   : New file for managing custom voices.
+-   : New component for voice management UI.
+-   : Significantly updated to integrate with the new backend endpoints.
+-   : Updated to include free trial logic.
 
 **Areas that need refactoring**:
--    is extremely complex and fragile due to its intricate state management. While a full refactor to a state machine is not requested, any work on it must be done with extreme care.
--    remains a monolithic component (>1200 lines) and is difficult to maintain.
+-    is over 1300 lines long and extremely complex. While new functionality was added in separate components (, ), the core state management and rendering logic for books and pages remains in this single file, making it brittle and hard to maintain.
 
 **key api endpoints**
--    (POST): Uploads an image to .
--    (POST): Regenerates audio for a single page.
--    (PUT): Updates a book's details, now including the  flag.
+-   : (GET) Check a user's subscription/trial status.
+-   : (POST) Activate a free trial for a user.
+-   : (GET) Fetch notifications for the current user.
+-   : (POST) Mark a notification as read.
+-   : (POST, DELETE) Manage notifications from the admin panel.
+-   : (GET, POST, DELETE) Manage the custom voice list.
+-   : (POST) Verify a voice ID with ElevenLabs.
 
 **Critical Info for New Agent**
--   **THE AUDIO BUG IS YOUR ONLY PRIORITY.** The user is blocked and frustrated by this recurring issue in . Do not attempt any other tasks until the user confirms the book reader is working flawlessly across all the scenarios they have described. The last fix attempt addressed stale state in a  callback. You must first verify if this fix was successful.
--   **Admin Validation:** The admin panel now requires an image for every page. This is a critical validation to prevent the reader from breaking.
--   **Capacitor Project:** The application is now a hybrid mobile app. The groundwork for native in-app purchases is laid but not complete. Refer to  for build context.
+-   The main stability blocker (audio sync bug) is **resolved**. The user is happy with the core reader experience.
+-   Your immediate priority is to finish the change voice invalidates audio feature. This is a small but important fix to complete the workflow. The backend part is done; you just need to ensure the frontend UI refreshes correctly in .
+-   After that, confirm the category icon persistence fix and the notification modal CSS fix with the user.
+-   The next major feature requested by the user is the full implementation of In-App Purchases.
 
 **documents and test reports created in this job**
--   
--   
--   
--   
--   
+-   : Updated with all new features (IAP, Trial, Notifications, Custom Voices) and a revised backlog.
 
 **Last 10 User Messages and any pending HUMAN messages**
--   **10. (LATEST)** User provided detailed console logs for multiple complex scenarios where the book reader audio sync fails, including toggling auto-play, re-reading books, and encountering pages without images. **This is the current active bug.**
--   **9.** User reported the 3s audio delay isn't working, the premium status toggle in the CMS didn't work, and asked what the Deploy button does.
--   **8.** User requested a 3s audio delay, and a feature to invalidate/regenerate audio in the CMS when a page's text is changed.
--   **7.** User reported that when logged out, the UI still shows hardcoded Elif profile data. Correct fallback should be Sizin için öneriler.
--   **6.** User confirmed profile management is okay, requested an editable username field in the future, and noted that progress is saved correctly. They also asked to make Elif için öneriler dynamic.
--   **5.** User asked for a 2.5s audio delay.
--   **4.** User requested a Finish Book button on the last page instead of an abrupt transition to the celebration screen.
--   **3.** User stated the  API fix did not work and they need audio to start *after* the image is fully rendered/painted.
--   **2.** User confirmed the audio re-start is fixed but it still begins before the image is fully loaded.
--   **1.** User noted that styling and page deletion in the admin panel are okay, but the audio restarting bug resurfaced when using large images.
+-   **10. (LATEST)** User reports that after changing a page's voice in the admin panel and updating, the book still plays the old voice. **This is the current .**
+-   **9.** User reports that the new custom voice management (Sesler) tab is working well.
+-   **8.** User reports bugs in the Sesler tab: a specific ElevenLabs voice ID couldn't be verified, and the delete confirmation was blocked by the browser.
+-   **7.** User clarifies they want a new Sesler (Voices) tab in the admin panel to manage a list of custom ElevenLabs Voice IDs, rather than a generic dropdown.
+-   **6.** User wants to use different voices from ElevenLabs per page, not just the default.
+-   **5.** User confirms category management is working but reports a persistence issue when updating a category icon.
+-   **4.** User reports that the new Notification modal has CSS/visibility problems and that the category icon is static, requesting image upload functionality for it.
+-   **3.** User confirms the in-app notification system functionality looks profound and asks about push notifications.
+-   **2.** User asks to implement a Free Trial.
+-   **1.** User confirms the critical audio sync bug is fixed and asks to remove the Made with Emergent branding.
 
 **Project Health Check:**
--   **Broken:** The core book reader feature has a critical, recurring audio synchronization bug.
+-   **Broken:** None.
 -   **Mocked:** None.
 
 **3rd Party Integrations**
--   **ElevenLabs (Text-to-Speech):** Used via an offline script for pre-generating audio.
--   **Emergent-managed Google Auth:** Used for user login and account management.
+-   **ElevenLabs (Text-to-Speech):** Used via a backend service for on-demand audio generation.
+-   **Emergent-managed Google Auth:** Used for user login.
 -   **Capacitor:** For native mobile app wrapping.
-    -   : Installed for handling mobile payments (not fully implemented).
+    -   : Installed and partially integrated for handling mobile payments.
 
 **Testing status**
--   Testing agent used after significant changes: Yes.
--   Troubleshoot agent used after agent stuck in loop: No.
--   Test files created: 
--   Known regressions: A major, recurring audio synchronization bug in the book reader.
+-   Testing agent used after significant changes: NO
+-   Troubleshoot agent used after agent stuck in loop: NO
+-   Test files created: []
+-   Known regressions: None. The major regression (audio sync) was fixed.
 
 **Credentials to test flow:**
 -   Log in with any Google account for the standard user flow.
--   To access the admin panel, the app is hardcoded to grant access to the user with the email .
+-   To access the admin panel at , the logged-in user's email must be .
 
 **What agent forgot to execute**
-The agent has been persistent but has so far failed to deliver a permanently stable solution for the complex audio synchronization logic in the book reader. The last fix was implemented based on user logs but was not verified before the session ended.</analysis>
+The previous agent correctly identified and fixed the backend logic for invalidating audio when a page's voice is changed. However, they did not complete the corresponding frontend change. The  function in  must be updated to re-fetch the page list after an update. Without this, the user does not get the visual feedback that the audio has been cleared and needs to be regenerated, leading them to believe the feature is broken.</analysis>
