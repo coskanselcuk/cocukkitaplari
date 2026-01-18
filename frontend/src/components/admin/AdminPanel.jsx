@@ -287,7 +287,8 @@ const AdminPanel = ({ onBack }) => {
     setEditPage({
       text: page.text || '',
       image: page.image || '',
-      pageNumber: page.pageNumber
+      pageNumber: page.pageNumber,
+      voiceId: page.voiceId || ''
     });
     setShowEditPage(true);
   };
