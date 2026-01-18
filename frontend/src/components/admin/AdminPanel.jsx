@@ -3,14 +3,15 @@ import {
   ArrowLeft, Plus, Trash2, Edit, Save, X, BookOpen, 
   FileText, Image, Volume2, Loader2, Check, AlertTriangle, Crown, Bell, Mic
 } from 'lucide-react';
-import { booksApi, categoriesApi, ttsApi } from '../../services/api';
+import { booksApi, categoriesApi, voicesApi } from '../../services/api';
 import axios from 'axios';
 import ImageUpload from './ImageUpload';
 import NotificationAdmin from './NotificationAdmin';
+import VoiceAdmin from './VoiceAdmin';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
-// Default voice ID (Irem)
+// Default voice ID (Irem) - used when no custom voices are set
 const DEFAULT_VOICE_ID = 'NsFK0aDGLbVusA7tQfOB';
 
 const AdminPanel = ({ onBack }) => {
