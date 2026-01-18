@@ -93,8 +93,12 @@ async def update_category(category_id: str, category_data: CategoryUpdate):
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
     
-    # Build update dict with only provided fields
-    update_data = {k: v for k, v in category_data.model_dump().items() if v is not None}
+    # Build update dict - include empty strings but exclude None values
+    # This allows clearing fields by setting them to empty string
+    update_data = {}
+    for k, v in category_data.model_dump().items():
+        if v is not None:  # Only exclude None, allow empty strings
+            update_data[k] = v
     
     if update_data:
         await db.categories.update_one({"id": category_id}, {"$set": update_data})
