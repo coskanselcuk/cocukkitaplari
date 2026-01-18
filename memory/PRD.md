@@ -410,6 +410,7 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 - [ ] Book preview mode in admin before publishing
 - [ ] Profile settings page with editable username
 - [x] **Free trial period (7-day) for new subscribers** ✅ COMPLETED
+- [x] **Trial expiration push notifications** ✅ COMPLETED
 - [ ] Offline mode with downloaded books
 - [ ] Family sharing (up to 5 profiles)
 - [ ] Push notifications for new book releases
