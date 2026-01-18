@@ -198,7 +198,8 @@ const AdminPanel = ({ onBack }) => {
         pageNumber,
         text: newPage.text,
         image: newPage.image,
-        bookId: selectedBook.id
+        bookId: selectedBook.id,
+        voiceId: newPage.voiceId || null
       };
       
       const response = await axios.post(`${API_URL}/api/books/${selectedBook.id}/pages`, pageData);
@@ -208,7 +209,7 @@ const AdminPanel = ({ onBack }) => {
       setBookPages(pagesRes.pages || []);
       
       setShowAddPage(false);
-      setNewPage({ pageNumber: 1, text: '', image: '', insertPosition: 'end' });
+      setNewPage({ pageNumber: 1, text: '', image: '', voiceId: '', insertPosition: 'end' });
     } catch (error) {
       console.error('Error creating page:', error);
       alert('Sayfa oluşturulurken hata oluştu');
