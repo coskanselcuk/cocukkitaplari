@@ -646,7 +646,11 @@ const AdminPanel = ({ onBack }) => {
                 <div key={cat.id} className="p-4 border rounded-lg hover:shadow-md transition-shadow">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{cat.icon || '📚'}</span>
+                      {cat.iconImage ? (
+                        <img src={cat.iconImage} alt={cat.name} className="w-10 h-10 object-cover rounded-lg" />
+                      ) : (
+                        <span className="text-2xl">{cat.icon || '📚'}</span>
+                      )}
                       <div>
                         <p className="font-medium text-gray-800">{cat.name}</p>
                         <p className="text-sm text-gray-500">{cat.slug}</p>
