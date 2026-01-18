@@ -99,4 +99,47 @@ export const authApi = {
   }
 };
 
+// Notifications API
+export const notificationsApi = {
+  getAll: async (limit = 20, unreadOnly = false) => {
+    const response = await api.get('/notifications', { 
+      params: { limit, unread_only: unreadOnly } 
+    });
+    return response.data;
+  },
+  
+  getUnreadCount: async () => {
+    const response = await api.get('/notifications/unread-count');
+    return response.data;
+  },
+  
+  markAsRead: async (notificationIds) => {
+    const response = await api.post('/notifications/mark-read', { 
+      notification_ids: notificationIds 
+    });
+    return response.data;
+  },
+  
+  markAllAsRead: async () => {
+    const response = await api.post('/notifications/mark-all-read');
+    return response.data;
+  },
+  
+  // Admin functions
+  create: async (notification) => {
+    const response = await api.post('/notifications/admin/create', notification);
+    return response.data;
+  },
+  
+  listAll: async (limit = 50) => {
+    const response = await api.get('/notifications/admin/list', { params: { limit } });
+    return response.data;
+  },
+  
+  delete: async (notificationId) => {
+    const response = await api.delete(`/notifications/admin/${notificationId}`);
+    return response.data;
+  }
+};
+
 export default api;
