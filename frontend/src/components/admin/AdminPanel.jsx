@@ -260,7 +260,14 @@ const AdminPanel = ({ onBack }) => {
     setIsSaving(true);
     try {
       await axios.delete(`${API_URL}/api/books/${selectedBook.id}/pages/${pageId}`);
-      setBookPages(bookPages.filter(p => p.id !== pageId));
+      // Refetch pages to get updated page numbers after reordering
+      const pagesResponse = await axios.get(`${API_URL}/api/books/${selectedBook.id}/pages`);
+      setBookPages(pagesResponse.data.pages || []);
+      // Also update the book's total pages
+      const booksResponse = await axios.get(`${API_URL}/api/books`);
+      setBooks(booksResponse.data.books || []);
+      const updatedBook = booksResponse.data.books.find(b => b.id === selectedBook.id);
+      if (updatedBook) setSelectedBook(updatedBook);
       setShowDeleteConfirm(null);
     } catch (error) {
       console.error('Error deleting page:', error);
