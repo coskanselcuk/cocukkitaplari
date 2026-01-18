@@ -449,6 +449,13 @@ const AdminPanel = ({ onBack }) => {
           >
             Kategoriler ({categories.length})
           </button>
+          <button
+            onClick={() => setActiveTab('notifications')}
+            className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'notifications' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700'}`}
+          >
+            <Bell size={18} className="inline mr-2" />
+            Bildirimler
+          </button>
         </div>
 
         {activeTab === 'books' && (
