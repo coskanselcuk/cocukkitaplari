@@ -46,6 +46,28 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 18, 2026 - In-App Notifications System
+- **Notification Backend APIs**: Complete CRUD for notifications
+  - `GET /api/notifications` - Get user notifications (filtered by audience)
+  - `GET /api/notifications/unread-count` - Get badge count
+  - `POST /api/notifications/mark-read` - Mark specific notifications as read
+  - `POST /api/notifications/mark-all-read` - Mark all as read
+  - `POST /api/notifications/admin/create` - Admin: Create new notification
+  - `GET /api/notifications/admin/list` - Admin: List all notifications
+  - `DELETE /api/notifications/admin/{id}` - Admin: Delete notification
+- **Auto-Notifications**: System triggers when:
+  - New book is created → "Yeni Kitap! 📚" notification
+  - New category is created → "Yeni Kategori! 🎨" notification
+  - Trial expiring soon → User-specific reminder
+  - Reading achievements → User-specific congratulation
+- **Notification Types**: new_book, new_category, subscription, achievement, announcement, trial, reminder
+- **Target Audiences**: All users, Free users only, Premium users only
+- **Frontend Components**:
+  - `NotificationPanel.jsx` - Slide-out panel with real-time notifications
+  - `NotificationAdmin.jsx` - CMS tab for creating/managing notifications
+  - Updated `Header.jsx` - Dynamic badge count from API
+- **Admin Panel Tab**: New "Bildirimler" tab in CMS for notification management
+
 ### January 18, 2026 - Free Trial Implementation
 - **7-Day Free Trial Feature**: Complete implementation for user acquisition
   - Backend: `/api/subscriptions/start-trial` - Starts trial, marks `trial_used=true`
