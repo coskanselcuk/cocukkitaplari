@@ -81,6 +81,7 @@ NOTIFICATION_ICONS = {
 }
 
 
+@router.get("")
 @router.get("/")
 async def get_user_notifications(request: Request, limit: int = 20, unread_only: bool = False):
     """Get notifications for the current user"""
