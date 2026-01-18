@@ -74,7 +74,8 @@ const AdminPanel = ({ onBack }) => {
   const [editPage, setEditPage] = useState({
     text: '',
     image: '',
-    pageNumber: 1
+    pageNumber: 1,
+    voiceId: ''
   });
 
   // New category form
