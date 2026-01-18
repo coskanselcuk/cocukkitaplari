@@ -333,7 +333,7 @@ const AdminPanel = ({ onBack }) => {
       });
       setCategories([...categories, response.data]);
       setShowAddCategory(false);
-      setNewCategory({ name: '', slug: '', icon: '📚', ageGroup: '4-6', sortOrder: 0 });
+      setNewCategory({ name: '', slug: '', icon: '📚', iconImage: '', ageGroup: '4-6', sortOrder: 0 });
     } catch (error) {
       console.error('Error creating category:', error);
       alert(error.response?.data?.detail || 'Kategori oluşturulurken hata oluştu');
