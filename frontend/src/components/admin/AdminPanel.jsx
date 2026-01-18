@@ -310,11 +310,23 @@ const AdminPanel = ({ onBack }) => {
     
     setIsSaving(true);
     try {
-      const response = await axios.put(
+      // Check if voice is being changed
+      const voiceChanged = editPage.voiceId !== (editingPage.voiceId || '');
+      
+      await axios.put(
         `${API_URL}/api/books/${selectedBook.id}/pages/${editingPage.id}`,
         editPage
       );
-      setBookPages(bookPages.map(p => p.id === editingPage.id ? response.data : p));
+      
+      // Re-fetch pages to get the updated state (including cleared audioUrl if voice changed)
+      const pagesRes = await booksApi.getPages(selectedBook.id);
+      setBookPages(pagesRes.pages || []);
+      
+      // Show info message if voice was changed
+      if (voiceChanged) {
+        alert('Sayfa güncellendi. Ses yeniden oluşturulmalı - "Ses Oluştur" butonuna tıklayın.');
+      }
+      
       setShowEditPage(false);
       setEditingPage(null);
     } catch (error) {
