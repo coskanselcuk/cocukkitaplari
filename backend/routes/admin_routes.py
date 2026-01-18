@@ -41,12 +41,13 @@ async def generate_audio_for_book(book_id: str):
     for page in pages:
         page_id = page.get('id')
         text = page.get('text', '')
+        voice_id = page.get('voiceId')  # Use page-specific voice if set
         
         if not text:
             continue
         
         try:
-            result = await generate_tts_audio(text)
+            result = await generate_tts_audio(text, voice_id)
             audio_url = result.get('audio_url')
             
             if audio_url:
@@ -81,8 +82,10 @@ async def generate_audio_for_page(book_id: str, page_id: str):
     if not text:
         raise HTTPException(status_code=400, detail="Page has no text")
     
+    voice_id = page.get('voiceId')  # Use page-specific voice if set
+    
     try:
-        result = await generate_tts_audio(text)
+        result = await generate_tts_audio(text, voice_id)
         audio_url = result.get('audio_url')
         
         if audio_url:
