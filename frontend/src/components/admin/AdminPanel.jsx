@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Trash2, Edit, Save, X, BookOpen, 
-  FileText, Image, Volume2, Loader2, Check, AlertTriangle, Crown
+  FileText, Image, Volume2, Loader2, Check, AlertTriangle, Crown, Bell
 } from 'lucide-react';
 import { booksApi, categoriesApi } from '../../services/api';
 import axios from 'axios';
 import ImageUpload from './ImageUpload';
+import NotificationAdmin from './NotificationAdmin';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
