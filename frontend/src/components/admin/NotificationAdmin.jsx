@@ -239,11 +239,11 @@ const NotificationAdmin = () => {
                         className={`p-2 rounded-lg border text-center transition-all ${
                           newNotification.type === type.value
                             ? 'border-orange-500 bg-orange-50 text-orange-700'
-                            : 'border-gray-200 hover:border-gray-300'
+                            : 'border-gray-200 hover:border-gray-300 text-gray-700 bg-white'
                         }`}
                       >
-                        <Icon size={20} className="mx-auto mb-1" />
-                        <span className="text-xs">{type.label}</span>
+                        <Icon size={20} className={`mx-auto mb-1 ${newNotification.type === type.value ? 'text-orange-600' : 'text-gray-500'}`} />
+                        <span className="text-xs font-medium">{type.label}</span>
                       </button>
                     );
                   })}
@@ -266,11 +266,11 @@ const NotificationAdmin = () => {
                         className={`p-3 rounded-lg border text-center transition-all ${
                           newNotification.target_audience === target.value
                             ? 'border-orange-500 bg-orange-50 text-orange-700'
-                            : 'border-gray-200 hover:border-gray-300'
+                            : 'border-gray-200 hover:border-gray-300 text-gray-700 bg-white'
                         }`}
                       >
-                        <Icon size={20} className="mx-auto mb-1" />
-                        <span className="text-sm">{target.label}</span>
+                        <Icon size={20} className={`mx-auto mb-1 ${newNotification.target_audience === target.value ? 'text-orange-600' : 'text-gray-500'}`} />
+                        <span className="text-sm font-medium">{target.label}</span>
                       </button>
                     );
                   })}
