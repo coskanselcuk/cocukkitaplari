@@ -28,6 +28,7 @@ const AdminPanel = ({ onBack }) => {
   const [audioGenProgress, setAudioGenProgress] = useState('');
   const [editingPage, setEditingPage] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
+  const [regeneratingPageId, setRegeneratingPageId] = useState(null);
 
   // New book form
   const [newBook, setNewBook] = useState({
