@@ -12,6 +12,7 @@ const VoiceAdmin = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingVoice, setEditingVoice] = useState(null);
   const [verifyingId, setVerifyingId] = useState(null);
+  const [deletingVoice, setDeletingVoice] = useState(null); // For delete confirmation
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
@@ -93,17 +94,19 @@ const VoiceAdmin = () => {
     }
   };
 
-  const handleDelete = async (voiceId) => {
-    if (!window.confirm('Bu sesi silmek istediğinize emin misiniz?')) return;
-
+  const handleDeleteConfirm = async () => {
+    if (!deletingVoice) return;
+    
     try {
-      await voicesApi.delete(voiceId);
-      setVoices(voices.filter(v => v.id !== voiceId));
+      await voicesApi.delete(deletingVoice.id);
+      setVoices(voices.filter(v => v.id !== deletingVoice.id));
       setSuccess('Ses silindi');
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Failed to delete voice:', err);
       setError('Ses silinirken hata oluştu');
+    } finally {
+      setDeletingVoice(null);
     }
   };
 
@@ -124,18 +127,19 @@ const VoiceAdmin = () => {
 
   const handleVerify = async (voiceId) => {
     setVerifyingId(voiceId);
+    setError(null);
     try {
       const result = await voicesApi.verify(voiceId);
       if (result.verified) {
         setVoices(voices.map(v => v.id === voiceId ? { ...v, verified: true } : v));
         setSuccess(`Ses doğrulandı! ElevenLabs adı: ${result.elevenlabs_name}`);
       } else {
-        setError(result.message || 'Ses doğrulanamadı');
+        setError(result.message || 'Ses ElevenLabs\'te bulunamadı. Voice ID\'yi kontrol edin.');
       }
-      setTimeout(() => { setSuccess(null); setError(null); }, 3000);
+      setTimeout(() => { setSuccess(null); setError(null); }, 5000);
     } catch (err) {
       console.error('Failed to verify voice:', err);
-      setError('Doğrulama başarısız oldu');
+      setError(err.response?.data?.detail || 'Doğrulama başarısız oldu. Voice ID\'yi kontrol edin.');
     } finally {
       setVerifyingId(null);
     }
@@ -177,10 +181,22 @@ const VoiceAdmin = () => {
               ElevenLabs Voice Library'ye gidin <ExternalLink size={12} />
             </a>
           </li>
-          <li>Kullanmak istediğiniz sesi bulun ve tıklayın</li>
-          <li>Ses detay sayfasında URL'den ID'yi kopyalayın (örn: <code className="bg-purple-100 px-1 rounded">NsFK0aDGLbVusA7tQfOB</code>)</li>
-          <li>Veya "ID" butonuna tıklayarak doğrudan kopyalayın</li>
+          <li>Kullanmak istediğiniz sesi bulun ve "Add to My Voices" ile ekleyin</li>
+          <li>
+            <a 
+              href="https://elevenlabs.io/app/voice-lab" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="underline hover:text-purple-900 inline-flex items-center gap-1"
+            >
+              My Voices (VoiceLab) sayfasına gidin <ExternalLink size={12} />
+            </a>
+          </li>
+          <li>Sesin üzerindeki "ID" butonuna tıklayarak Voice ID'yi kopyalayın</li>
         </ol>
+        <p className="text-xs text-purple-600 mt-2 bg-purple-100 p-2 rounded">
+          <strong>Not:</strong> Voice Library'deki sesleri kullanmak için önce "Add to My Voices" ile hesabınıza eklemeniz gerekir.
+        </p>
       </div>
 
       {/* Success/Error Messages */}
@@ -194,6 +210,9 @@ const VoiceAdmin = () => {
         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-2">
           <AlertCircle size={18} />
           {error}
+          <button onClick={() => setError(null)} className="ml-auto">
+            <X size={16} />
+          </button>
         </div>
       )}
 
@@ -268,7 +287,7 @@ const VoiceAdmin = () => {
                             <CheckCircle size={10} /> Doğrulanmış
                           </span>
                         ) : (
-                          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+                          <span className="bg-orange-100 text-orange-600 text-xs px-2 py-0.5 rounded-full">
                             Doğrulanmamış
                           </span>
                         )}
@@ -312,7 +331,7 @@ const VoiceAdmin = () => {
                         <Edit size={16} />
                       </button>
                       <button
-                        onClick={() => handleDelete(voice.id)}
+                        onClick={() => setDeletingVoice(voice)}
                         className="p-2 hover:bg-red-100 rounded-lg text-red-600"
                         title="Sil"
                       >
@@ -330,8 +349,8 @@ const VoiceAdmin = () => {
       {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && setShowAddModal(false)}>
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl">
-            <div className="p-4 border-b flex items-center justify-between">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white">
               <h3 className="font-bold text-lg text-gray-800">Yeni Ses Ekle</h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -349,13 +368,13 @@ const VoiceAdmin = () => {
                 <input
                   type="text"
                   value={newVoice.elevenlabs_id}
-                  onChange={(e) => setNewVoice({ ...newVoice, elevenlabs_id: e.target.value })}
+                  onChange={(e) => setNewVoice({ ...newVoice, elevenlabs_id: e.target.value.trim() })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                  placeholder="NsFK0aDGLbVusA7tQfOB"
+                  placeholder="e79twtVS2278lVZZQiAD"
                   required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  ElevenLabs'tan kopyaladığınız Voice ID
+                  My Voices'tan kopyaladığınız Voice ID
                 </p>
               </div>
 
@@ -426,6 +445,43 @@ const VoiceAdmin = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deletingVoice && (
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full shadow-2xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 size={24} className="text-red-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-gray-800">Sesi Sil</h3>
+                <p className="text-sm text-gray-500">Bu işlem geri alınamaz</p>
+              </div>
+            </div>
+            
+            <p className="text-gray-700 mb-6">
+              <strong>"{deletingVoice.name}"</strong> sesini silmek istediğinize emin misiniz?
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeletingVoice(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
+              >
+                İptal
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium flex items-center justify-center gap-2"
+              >
+                <Trash2 size={16} />
+                Sil
+              </button>
+            </div>
           </div>
         </div>
       )}
