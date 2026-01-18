@@ -556,6 +556,7 @@ async def get_subscription_stats(request: Request):
     # Count subscriptions
     total_users = await db.users.count_documents({})
     premium_users = await db.users.count_documents({"subscription_tier": "premium"})
+    trial_users = await db.users.count_documents({"is_trial": True})
     total_purchases = await db.purchases.count_documents({})
     
     # Get recent purchases
@@ -564,11 +565,141 @@ async def get_subscription_stats(request: Request):
         {"_id": 0, "receipt_data": 0}
     ).sort("created_at", -1).limit(10).to_list(length=10)
     
+    # Get trial statistics
+    trial_stats = await db.users.find(
+        {"trial_used": True},
+        {"_id": 0, "user_id": 1, "email": 1, "is_trial": 1, "trial_ends_at": 1}
+    ).to_list(length=100)
+    
     return {
         "total_users": total_users,
         "premium_users": premium_users,
+        "trial_users": trial_users,
         "free_users": total_users - premium_users,
         "conversion_rate": round((premium_users / total_users * 100) if total_users > 0 else 0, 2),
         "total_purchases": total_purchases,
-        "recent_purchases": recent_purchases
+        "recent_purchases": recent_purchases,
+        "trial_stats": trial_stats
+    }
+
+
+@router.get("/admin/trial-notifications")
+async def get_trial_notification_status(request: Request):
+    """Admin endpoint to see trial notification history"""
+    db = get_db()
+    
+    # Get authenticated user
+    user = await get_user_from_request(request)
+    if not user or user.get("email") != "coskanselcuk@gmail.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Get all sent trial notifications
+    sent_notifications = await db.sent_trial_notifications.find(
+        {},
+        {"_id": 0}
+    ).sort("sent_at", -1).to_list(length=100)
+    
+    # Get users with active trials
+    active_trials = await db.users.find(
+        {"is_trial": True},
+        {"_id": 0, "user_id": 1, "email": 1, "name": 1, "trial_ends_at": 1}
+    ).to_list(length=100)
+    
+    # Calculate days remaining for each
+    now = datetime.now(timezone.utc)
+    for trial in active_trials:
+        try:
+            trial_ends_at = datetime.fromisoformat(trial.get("trial_ends_at", "").replace('Z', '+00:00'))
+            trial["days_remaining"] = max(0, (trial_ends_at - now).days)
+        except Exception:
+            trial["days_remaining"] = "unknown"
+    
+    return {
+        "sent_notifications": sent_notifications,
+        "active_trials": active_trials,
+        "total_sent": len(sent_notifications),
+        "total_active_trials": len(active_trials)
+    }
+
+
+@router.post("/admin/trigger-trial-check")
+async def trigger_trial_check(request: Request):
+    """Admin endpoint to manually trigger trial expiration check"""
+    from routes.notification_routes import create_system_notification
+    
+    db = get_db()
+    
+    # Get authenticated user
+    user = await get_user_from_request(request)
+    if not user or user.get("email") != "coskanselcuk@gmail.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    now = datetime.now(timezone.utc)
+    notifications_sent = []
+    
+    # Find users with active trials
+    trial_users = await db.users.find({
+        "is_trial": True,
+        "trial_ends_at": {"$exists": True}
+    }, {"_id": 0}).to_list(length=1000)
+    
+    for trial_user in trial_users:
+        user_id = trial_user.get("user_id")
+        trial_ends_at_str = trial_user.get("trial_ends_at")
+        
+        if not trial_ends_at_str:
+            continue
+        
+        try:
+            trial_ends_at = datetime.fromisoformat(trial_ends_at_str.replace('Z', '+00:00'))
+        except Exception:
+            continue
+        
+        days_remaining = (trial_ends_at - now).days
+        
+        # Check if notification already sent for this milestone
+        existing_notif = await db.sent_trial_notifications.find_one({
+            "user_id": user_id,
+            "days_remaining": days_remaining
+        })
+        
+        if existing_notif:
+            continue
+        
+        # Send notification based on days remaining
+        if days_remaining in [3, 1, 0]:
+            if days_remaining == 3:
+                title = "Deneme Süreniz Bitiyor! ⏰"
+                message = "Premium denemeniz 3 gün içinde sona erecek. Abone olarak tüm kitaplara erişiminizi sürdürün!"
+            elif days_remaining == 1:
+                title = "Son 1 Gün! ⚠️"
+                message = "Premium denemeniz yarın sona eriyor! Hemen abone olun ve kesintisiz okumaya devam edin."
+            else:
+                title = "Deneme Süreniz Bitti 😔"
+                message = "Premium denemeniz sona erdi. Premium kitaplara erişmek için abone olun!"
+            
+            await create_system_notification(
+                title=title,
+                message=message,
+                notif_type="trial",
+                target_user_id=user_id
+            )
+            
+            await db.sent_trial_notifications.insert_one({
+                "user_id": user_id,
+                "days_remaining": days_remaining,
+                "sent_at": now.isoformat(),
+                "triggered_manually": True
+            })
+            
+            notifications_sent.append({
+                "user_id": user_id,
+                "days_remaining": days_remaining
+            })
+    
+    return {
+        "success": True,
+        "message": f"Manual trial check complete. {len(notifications_sent)} notifications sent.",
+        "notifications_sent": notifications_sent,
+        "users_checked": len(trial_users)
     }
