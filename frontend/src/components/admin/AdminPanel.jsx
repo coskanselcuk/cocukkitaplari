@@ -77,6 +77,7 @@ const AdminPanel = ({ onBack }) => {
     name: '',
     slug: '',
     icon: '📚',
+    iconImage: '',
     ageGroup: '4-6',
     sortOrder: 0
   });
@@ -86,6 +87,7 @@ const AdminPanel = ({ onBack }) => {
     name: '',
     slug: '',
     icon: '',
+    iconImage: '',
     ageGroup: '',
     sortOrder: 0
   });
