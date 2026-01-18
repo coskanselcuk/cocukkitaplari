@@ -89,3 +89,7 @@ backend/uploads/
 
 # Migration backup (contains data)
 backend/migration_backup.json
+-e 
+# Environment files
+*.env
+*.env.*
