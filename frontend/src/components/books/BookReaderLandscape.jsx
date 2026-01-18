@@ -124,24 +124,20 @@ const BookReaderLandscape = ({ book, onClose }) => {
     };
   }, [book?.id, currentPage, resumeContinue, progressLoaded, userId]);
 
-  // Handle image load - wait for decode + delay for actual paint
+  // Handle image load - use decode() to ensure image is ready
   const handleImageLoad = useCallback((e) => {
     const img = e.target;
-    
-    const markLoaded = () => {
-      // Calculate how much time has passed since page changed
-      const timeSincePageChange = Date.now() - pageChangeTimeRef.current;
-      const minimumDelay = 3000; // 3 seconds minimum from page change
-      const remainingDelay = Math.max(0, minimumDelay - timeSincePageChange);
-      
-      // Wait for remaining delay to ensure 3 seconds from page change
-      setTimeout(() => setIsImageLoaded(true), remainingDelay);
-    };
+    console.log('Image onLoad fired at:', Date.now() - pageChangeTimeRef.current, 'ms since page change');
     
     if (img.decode) {
-      img.decode().then(markLoaded).catch(markLoaded);
+      img.decode()
+        .then(() => {
+          console.log('Image decoded at:', Date.now() - pageChangeTimeRef.current, 'ms since page change');
+          setIsImageLoaded(true);
+        })
+        .catch(() => setIsImageLoaded(true));
     } else {
-      markLoaded();
+      setIsImageLoaded(true);
     }
   }, []);
 
