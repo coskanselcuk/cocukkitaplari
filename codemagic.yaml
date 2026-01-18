@@ -1,0 +1,213 @@
+# Codemagic CI/CD Configuration for Çocuk Kitapları
+# Documentation: https://docs.codemagic.io/yaml/yaml-getting-started/
+
+workflows:
+  # ============================================
+  # iOS Build
+  # ============================================
+  ios-build:
+    name: iOS Build
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.cocukkitaplari.app
+      vars:
+        REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
+      node: 18
+      xcode: latest
+      cocoapods: default
+    
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    
+    scripts:
+      - name: Install dependencies
+        script: |
+          cd frontend
+          yarn install
+      
+      - name: Build React app
+        script: |
+          cd frontend
+          echo "REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL" > .env.production
+          yarn build
+      
+      - name: Add iOS platform
+        script: |
+          cd frontend
+          npx cap add ios || true
+          npx cap sync ios
+      
+      - name: Install CocoaPods
+        script: |
+          cd frontend/ios/App
+          pod install
+      
+      - name: Set up code signing
+        script: |
+          xcode-project use-profiles
+      
+      - name: Build iOS app
+        script: |
+          cd frontend/ios/App
+          xcode-project build-ipa \
+            --workspace "App.xcworkspace" \
+            --scheme "App"
+    
+    artifacts:
+      - frontend/ios/App/build/ios/ipa/*.ipa
+      - frontend/ios/App/build/ios/ipa/*.dSYM.zip
+    
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+
+  # ============================================
+  # Android Build
+  # ============================================
+  android-build:
+    name: Android Build
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    
+    environment:
+      android_signing:
+        - cocukkitaplari_keystore
+      vars:
+        REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
+      node: 18
+      java: 17
+    
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+    
+    scripts:
+      - name: Install dependencies
+        script: |
+          cd frontend
+          yarn install
+      
+      - name: Build React app
+        script: |
+          cd frontend
+          echo "REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL" > .env.production
+          yarn build
+      
+      - name: Add Android platform
+        script: |
+          cd frontend
+          npx cap add android || true
+          npx cap sync android
+      
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > frontend/android/local.properties
+      
+      - name: Build Android AAB
+        script: |
+          cd frontend/android
+          chmod +x gradlew
+          ./gradlew bundleRelease
+    
+    artifacts:
+      - frontend/android/app/build/outputs/**/*.aab
+      - frontend/android/app/build/outputs/**/*.apk
+    
+    publishing:
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
+
+  # ============================================
+  # Both Platforms (Full Release)
+  # ============================================
+  release-both:
+    name: Release (iOS + Android)
+    max_build_duration: 90
+    instance_type: mac_mini_m1
+    
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.cocukkitaplari.app
+      android_signing:
+        - cocukkitaplari_keystore
+      vars:
+        REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
+      node: 18
+      xcode: latest
+      cocoapods: default
+      java: 17
+    
+    triggering:
+      events:
+        - tag
+      tag_patterns:
+        - pattern: 'v*'
+          include: true
+    
+    scripts:
+      - name: Install dependencies
+        script: |
+          cd frontend
+          yarn install
+      
+      - name: Build React app
+        script: |
+          cd frontend
+          echo "REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL" > .env.production
+          yarn build
+      
+      # iOS
+      - name: Setup iOS
+        script: |
+          cd frontend
+          npx cap add ios || true
+          npx cap sync ios
+          cd ios/App && pod install
+      
+      - name: Build iOS
+        script: |
+          xcode-project use-profiles
+          cd frontend/ios/App
+          xcode-project build-ipa \
+            --workspace "App.xcworkspace" \
+            --scheme "App"
+      
+      # Android
+      - name: Setup Android
+        script: |
+          cd frontend
+          npx cap add android || true
+          npx cap sync android
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
+      
+      - name: Build Android
+        script: |
+          cd frontend/android
+          chmod +x gradlew
+          ./gradlew bundleRelease
+    
+    artifacts:
+      - frontend/ios/App/build/ios/ipa/*.ipa
+      - frontend/android/app/build/outputs/**/*.aab
+    
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+      google_play:
+        credentials: $GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        track: internal
