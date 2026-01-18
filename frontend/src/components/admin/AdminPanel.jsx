@@ -190,7 +190,8 @@ const AdminPanel = ({ onBack }) => {
       coverImage: book.coverImage || '',
       description: book.description || '',
       ageGroup: book.ageGroup || '',
-      duration: book.duration || ''
+      duration: book.duration || '',
+      isPremium: book.isPremium || false
     });
     setShowEditBook(true);
   };
