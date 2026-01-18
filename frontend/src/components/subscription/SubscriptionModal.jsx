@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { X, Crown, Check, Loader2, Smartphone, RefreshCw, ExternalLink } from 'lucide-react';
+import { X, Crown, Check, Loader2, Smartphone, RefreshCw, ExternalLink, Gift, Clock } from 'lucide-react';
 import { 
   isNativeApp, 
   getProducts, 
   purchaseProduct, 
   restorePurchases, 
   manageSubscription,
+  startFreeTrial,
+  getTrialStatus,
   PRODUCTS 
 } from '../../services/iapService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -16,9 +18,11 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
   const [selectedPlan, setSelectedPlan] = useState(PRODUCTS.MONTHLY_SUBSCRIPTION);
   const [isPurchasing, setIsPurchasing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [isStartingTrial, setIsStartingTrial] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [isNative, setIsNative] = useState(false);
+  const [trialStatus, setTrialStatus] = useState(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -26,8 +30,48 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
       setProducts(getProducts());
       setError(null);
       setSuccessMessage(null);
+      
+      // Fetch trial status if authenticated
+      if (isAuthenticated && user?.user_id) {
+        fetchTrialStatus();
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, isAuthenticated, user?.user_id]);
+
+  const fetchTrialStatus = async () => {
+    if (!user?.user_id) return;
+    const status = await getTrialStatus(user.user_id);
+    setTrialStatus(status);
+  };
+
+  const handleStartTrial = async () => {
+    if (!isAuthenticated || !user?.user_id) {
+      setError('Ücretsiz deneme için giriş yapmanız gerekiyor');
+      return;
+    }
+
+    setIsStartingTrial(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const result = await startFreeTrial(user.user_id);
+      
+      if (result.success) {
+        setSuccessMessage(result.message || '7 günlük ücretsiz denemeniz başladı!');
+        setTimeout(() => {
+          onSubscriptionComplete?.();
+          onClose();
+        }, 2000);
+      } else {
+        setError(result.error || 'Deneme başlatılamadı');
+      }
+    } catch (err) {
+      setError('Bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
+      setIsStartingTrial(false);
+    }
+  };
 
   const handlePurchase = async () => {
     if (!isAuthenticated) {
@@ -43,7 +87,6 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
       const result = await purchaseProduct(selectedPlan);
       
       if (result.cancelled) {
-        // User cancelled - no error message needed
         setIsPurchasing(false);
         return;
       }
@@ -56,7 +99,6 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
             onClose();
           }, 1500);
         }
-        // If pending, the store event handlers will handle completion
       } else {
         setError(result.error || 'Satın alma başarısız oldu');
       }
@@ -107,8 +149,10 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
   const monthlyProduct = products.find(p => p.id === PRODUCTS.MONTHLY_SUBSCRIPTION);
   const yearlyProduct = products.find(p => p.id === PRODUCTS.YEARLY_SUBSCRIPTION);
 
-  // Check if user already has premium
+  // Check if user already has premium or is in trial
   const isPremium = user?.subscription_tier === 'premium';
+  const isInTrial = trialStatus?.is_trial;
+  const canStartTrial = trialStatus?.can_start_trial && !isPremium;
 
   return (
     <div 
@@ -133,7 +177,9 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
             {isPremium ? 'Premium Üyelik' : "Premium'a Geç"}
           </h2>
           <p className="text-white/90 mt-1">
-            {isPremium ? 'Aktif aboneliğinizi yönetin' : 'Tüm kitaplara sınırsız erişim'}
+            {isPremium 
+              ? (isInTrial ? `Deneme süresi: ${trialStatus?.days_remaining} gün kaldı` : 'Aktif aboneliğinizi yönetin')
+              : 'Tüm kitaplara sınırsız erişim'}
           </p>
         </div>
 
@@ -144,10 +190,77 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
               <div className="w-20 h-20 bg-green-100 rounded-full mx-auto flex items-center justify-center mb-4">
                 <Check size={40} className="text-green-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-800 mb-2">Premium Üyesiniz!</h3>
-              <p className="text-gray-600 mb-6">Tüm kitaplara sınırsız erişiminiz var.</p>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">
+                {isInTrial ? 'Deneme Süreniz Aktif!' : 'Premium Üyesiniz!'}
+              </h3>
+              <p className="text-gray-600 mb-4">Tüm kitaplara sınırsız erişiminiz var.</p>
               
-              {isNative && (
+              {isInTrial && trialStatus?.days_remaining !== undefined && (
+                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                  <div className="flex items-center justify-center gap-2 text-amber-700 mb-2">
+                    <Clock size={20} />
+                    <span className="font-semibold">{trialStatus.days_remaining} gün kaldı</span>
+                  </div>
+                  <p className="text-sm text-amber-600">
+                    Deneme süreniz bitince premium özelliklere erişiminiz sona erecek.
+                  </p>
+                </div>
+              )}
+              
+              {isInTrial && (
+                <div className="space-y-3 mb-4">
+                  <p className="text-sm text-gray-500 mb-2">Deneme sonrasına hazırlanın:</p>
+                  {/* Plan Selection for trial users */}
+                  <button
+                    onClick={() => setSelectedPlan(PRODUCTS.MONTHLY_SUBSCRIPTION)}
+                    className={`w-full p-3 rounded-xl border-2 text-left transition-all text-sm ${
+                      selectedPlan === PRODUCTS.MONTHLY_SUBSCRIPTION
+                        ? 'border-orange-500 bg-orange-50'
+                        : 'border-gray-200 hover:border-orange-300'
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-gray-800">Aylık</span>
+                      <span className="font-bold text-gray-800">{monthlyProduct?.price || '₺29.99'}/ay</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setSelectedPlan(PRODUCTS.YEARLY_SUBSCRIPTION)}
+                    className={`w-full p-3 rounded-xl border-2 text-left transition-all text-sm relative ${
+                      selectedPlan === PRODUCTS.YEARLY_SUBSCRIPTION
+                        ? 'border-orange-500 bg-orange-50'
+                        : 'border-gray-200 hover:border-orange-300'
+                    }`}
+                  >
+                    <div className="absolute -top-2 right-3 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      %40 İNDİRİM
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-gray-800">Yıllık</span>
+                      <span className="font-bold text-gray-800">{yearlyProduct?.price || '₺214.99'}/yıl</span>
+                    </div>
+                  </button>
+                  
+                  {isNative && (
+                    <button
+                      onClick={handlePurchase}
+                      disabled={isPurchasing}
+                      className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {isPurchasing ? (
+                        <>
+                          <Loader2 size={18} className="animate-spin" />
+                          İşleniyor...
+                        </>
+                      ) : (
+                        'Şimdi Abone Ol'
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {isNative && !isInTrial && (
                 <button
                   onClick={handleManageSubscription}
                   className="w-full py-3 border-2 border-orange-500 text-orange-600 font-semibold rounded-2xl flex items-center justify-center gap-2 hover:bg-orange-50 transition-colors"
@@ -176,6 +289,55 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
                   </div>
                 ))}
               </div>
+
+              {/* Free Trial CTA - Only show if user can start trial */}
+              {canStartTrial && isAuthenticated && (
+                <div className="mb-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                      <Gift size={20} className="text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-800">7 Gün Ücretsiz Dene!</h4>
+                      <p className="text-sm text-gray-600">Kredi kartı gerekmez</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleStartTrial}
+                    disabled={isStartingTrial}
+                    className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    data-testid="start-trial-button"
+                  >
+                    {isStartingTrial ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Başlatılıyor...
+                      </>
+                    ) : (
+                      <>
+                        <Gift size={18} />
+                        Ücretsiz Denemeyi Başlat
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* Trial already used message */}
+              {trialStatus?.trial_used && !isPremium && (
+                <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-600 text-sm">
+                  Ücretsiz deneme hakkınızı daha önce kullandınız.
+                </div>
+              )}
+
+              {/* Divider */}
+              {canStartTrial && isAuthenticated && (
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="flex-1 h-px bg-gray-200"></div>
+                  <span className="text-sm text-gray-400">veya</span>
+                  <div className="flex-1 h-px bg-gray-200"></div>
+                </div>
+              )}
 
               {/* Plan Selection */}
               <div className="space-y-3 mb-6">
@@ -249,12 +411,12 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
               {/* Not Authenticated Warning */}
               {!isAuthenticated && (
                 <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-sm">
-                  Satın alma için önce giriş yapmanız gerekiyor.
+                  Satın alma veya deneme için önce giriş yapmanız gerekiyor.
                 </div>
               )}
 
               {/* Not Native Warning */}
-              {!isNative && (
+              {!isNative && isAuthenticated && !canStartTrial && (
                 <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 text-sm flex items-start gap-2">
                   <Smartphone size={18} className="flex-shrink-0 mt-0.5" />
                   <span>
@@ -266,7 +428,7 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
               {/* Purchase Button */}
               <button
                 onClick={handlePurchase}
-                disabled={isPurchasing || !isNative || !isAuthenticated}
+                disabled={isPurchasing || (!isNative && !canStartTrial) || !isAuthenticated}
                 className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 data-testid="subscribe-button"
               >
