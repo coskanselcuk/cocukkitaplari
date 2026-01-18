@@ -39,12 +39,23 @@ class SubscriptionStatusResponse(BaseModel):
     expires_at: Optional[str] = None
     platform: Optional[str] = None
     auto_renewing: bool = False
+    is_trial: bool = False
+    trial_ends_at: Optional[str] = None
+    trial_used: bool = False
 
 
 class RestorePurchaseRequest(BaseModel):
     user_id: str
     platform: str
     receipts: list  # List of receipt data to verify
+
+
+class StartTrialRequest(BaseModel):
+    user_id: str
+
+
+# Trial duration in days
+TRIAL_DURATION_DAYS = 7
 
 
 # Helper to get user from session
