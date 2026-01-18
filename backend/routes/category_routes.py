@@ -14,6 +14,7 @@ class CategoryUpdate(BaseModel):
     name: Optional[str] = None
     slug: Optional[str] = None
     icon: Optional[str] = None
+    iconImage: Optional[str] = None
     ageGroup: Optional[str] = None
     sortOrder: Optional[int] = None
 
