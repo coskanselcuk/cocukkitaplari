@@ -188,7 +188,7 @@ async def update_book(book_id: str, book_data: BookUpdate):
 
 @router.put("/{book_id}/pages/{page_id}", response_model=PageResponse)
 async def update_page(book_id: str, page_id: str, page_data: PageUpdate):
-    """Update a page - clears audio if text changes"""
+    """Update a page - clears audio if text or voice changes"""
     db = get_db()
     
     # Check if page exists
@@ -196,12 +196,25 @@ async def update_page(book_id: str, page_id: str, page_data: PageUpdate):
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
     
-    # Build update dict with only provided fields
-    update_data = {k: v for k, v in page_data.model_dump().items() if v is not None}
+    # Build update dict with only provided fields (allow empty strings for voiceId)
+    update_data = {}
+    for k, v in page_data.model_dump().items():
+        if k == "voiceId":
+            # For voiceId, include it even if empty string (to clear the voice)
+            if v is not None:
+                update_data[k] = v if v != "" else None
+        elif v is not None:
+            update_data[k] = v
     
-    # If text is being changed, clear the audio (it's now invalid)
-    if "text" in update_data and update_data["text"] != page.get("text", ""):
-        update_data["audioUrl"] = None  # Clear audio when text changes
+    # Check if text is being changed - clear audio
+    text_changed = "text" in update_data and update_data["text"] != page.get("text", "")
+    
+    # Check if voice is being changed - clear audio
+    voice_changed = "voiceId" in update_data and update_data.get("voiceId") != page.get("voiceId")
+    
+    # If text or voice changes, clear the audio (it needs to be regenerated)
+    if text_changed or voice_changed:
+        update_data["audioUrl"] = None  # Clear audio when text or voice changes
     
     if update_data:
         await db.pages.update_one({"id": page_id}, {"$set": update_data})
