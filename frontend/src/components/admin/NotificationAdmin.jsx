@@ -210,13 +210,13 @@ const NotificationAdmin = () => {
 
       {/* Create Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl">
-            <div className="p-4 border-b flex items-center justify-between">
+        <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && setShowCreateModal(false)}>
+          <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white">
               <h3 className="font-bold text-lg text-gray-800">Yeni Bildirim Oluştur</h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-full"
               >
                 <X size={20} />
               </button>
