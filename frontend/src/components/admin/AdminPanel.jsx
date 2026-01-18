@@ -526,7 +526,7 @@ const AdminPanel = ({ onBack }) => {
                       <p className="text-gray-500 text-center py-8">Henüz sayfa eklenmemiş. Sayfa Ekle butonuna tıklayın.</p>
                     ) : (
                       bookPages.map((page, idx) => (
-                        <div key={idx} className="p-3 border rounded-lg">
+                        <div key={idx} className={`p-3 border rounded-lg ${!page.audioUrl ? 'border-orange-300 bg-orange-50' : ''}`}>
                           <div className="flex items-start gap-3">
                             <div className="bg-orange-100 text-orange-600 font-bold rounded-full w-8 h-8 flex items-center justify-center text-sm flex-shrink-0">
                               {page.pageNumber}
@@ -541,11 +541,28 @@ const AdminPanel = ({ onBack }) => {
                                     <Check size={12} /> Ses var
                                   </span>
                                 ) : (
-                                  <span className="text-gray-400">Ses yok</span>
+                                  <span className="flex items-center gap-1 text-orange-600 font-medium">
+                                    <AlertTriangle size={12} /> Ses yok
+                                  </span>
                                 )}
                               </div>
                             </div>
                             <div className="flex gap-1 flex-shrink-0">
+                              {/* Regenerate audio button - show if no audio */}
+                              {!page.audioUrl && (
+                                <button
+                                  onClick={() => regeneratePageAudio(page.id)}
+                                  disabled={regeneratingPageId === page.id}
+                                  className="p-1.5 hover:bg-purple-100 rounded text-purple-600 disabled:opacity-50"
+                                  title="Ses oluştur"
+                                >
+                                  {regeneratingPageId === page.id ? (
+                                    <Loader2 size={14} className="animate-spin" />
+                                  ) : (
+                                    <Volume2 size={14} />
+                                  )}
+                                </button>
+                              )}
                               <button
                                 onClick={() => openEditPage(page)}
                                 className="p-1.5 hover:bg-blue-100 rounded text-blue-600"
