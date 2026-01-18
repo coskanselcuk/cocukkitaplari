@@ -348,6 +348,7 @@ const AdminPanel = ({ onBack }) => {
       name: cat.name || '',
       slug: cat.slug || '',
       icon: cat.icon || '📚',
+      iconImage: cat.iconImage || '',
       ageGroup: cat.ageGroup || '4-6',
       sortOrder: cat.sortOrder || 0
     });
