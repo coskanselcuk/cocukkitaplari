@@ -159,9 +159,16 @@ const BookReaderLandscape = ({ book, onClose }) => {
 
   // Auto-start audio after delay when image loads (only once per page)
   useEffect(() => {
-    // Skip if autoPlay is off, image not loaded, or no audio
-    if (!autoPlay || !isImageLoaded || !currentPageData?.audioUrl) {
-      console.log('Audio start skipped - autoPlay:', autoPlay, 'isImageLoaded:', isImageLoaded, 'hasAudio:', !!currentPageData?.audioUrl);
+    // Skip if autoPlay is off or no audio
+    if (!autoPlay || !currentPageData?.audioUrl) {
+      console.log('Audio start skipped - autoPlay:', autoPlay, 'hasAudio:', !!currentPageData?.audioUrl);
+      return;
+    }
+    
+    // Skip if image not loaded (but handle missing images)
+    const hasImage = currentPageData?.image;
+    if (hasImage && !isImageLoaded) {
+      console.log('Audio start skipped - waiting for image to load');
       return;
     }
     
@@ -174,29 +181,44 @@ const BookReaderLandscape = ({ book, onClose }) => {
     const audio = audioRef.current;
     if (!audio) return;
     
+    // Capture the audio URL NOW before the timeout
+    const audioUrlToPlay = currentPageData.audioUrl;
+    const pageToMark = currentPage;
+    
     // Calculate remaining delay to ensure 3 seconds from page change
     const timeSincePageChange = Date.now() - pageChangeTimeRef.current;
     const remainingDelay = Math.max(0, 3000 - timeSincePageChange);
     
-    console.log('Starting audio with delay:', remainingDelay, 'ms (time since page change:', timeSincePageChange, 'ms)');
-    
-    // Mark that we're starting audio for this page
-    audioStartedForPageRef.current = currentPage;
+    console.log('Scheduling audio for page:', pageToMark, 'delay:', remainingDelay, 'ms');
     
     // Start audio after remaining delay
     const timeoutId = setTimeout(() => {
-      audio.src = currentPageData.audioUrl;
+      // Verify we're still on the same page before playing
+      if (currentPageRef.current !== pageToMark) {
+        console.log('Page changed during delay, cancelling audio for page:', pageToMark);
+        return;
+      }
+      
+      // Mark that we're starting audio for this page
+      audioStartedForPageRef.current = pageToMark;
+      
+      console.log('Playing audio for page:', pageToMark);
+      audio.src = audioUrlToPlay;
       audio.play()
         .then(() => setIsPlaying(true))
-        .catch(() => {
+        .catch((err) => {
+          console.log('Audio play failed:', err);
           setIsPlaying(false);
           // Reset tracker if play failed so user can manually retry
           audioStartedForPageRef.current = -1;
         });
     }, remainingDelay);
     
-    return () => clearTimeout(timeoutId);
-  }, [autoPlay, isImageLoaded, currentPageData?.audioUrl, currentPage]);
+    return () => {
+      console.log('Cleanup: clearing timeout for page:', pageToMark);
+      clearTimeout(timeoutId);
+    };
+  }, [autoPlay, isImageLoaded, currentPageData?.audioUrl, currentPageData?.image, currentPage]);
 
   // AUDIO ENDED HANDLER - uses refs to access latest state values
   const handleAudioEnded = useCallback(() => {
