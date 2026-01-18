@@ -1023,7 +1023,7 @@ const AdminPanel = ({ onBack }) => {
       {/* Edit Page Modal */}
       {showEditPage && editingPage && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 pb-2 border-b">
               <h3 className="font-bold text-lg text-gray-800">Sayfayı Düzenle (Sayfa {editingPage.pageNumber})</h3>
               <button onClick={() => { setShowEditPage(false); setEditingPage(null); }} className="p-2 hover:bg-gray-100 rounded-full">
@@ -1048,6 +1048,30 @@ const AdminPanel = ({ onBack }) => {
                   label="Sayfa Resmi"
                   placeholder="https://images.unsplash.com/..."
                 />
+              </div>
+              
+              {/* Voice Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                  <Mic size={16} />
+                  Ses (Seslendirme)
+                </label>
+                <select
+                  value={editPage.voiceId || ''}
+                  onChange={(e) => setEditPage({...editPage, voiceId: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
+                  disabled={voicesLoading}
+                >
+                  <option value="">Varsayılan (Irem - Audiobook)</option>
+                  {voices.map((voice) => (
+                    <option key={voice.voice_id} value={voice.voice_id}>
+                      {voice.name} {voice.category ? `(${voice.category})` : ''}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  {voicesLoading ? 'Sesler yükleniyor...' : `${voices.length} ses mevcut. Boş bırakılırsa varsayılan ses kullanılır.`}
+                </p>
               </div>
             </div>
 
