@@ -46,6 +46,24 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 18, 2026 - Trial Expiration Push Notifications & Audio Voice Fix
+- **Trial Expiration Notification System**: Automated background task that sends in-app notifications when user's trial is expiring
+  - Background task runs every hour to check all users with active trials
+  - Sends notifications at 3 key milestones:
+    - 3 days remaining: "Deneme Süreniz Bitiyor! ⏰"
+    - 1 day remaining: "Son 1 Gün! ⚠️"
+    - 0 days (expired): "Deneme Süreniz Bitti 😔"
+  - Tracks sent notifications in `sent_trial_notifications` collection to prevent duplicates
+  - Auto-updates user's subscription_tier to "free" when trial expires
+- **Admin Trial Management APIs**:
+  - `GET /api/subscriptions/admin/trial-notifications` - View sent notifications and active trials
+  - `POST /api/subscriptions/admin/trigger-trial-check` - Manually trigger trial check (for testing)
+  - Enhanced `GET /api/subscriptions/admin/stats` - Now includes trial statistics
+- **Audio Invalidation UI Fix**: Fixed the admin panel to properly refresh after voice changes
+  - `updatePage` function now re-fetches all pages after update
+  - Shows alert "Sayfa güncellendi. Ses yeniden oluşturulmalı" when voice is changed
+  - Page list correctly shows "Ses Yok" status after voice change
+
 ### January 18, 2026 - Custom Voice Management (Sesler Tab)
 - **Voice Management Feature**: New "Sesler" tab in admin panel for managing custom ElevenLabs voices
   - Add voices by providing ElevenLabs Voice ID and custom name
