@@ -231,7 +231,7 @@ function AppContent() {
             <div className="mt-2">
               {/* Personalized */}
               <BookCarousel 
-                title={`${displayName} İçin Öneriler`}
+                title={displayName ? `${displayName} İçin Öneriler` : 'Sizin İçin Öneriler'}
                 books={recommendedBooks.length > 0 ? recommendedBooks : books.slice(0, 6)}
                 onBookSelect={handleBookSelect}
                 onSeeAll={() => {
