@@ -55,6 +55,7 @@ const AdminPanel = ({ onBack }) => {
     pageNumber: 1,
     text: '',
     image: '',
+    voiceId: '',
     insertPosition: 'end' // 'end', 'start', or specific number
   });
 
