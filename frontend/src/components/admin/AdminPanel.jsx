@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Trash2, Edit, Save, X, BookOpen, 
-  FileText, Image, Volume2, Loader2, Check, AlertTriangle
+  FileText, Image, Volume2, Loader2, Check, AlertTriangle, Crown
 } from 'lucide-react';
 import { booksApi, categoriesApi } from '../../services/api';
 import axios from 'axios';
