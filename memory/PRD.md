@@ -46,6 +46,15 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 18, 2026 - Per-Page Voice Selection
+- **Voice Selection Feature**: Added ability to use different ElevenLabs voices per page
+  - Backend: Added `voiceId` field to Page model
+  - Backend: Audio generation now uses page-specific voice if set, otherwise default (Irem)
+  - Frontend: Voice selector dropdown in Add Page and Edit Page modals
+  - Frontend: Voice indicator badge shown in page list for pages with custom voices
+  - API: `/api/tts/voices` returns 22 available ElevenLabs voices
+- **How it works**: Each page can have its own voice. Default is "Irem - Audiobook Narrator". When audio is generated/regenerated, it uses the page's assigned voice.
+
 ### January 18, 2026 - In-App Notifications System
 - **Notification Backend APIs**: Complete CRUD for notifications
   - `GET /api/notifications` - Get user notifications (filtered by audience)
