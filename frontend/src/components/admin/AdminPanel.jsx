@@ -270,6 +270,17 @@ const AdminPanel = ({ onBack }) => {
 
   const updatePage = async () => {
     if (!selectedBook || !editingPage) return;
+    
+    // Validate required fields
+    if (!editPage.text.trim()) {
+      alert('Sayfa metni gereklidir');
+      return;
+    }
+    if (!editPage.image.trim()) {
+      alert('Sayfa resmi gereklidir');
+      return;
+    }
+    
     setIsSaving(true);
     try {
       const response = await axios.put(
