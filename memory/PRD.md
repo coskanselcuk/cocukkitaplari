@@ -46,6 +46,24 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 18, 2026 - Free Trial Implementation
+- **7-Day Free Trial Feature**: Complete implementation for user acquisition
+  - Backend: `/api/subscriptions/start-trial` - Starts trial, marks `trial_used=true`
+  - Backend: `/api/subscriptions/trial-status/{user_id}` - Returns trial eligibility and days remaining
+  - Trial can only be used once per user (prevents abuse)
+  - Trial grants premium access for 7 days without payment
+  - Auto-expires after 7 days, reverts user to free tier
+- **Updated Subscription Modal UI**:
+  - Purple gradient "7 Gün Ücretsiz Dene!" CTA for eligible users
+  - Shows "Kredi kartı gerekmez" (No credit card required)
+  - Trial users see countdown of days remaining
+  - After trial used: Shows "Ücretsiz deneme hakkınızı daha önce kullandınız"
+  - Trial users can upgrade to paid plan before trial ends
+- **Backend Trial Tracking**:
+  - `is_trial`, `trial_used`, `trial_started_at`, `trial_ends_at` fields on user
+  - `trial_logs` collection for analytics
+  - Subscription status API includes trial info
+
 ### January 18, 2026 - Audio Bug Fix, Badge Removal & In-App Purchase Backend
 - **Audio Sync Bug Fixed**: Critical fix for book reader audio synchronization
   - Fixed issue where audio played from previous page after pausing, toggling auto-play, and navigating
