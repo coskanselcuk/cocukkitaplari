@@ -91,6 +91,7 @@ app.include_router(auth_router, prefix="/api")
 app.include_router(upload_router, prefix="/api")
 app.include_router(subscription_router, prefix="/api")
 app.include_router(notification_router, prefix="/api")
+app.include_router(voice_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
