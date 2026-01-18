@@ -159,6 +159,7 @@ async def verify_voice(voice_id: str):
     
     try:
         async with httpx.AsyncClient() as client:
+            # First try the direct voice endpoint (for user's own voices)
             response = await client.get(
                 f"https://api.elevenlabs.io/v1/voices/{voice['elevenlabs_id']}",
                 headers={"xi-api-key": ELEVENLABS_API_KEY}
@@ -176,16 +177,44 @@ async def verify_voice(voice_id: str):
                     "elevenlabs_name": el_data.get("name"),
                     "elevenlabs_category": el_data.get("category")
                 }
-            else:
-                await db.custom_voices.update_one(
-                    {"id": voice_id},
-                    {"$set": {"verified": False}}
+            
+            # If not found, try the shared voices endpoint (for library voices)
+            response2 = await client.get(
+                f"https://api.elevenlabs.io/v1/shared-voices",
+                headers={"xi-api-key": ELEVENLABS_API_KEY},
+                params={"page_size": 100}
+            )
+            
+            if response2.status_code == 200:
+                shared_data = response2.json()
+                voices_list = shared_data.get("voices", [])
+                found_voice = next(
+                    (v for v in voices_list if v.get("voice_id") == voice['elevenlabs_id']),
+                    None
                 )
-                return {
-                    "success": False,
-                    "verified": False,
-                    "message": "Ses ElevenLabs'te bulunamadı"
-                }
+                if found_voice:
+                    await db.custom_voices.update_one(
+                        {"id": voice_id},
+                        {"$set": {"verified": True}}
+                    )
+                    return {
+                        "success": True,
+                        "verified": True,
+                        "elevenlabs_name": found_voice.get("name"),
+                        "elevenlabs_category": found_voice.get("category"),
+                        "note": "Bu ses Voice Library'den. Kullanmak için ElevenLabs'ta 'Add to My Voices' yapmanız gerekebilir."
+                    }
+            
+            # Voice not found anywhere
+            await db.custom_voices.update_one(
+                {"id": voice_id},
+                {"$set": {"verified": False}}
+            )
+            return {
+                "success": False,
+                "verified": False,
+                "message": "Ses ElevenLabs'te bulunamadı. Voice Library'den bir ses kullanıyorsanız, önce 'Add to My Voices' ile hesabınıza ekleyin."
+            }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Doğrulama hatası: {str(e)}")
 
