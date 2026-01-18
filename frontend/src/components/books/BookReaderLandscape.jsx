@@ -120,6 +120,18 @@ const BookReaderLandscape = ({ book, onClose }) => {
     };
   }, [book?.id, currentPage, resumeContinue, progressLoaded, userId]);
 
+  // Handle image load - wait for actual render before marking as loaded
+  const handleImageLoad = useCallback(() => {
+    // Use requestAnimationFrame to wait for the browser to paint the image
+    // This ensures the image is actually visible before we start audio
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // Double rAF ensures the paint has completed
+        setIsImageLoaded(true);
+      });
+    });
+  }, []);
+
   // Stop audio when page changes and reset tracking
   useEffect(() => {
     const audio = audioRef.current;
