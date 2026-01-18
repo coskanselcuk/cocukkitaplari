@@ -191,21 +191,26 @@ const BookReaderLandscape = ({ book, onClose }) => {
         console.log('Auto-advancing to page:', current + 1);
         setCurrentPage(current + 1);
       } else {
-        console.log('Book complete, showing celebration');
-        // Mark complete in backend
-        progressApi.markComplete(userId, book?.id).catch(() => {});
-        setShowCelebration(true);
+        // Last page - show finish button instead of auto-advancing to celebration
+        console.log('Last page audio ended - showing finish button');
+        setShowFinishButton(true);
       }
     }
-  }, [book?.id, userId]); // Include book.id and userId for completion tracking
+  }, []);
+
+  // Handle finish book - called when user clicks the finish button
+  const handleFinishBook = useCallback(() => {
+    progressApi.markComplete(userId, book?.id).catch(() => {});
+    setShowFinishButton(false);
+    setShowCelebration(true);
+  }, [book?.id, userId]);
 
   const goNext = () => {
     if (currentPage < totalPages - 1) {
       setCurrentPage(prev => prev + 1);
     } else {
-      // Mark complete and show celebration
-      progressApi.markComplete(userId, book?.id).catch(() => {});
-      setShowCelebration(true);
+      // Last page - show finish button
+      setShowFinishButton(true);
     }
   };
 
