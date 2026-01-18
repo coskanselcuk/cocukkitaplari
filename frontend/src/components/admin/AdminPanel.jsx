@@ -672,6 +672,10 @@ const AdminPanel = ({ onBack }) => {
             </div>
           </div>
         )}
+
+        {activeTab === 'notifications' && (
+          <NotificationAdmin />
+        )}
       </div>
 
       {/* Add Book Modal */}
