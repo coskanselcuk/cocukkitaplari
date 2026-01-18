@@ -12,6 +12,7 @@ class CategoryBase(BaseModel):
     name: str
     description: str = ""
     icon: str = "📚"
+    iconImage: str = ""  # Image URL for category icon (takes priority over emoji)
     color: str = "#FF6B35"
     gradient: str = "from-orange-400 to-orange-600"
     islandImage: str = ""
@@ -24,6 +25,7 @@ class CategoryCreate(BaseModel):
     name: str
     description: Optional[str] = ""
     icon: Optional[str] = "📚"
+    iconImage: Optional[str] = ""
     color: Optional[str] = "#FF6B35"
     gradient: Optional[str] = "from-orange-400 to-orange-600"
     islandImage: Optional[str] = ""
@@ -43,6 +45,7 @@ class CategoryResponse(BaseModel):
     name: str
     description: str = ""
     icon: str = "📚"
+    iconImage: str = ""
     color: str = "#FF6B35"
     gradient: str = "from-orange-400 to-orange-600"
     islandImage: str = ""
