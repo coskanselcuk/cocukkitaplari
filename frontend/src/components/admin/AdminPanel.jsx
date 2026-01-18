@@ -592,7 +592,7 @@ const AdminPanel = ({ onBack }) => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm text-gray-700 line-clamp-2">{page.text}</p>
-                              <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                              <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-gray-500">
                                 <Image size={12} />
                                 <span className="truncate max-w-32">{page.image?.split('/').pop()}</span>
                                 {page.audioUrl ? (
@@ -602,6 +602,12 @@ const AdminPanel = ({ onBack }) => {
                                 ) : (
                                   <span className="flex items-center gap-1 text-orange-600 font-medium">
                                     <AlertTriangle size={12} /> Ses yok
+                                  </span>
+                                )}
+                                {page.voiceId && (
+                                  <span className="flex items-center gap-1 text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">
+                                    <Mic size={10} />
+                                    {voices.find(v => v.voice_id === page.voiceId)?.name || 'Özel ses'}
                                   </span>
                                 )}
                               </div>
