@@ -209,6 +209,23 @@ const AdminPanel = ({ onBack }) => {
     }
   };
 
+  // Regenerate audio for a single page
+  const regeneratePageAudio = async (pageId) => {
+    if (!selectedBook) return;
+    setRegeneratingPageId(pageId);
+    try {
+      await axios.post(`${API_URL}/api/admin/generate-audio/${selectedBook.id}/page/${pageId}`);
+      // Refetch pages to get updated audio URL
+      const pagesResponse = await axios.get(`${API_URL}/api/books/${selectedBook.id}/pages`);
+      setBookPages(pagesResponse.data.pages || []);
+    } catch (error) {
+      console.error('Error regenerating audio:', error);
+      alert('Ses oluşturulurken hata oluştu');
+    } finally {
+      setRegeneratingPageId(null);
+    }
+  };
+
   const deleteBook = async (bookId) => {
     setIsSaving(true);
     try {
