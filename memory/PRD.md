@@ -46,6 +46,24 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 18, 2026 - Custom Voice Management (Sesler Tab)
+- **Voice Management Feature**: New "Sesler" tab in admin panel for managing custom ElevenLabs voices
+  - Add voices by providing ElevenLabs Voice ID and custom name
+  - Voices are automatically verified against ElevenLabs API
+  - Set any voice as default for new pages
+  - Edit, delete, and verify voices
+  - Instructions for finding ElevenLabs Voice IDs included in UI
+- **Backend**: New `/api/voices/*` endpoints for CRUD operations on custom voices
+  - `GET /api/voices` - List all custom voices
+  - `POST /api/voices` - Add a new voice with ElevenLabs ID
+  - `PUT /api/voices/{id}` - Update voice name/description
+  - `DELETE /api/voices/{id}` - Delete a voice
+  - `POST /api/voices/{id}/verify` - Verify voice exists in ElevenLabs
+  - `POST /api/voices/set-default/{id}` - Set default voice
+- **Page Voice Selection**: Voice dropdowns now use custom voices from DB
+  - Shows voice name, description, and default indicator
+  - Falls back to hardcoded Irem if no custom voices added
+
 ### January 18, 2026 - Per-Page Voice Selection
 - **Voice Selection Feature**: Added ability to use different ElevenLabs voices per page
   - Backend: Added `voiceId` field to Page model
