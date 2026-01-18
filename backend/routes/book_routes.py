@@ -28,6 +28,7 @@ class PageUpdate(BaseModel):
     text: Optional[str] = None
     image: Optional[str] = None
     pageNumber: Optional[int] = None
+    voiceId: Optional[str] = None
 
 router = APIRouter(prefix="/books", tags=["books"])
 
