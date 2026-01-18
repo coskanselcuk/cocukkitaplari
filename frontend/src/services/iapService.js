@@ -326,6 +326,40 @@ export const getSubscriptionStatus = async (userId) => {
   }
 };
 
+// Start free trial
+export const startFreeTrial = async (userId) => {
+  if (!userId) {
+    return { success: false, error: 'Kullanıcı bulunamadı' };
+  }
+  
+  try {
+    const response = await api.post('/subscriptions/start-trial', {
+      user_id: userId
+    });
+    return { 
+      success: true, 
+      ...response.data 
+    };
+  } catch (error) {
+    console.error('Failed to start trial:', error);
+    const errorMessage = error.response?.data?.detail || 'Deneme başlatılamadı';
+    return { success: false, error: errorMessage };
+  }
+};
+
+// Get trial status
+export const getTrialStatus = async (userId) => {
+  if (!userId) return null;
+  
+  try {
+    const response = await api.get(`/subscriptions/trial-status/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get trial status:', error);
+    return null;
+  }
+};
+
 // Manage subscription (opens native subscription management)
 export const manageSubscription = () => {
   if (!isNativeApp()) {
