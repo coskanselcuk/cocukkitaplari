@@ -72,14 +72,14 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Get display name - prefer authenticated user's name, fallback to profile
+  // Get display name - prefer authenticated user's name, fallback to "Sizin"
   const displayName = useMemo(() => {
     if (isAuthenticated && user?.name) {
       // Get first name only
       return user.name.split(' ')[0];
     }
-    return currentProfile?.name || 'Sana';
-  }, [isAuthenticated, user?.name, currentProfile?.name]);
+    return null; // Will use "Sizin için Öneriler" when not logged in
+  }, [isAuthenticated, user?.name]);
 
   // Memoized book lists derived from API data
   const newBooks = useMemo(() => books.filter(book => book.isNew), [books]);
