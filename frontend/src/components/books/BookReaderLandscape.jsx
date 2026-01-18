@@ -120,13 +120,13 @@ const BookReaderLandscape = ({ book, onClose }) => {
     };
   }, [book?.id, currentPage, resumeContinue, progressLoaded, userId]);
 
-  // Handle image load - wait for decode + small delay for actual paint
+  // Handle image load - wait for decode + delay for actual paint
   const handleImageLoad = useCallback((e) => {
     const img = e.target;
     
     const markLoaded = () => {
-      // Delay after decode to ensure paint has completed
-      setTimeout(() => setIsImageLoaded(true), 200);
+      // 1 second delay after decode to ensure paint has completed
+      setTimeout(() => setIsImageLoaded(true), 1000);
     };
     
     if (img.decode) {
