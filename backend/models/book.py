@@ -76,6 +76,7 @@ class PageBase(BaseModel):
     text: str
     image: str
     hotspots: List[Hotspot] = Field(default_factory=list)
+    voiceId: Optional[str] = None  # ElevenLabs voice ID for this page
 
 
 class PageCreate(PageBase):
@@ -98,6 +99,7 @@ class PageResponse(BaseModel):
     image: str
     hotspots: List[Hotspot]
     audioUrl: Optional[str] = None
+    voiceId: Optional[str] = None
 
 
 class BookPagesResponse(BaseModel):
