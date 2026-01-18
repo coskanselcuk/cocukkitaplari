@@ -40,6 +40,9 @@ const BookReaderLandscape = ({ book, onClose }) => {
   // Track if audio has been started for current page to prevent restarts
   const audioStartedForPageRef = useRef(-1);
   
+  // Track when page changed for minimum delay enforcement
+  const pageChangeTimeRef = useRef(Date.now());
+  
   // Refs to hold latest state values - prevents stale closure issues
   const autoPlayRef = useRef(autoPlay);
   const currentPageRef = useRef(currentPage);
