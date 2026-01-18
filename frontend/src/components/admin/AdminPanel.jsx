@@ -147,6 +147,17 @@ const AdminPanel = ({ onBack }) => {
 
   const createPage = async () => {
     if (!selectedBook) return;
+    
+    // Validate required fields
+    if (!newPage.text.trim()) {
+      alert('Sayfa metni gereklidir');
+      return;
+    }
+    if (!newPage.image.trim()) {
+      alert('Sayfa resmi gereklidir');
+      return;
+    }
+    
     setIsSaving(true);
     try {
       // Calculate page number based on insert position
