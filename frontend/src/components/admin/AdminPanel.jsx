@@ -40,7 +40,8 @@ const AdminPanel = ({ onBack }) => {
     ageGroup: '4-6',
     duration: '5 dk',
     hasAudio: true,
-    isNew: true
+    isNew: true,
+    isPremium: false
   });
 
   // New page form
@@ -59,7 +60,8 @@ const AdminPanel = ({ onBack }) => {
     coverImage: '',
     description: '',
     ageGroup: '',
-    duration: ''
+    duration: '',
+    isPremium: false
   });
 
   // Edit page form
