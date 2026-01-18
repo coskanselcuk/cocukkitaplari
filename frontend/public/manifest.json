@@ -1,0 +1,42 @@
+{
+  "short_name": "Çocuk Kitapları",
+  "name": "Çocuk Kitapları - Sesli Hikayeler",
+  "description": "Çocuklar için sesli masallar ve interaktif hikayeler",
+  "icons": [
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "app-icons/app-icon-1024.png",
+      "type": "image/png",
+      "sizes": "1024x1024"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#22d3ee",
+  "background_color": "#0f172a",
+  "categories": ["education", "books", "kids"],
+  "lang": "tr",
+  "prefer_related_applications": true,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.cocukkitaplari.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/cocuk-kitaplari/id0000000000"
+    }
+  ]
+}
