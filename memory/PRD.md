@@ -324,6 +324,14 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 - [ ] Drag-and-drop page reordering in admin panel
 - [ ] Book preview mode in admin before publishing
 - [ ] Profile settings page with editable username
+- [ ] Free trial period (7-day) for new subscribers - conversion booster
+- [ ] Offline mode with downloaded books
+- [ ] Family sharing (up to 5 profiles)
+- [ ] Push notifications for new book releases
+- [ ] Reading statistics dashboard for parents
+- [ ] Achievement badges for reading milestones
+- [ ] Bedtime reminder notifications
+- [ ] Multiple language support (English, German for expat families)
 
 ## Testing Notes
 - Backend tests: `/app/tests/test_backend_api.py`, `/app/tests/test_upload_api.py`
