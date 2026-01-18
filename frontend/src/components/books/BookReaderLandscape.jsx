@@ -120,16 +120,19 @@ const BookReaderLandscape = ({ book, onClose }) => {
     };
   }, [book?.id, currentPage, resumeContinue, progressLoaded, userId]);
 
-  // Handle image load - use decode() to ensure image is fully rendered
+  // Handle image load - wait for decode + small delay for actual paint
   const handleImageLoad = useCallback((e) => {
     const img = e.target;
-    // decode() returns a promise that resolves when image is fully ready for display
+    
+    const markLoaded = () => {
+      // Delay after decode to ensure paint has completed
+      setTimeout(() => setIsImageLoaded(true), 200);
+    };
+    
     if (img.decode) {
-      img.decode()
-        .then(() => setIsImageLoaded(true))
-        .catch(() => setIsImageLoaded(true));
+      img.decode().then(markLoaded).catch(markLoaded);
     } else {
-      setIsImageLoaded(true);
+      markLoaded();
     }
   }, []);
 
