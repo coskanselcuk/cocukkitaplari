@@ -87,6 +87,7 @@ app.include_router(progress_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
 app.include_router(auth_router, prefix="/api")
 app.include_router(upload_router, prefix="/api")
+app.include_router(subscription_router, prefix="/api")
 
 app.add_middleware(
     CORSMiddleware,
