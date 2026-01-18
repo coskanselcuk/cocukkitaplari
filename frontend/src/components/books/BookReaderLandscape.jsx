@@ -20,6 +20,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [showFinishButton, setShowFinishButton] = useState(false); // Show button on last page after audio ends
   const [pages, setPages] = useState(mockPages);
   const [isLoadingPages, setIsLoadingPages] = useState(true);
   const [touchStart, setTouchStart] = useState(null);
