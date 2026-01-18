@@ -7,6 +7,7 @@ import os
 from models.category import (
     Category, CategoryCreate, CategoryResponse, CategoriesListResponse
 )
+from routes.notification_routes import notify_new_category
 
 
 class CategoryUpdate(BaseModel):
