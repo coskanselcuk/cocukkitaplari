@@ -2,175 +2,163 @@
 The user wants to build a pixel-perfect clone of the TRT Çocuk Kitaplık mobile application. The core features include a main screen with category islands, a book library, a landscape book reader with page-by-page audio narration, and a simple admin panel for content management. The application is intended for deployment on Apple and Google app stores with a subscription model for accessing premium content.
 
 **PRODUCT REQUIREMENTS:**
--   **UI/UX:**
-    -   Clone the design from the user-provided screen recording.
-    -   A starry night background for the book library view.
--   **Book Reader:**
-    -   Landscape mode with swipe gestures.
-    -   Audio for each page that plays automatically.
-    -   When Auto-Play is on, the page should turn automatically when the audio finishes.
--   **Audio:**
-    -   Use pre-generated audio stored in the database to eliminate loading times. The chosen voice is Irem - Audiobook Narrator from ElevenLabs.
--   **Content & Monetization:**
-    -   Brand name is Çocuk Kitapları.
-    -   The app will have free and premium books, with access controlled by a monthly subscription.
--   **Content Management:**
-    -   An admin panel is required for the user to manage books, pages, and categories without developer intervention.
--   **Authentication:**
-    -   User authentication is required to manage subscriptions and sync reading progress.
+-   **UI/UX:** Clone the design from the user-provided screen recording. A starry night background for the book library view.
+-   **Book Reader:** Landscape mode with swipe gestures. Audio for each page that plays automatically. When Auto-Play is on, the page should turn automatically when the audio finishes.
+-   **Audio:** Use pre-generated audio stored in the database. The chosen voice is Irem - Audiobook Narrator from ElevenLabs.
+-   **Content & Monetization:** Brand name is Çocuk Kitapları. The app will have free and premium books, with access controlled by a monthly subscription.
+-   **Content Management:** An admin panel is required for the user to manage books, pages, and categories.
+-   **Authentication:** User authentication is required to manage subscriptions and sync reading progress.
+-   **Mobile Deployment:** The app must be easily deployable to iOS and Android app stores.
 
 **User's preferred language**: The user communicates in English. However, the application's content and UI text are in **Turkish**. The next agent must continue to use Turkish for all user-facing text in the app.
 
 **what currently exists?**
-A full-stack application with a React frontend and a FastAPI backend connected to a MongoDB database.
+A full-stack application with a React frontend and a FastAPI backend connected to a MongoDB database. The application is now a hybrid mobile app using **Capacitor**.
 
--   **Content:** All book, page, and category data is served from the backend API. All books now have seeded pages and pre-generated audio stored as base64 strings in the database.
--   **Admin Panel:** A comprehensive admin panel exists at  with full CRUD (Create, Read, Update, Delete) functionality for books, pages, and categories. It also includes a button to trigger audio generation for books that are missing it.
--   **Authentication:** A complete user authentication system using Emergent-managed Google Social Login is in place. It uses a React Context () on the frontend and JWTs on the backend.
--   **Subscription Model:** The application supports a free/premium subscription model. Books can be marked as , and the UI correctly restricts access for non-subscribed users, showing a Subscribe modal. Backend endpoints exist to manage a user's subscription status.
--   **Features:** The book reader's critical auto-play bug has been fixed. Reading progress is now synced to the backend and tied to the authenticated user's ID. The search feature and the main screen's Island Map are both dynamic and fetch live data from the API. Premium badges are displayed on book cards throughout the app.
+-   **Content:** All content (10 books, categories) is served from the API. All books have 5 pages each with pre-generated audio.
+-   **Admin Panel:** A comprehensive admin panel () allows full CRUD for books and categories. For pages, it supports CRUD, reordering, and features to manage audio content (clearing audio on text change, per-page regeneration). Image uploads are now required for pages.
+-   **Authentication & Authorization:** A complete user authentication system using Emergent-managed Google Social Login is in place. Admin panel access is restricted to the user .
+-   **Subscription & Monetization:** A free/premium model is fully implemented. The UI clearly distinguishes premium content with badges and lock overlays. The admin panel supports toggling a book's premium status. The foundation for native in-app purchases via Capacitor is in place.
+-   **Core App:** The home page, library, and search are all dynamic and synced with the backend. User reading progress is saved to the database. The UI correctly reflects the user's logged-in/logged-out state.
+-   **Mobile Readiness:** Capacitor is integrated into the frontend, and a guide (), app icon, and store listing templates () have been created.
 
 **Last working item**:
--   Last item agent was working: The user requested to address two items: verify the OAuth flow and add loading animations. The previous task of making the  dynamic has been completed.
--   Status: NOT STARTED
+-   Last item agent was working: Fixing a critical and recurring audio synchronization bug in the book reader (). The user provided detailed logs of multiple scenarios where the audio would play for the wrong page, fail to start, or desynchronize after pausing, toggling auto-play, or changing books.
+-   Status: IN PROGRESS
 -   Agent Testing Done: N
--   Which testing method agent to use? The agent should ask the user to test the OAuth flow on the preview URL. For the loading animation, the screenshot tool can be used for verification.
+-   Which testing method agent to use? The agent must first ask the user to verify the latest fix against the scenarios they described. If the bug persists, use the  with a detailed plan covering all the user's reported edge cases (pausing, toggling auto-play, re-reading, etc.).
 -   User Testing Done: N
 
 **All Pending/In progress Issue list**:
-There are no pending bugs or issues. All issues raised by the user during the session have been resolved.
+-   **Issue 1: Book Reader Audio Synchronization Bug (P0 - CRITICAL)**
+    -   **Description:** The audio in the book reader gets out of sync with the displayed page under complex user interactions. Logs show race conditions and stale state issues, particularly with timeouts and state updates. This is a major regression that makes the core feature unusable.
+    -   **Attempted fixes:** The last agent implemented a significant refactor of the audio start effect in . The fix involves passing the current page data directly into the  to prevent stale closures and moving the  update inside the timeout to ensure it's only marked as started right before playing. It also handles pages without images gracefully and adds validation in the CMS to prevent them.
+    -   **Next debug checklist:**
+        1.  Guide the user to re-test the scenarios from their last message to see if the new fix works.
+        2.  If it fails, meticulously analyze the user's console logs again.
+        3.  Focus on the  hooks in , especially the one responsible for starting audio. Pay close attention to the dependency array and how state variables like , , , and  interact.
+        4.  Verify the logic for handling cached images vs. slow-loading new images.
+    -   **Why fix this issue and what will be achieved with the fix?** This is the most critical bug in the application. Fixing it will make the book reader reliable and deliver the core value proposition to the end-user.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** Y
+    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Blocked on other issue:** None. This is the main blocker for the project.
 
 **In progress Task List**:
-There are no tasks currently in progress.
+There are no other tasks in progress. The sole focus is on the critical audio bug.
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks:**
--   **Task 1 (P0):** Verify OAuth flow works on the preview URL. (This is a user verification step).
--   **Task 2 (P1):** Add a loading animation/skeleton state while books are being fetched in the Library view () and Search modal ().
+-   **Task 1 (P1):** Fully implement native in-app purchases. The Capacitor plugin is installed, and placeholder components (, ) exist. This task involves wiring them up to the Apple/Google billing services.
+-   **Task 2 (P2):** Generate screenshots for the app stores using the provided script ().
 
 **Future Tasks:**
--   **Task 3 (P0 - HIGH PRIORITY):** Implement local image upload functionality in the admin panel instead of relying on external URLs.
--   **Task 4 (P1):** Implement native in-app purchase integration (Apple StoreKit/Google Play Billing). This will likely be done when converting to a native app, but the backend logic for subscription status is ready.
--   **Task 5 (P2):** Add a Bulk Audio Generation feature to the admin panel.
--   **Task 6 (P2):** Implement a reading streak feature to encourage user engagement.
+-   Add a Bulk Audio Generation feature to the admin panel.
+-   Implement a reading streak feature to encourage user engagement.
+-   Add a Profile Settings page where users can edit their name (currently non-editable and pulled from Google).
 
 **Completed work in this session**
--   **Auto-Play Bug Fix:** Resolved the critical, recurring bug where the book reader would not automatically advance pages. Verified with the testing agent.
--   **Full Admin Panel CRUD:**
-    -   Implemented complete Create, Read, Update, and Delete functionality for Books, Pages, and Categories in the Admin Panel.
-    -   Improved the Add Page functionality to allow insertion at any position, with automatic reordering of subsequent pages.
-    -   Fixed all reported UI bugs in the admin modals (text colors, missing buttons, layout).
-    -   Fixed the Back button functionality to exit the admin panel.
--   **User Authentication & Subscription System:**
-    -   Integrated Emergent-managed Google Social Login for user authentication.
-    -   Implemented a subscription model with  flags on books and UI to lock content for non-subscribed users.
-    -   Added an admin endpoint to manage user subscription status.
-    -   Created a subscription management UI on the user's profile page.
--   **Backend Progress Sync:** Migrated reading progress from frontend  to the backend, linking it to the authenticated user's ID.
--   **Data & API Fixes:**
-    -   Fixed the Search feature to use the backend API instead of mock data.
-    -   Fixed the  on the home page to be dynamic and fetch categories from the API.
-    -   Seeded all original books with page data and generated audio for all of them.
--   **UI Enhancements:** Added Premium and New badges to book cards in the library and search results to clearly indicate content status.
+-   **Feature: Skeleton Loading States:** Implemented for the book library and search modal.
+-   **Feature: Local Image Uploads:** Added a backend endpoint and a frontend drag-and-drop component () to the admin panel for all image fields.
+-   **Feature: Admin Access Control:** Restricted admin panel access to a specific user email.
+-   **Feature: Premium Content Management:** Added toggles in the admin panel to set books as premium. The UI now clearly shows locked content for non-subscribed users.
+-   **Bug Fix: Data Sync:** Fixed the home page to use live API data instead of mock data, ensuring consistency with the database.
+-   **Feature: Capacitor Integration:** Successfully integrated Capacitor, turning the web app into a mobile-ready project with plugins for in-app purchases, splash screen, and app icon. Created a mobile build guide.
+-   **Feature: Store Assets:** Generated a professional app icon and created templates for App Store/Google Play descriptions.
+-   **Bug Fix: Admin Panel UX:** Fixed UI styling issues in modals and corrected the page deletion logic to re-fetch data and prevent broken states.
+-   **Feature: Book Reader UX:**
+    -   Implemented a Finish Book button on the last page to prevent abruptly ending the experience.
+    -   Implemented a system to automatically invalidate audio when a page's text is edited in the CMS, with a UI button to regenerate it.
+-   **Bug Fix: Audio Start Delay:** Multiple attempts were made to enforce a delay between image load and audio start, culminating in the current logic being debugged.
 
 **Earlier issues found/mentioned but not fixed**
-There are no unfixed issues. The request for local image uploads was acknowledged and added to the future tasks backlog as a high-priority item.
+There are no outstanding issues apart from the critical audio bug.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** The book reader's auto-play feature was consistently failing.
--   **Recurrence count:** High (multiple failed attempts in the previous session).
--   **Status:** RESOLVED. The agent implemented a robust fix using a  to prevent stale state in the event handler, and the fix was confirmed by the testing agent.
+-   **Issue recurrence in previous fork:** The book reader's audio-visual synchronization has been a persistent problem.
+-   **Recurrence count:** High. The complexity of state interactions (, , refs, user actions) has led to multiple fixes that were later broken by different edge cases.
+-   **Status:** IN PROGRESS
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Frontend:** React, TailwindCSS, React Context API (for auth), .
+-   **Frontend:** React, TailwindCSS, CapacitorJS for mobile wrapping.
 -   **Backend:** FastAPI, Pydantic, Motor (async MongoDB driver).
 -   **Database:** MongoDB.
 -   **Authentication:** Emergent-managed Google Social Login (OAuth2).
--   **Audio Generation:** ElevenLabs API (used via an offline script, not in the live app). Audio is stored as base64 strings.
+-   **File Handling:** Local file storage on the backend via a new  endpoint using .
+-   **State Management:** Heavy use of , , and  for complex component logic, especially in .
 
 **key DB schema**
--   : 
--   : 
--   : 
--   : 
--   : 
+-   **users**: 
+-   **categories**: 
+-   **books**:  (Pages are embedded within book documents).
+-   **progress**: 
 
 **changes in tech stack**
--    was added to the backend  to support the server-side calls required for the OAuth flow.
+-    added to the backend for file uploads.
+-   **Capacitor** and its related plugins (, , , etc.) were added to the frontend to enable mobile deployment.
 
 **All files of reference**
--   : The core of the content management system.
--   : The book reader component, where the auto-play bug was fixed and progress sync was implemented.
--   : Main application component, integrates the  and handles top-level view routing.
--   : Manages user authentication state and session handling.
--   : Handles all user authentication logic (Google login, callback, session exchange).
--   : Contains all CRUD endpoints for books and pages.
--   : Contains all CRUD endpoints for categories.
--   : Contains endpoints for admin actions like audio generation and user subscription management.
+-   : **CRITICAL FILE.** The source of the main audio synchronization bug.
+-   : Core CMS component, heavily modified for new features (image upload, premium toggles, audio regeneration).
+-   : Contains backend logic for updating books/pages, including  and clearing .
+-   : New file with instructions for building the native app.
+-   : New service for handling native in-app purchases.
 
 **Areas that need refactoring**:
--   The  component has grown to over 900 lines and manages the state and UI for books, pages, and categories, along with multiple modals. It should be broken down into smaller, more focused components (e.g., , , , , etc.) to improve maintainability.
+-    is extremely complex and fragile due to its intricate state management. While a full refactor to a state machine is not requested, any work on it must be done with extreme care.
+-    remains a monolithic component (>1200 lines) and is difficult to maintain.
 
 **key api endpoints**
--   : (GET) Initiates the Google OAuth flow.
--   : (GET) Endpoint for Google to redirect to after authentication.
--   : (POST) Exchanges a one-time session ID for a persistent JWT token.
--   : (GET) Retrieves the current authenticated user's profile.
--   , : Full CRUD endpoints.
--   : Full CRUD endpoints for a book's pages.
--   : (GET/POST) Endpoints to save and retrieve a user's reading progress.
--   : (POST) Triggers audio generation for a book.
--   : (POST) Sets a user's subscription tier to premium.
+-    (POST): Uploads an image to .
+-    (POST): Regenerates audio for a single page.
+-    (PUT): Updates a book's details, now including the  flag.
 
 **Critical Info for New Agent**
--   **MongoDB Access:** The user asked how to access the database. You can explain that MongoDB is a standard, portable database. To access it outside the Emergent environment, they would typically use a tool like MongoDB Compass and connect using the  connection string from . All data (users, books, pages, progress) is stored there and is fully exportable. **There is no vendor lock-in.**
--   **Authentication Flow:** The app uses Emergent-managed Google Login. When a user clicks Login, they are redirected to an Emergent auth page. After successful login, they are redirected back to the app with a  in the URL hash. The frontend's  detects this, sends the  to the backend's  endpoint, and receives a JWT token in return, which is stored in an  cookie to complete the session.
--   **Data is Live:** All mock data has been eliminated. The app is fully dependent on the backend API and the MongoDB database for all content and state.
+-   **THE AUDIO BUG IS YOUR ONLY PRIORITY.** The user is blocked and frustrated by this recurring issue in . Do not attempt any other tasks until the user confirms the book reader is working flawlessly across all the scenarios they have described. The last fix attempt addressed stale state in a  callback. You must first verify if this fix was successful.
+-   **Admin Validation:** The admin panel now requires an image for every page. This is a critical validation to prevent the reader from breaking.
+-   **Capacitor Project:** The application is now a hybrid mobile app. The groundwork for native in-app purchases is laid but not complete. Refer to  for build context.
 
 **documents and test reports created in this job**
 -   
--    (Continuously updated)
+-   
+-   
+-   
+-   
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **User:** Go on with next action items, but how do I exit the Admin Panel? Am I locked into your storage?
-    -   *Agent Action:* Fixed the admin panel back button and explained that all data is in a standard MongoDB database with no vendor lock-in. Implemented Category CRUD.
-2.  **User:** Proceed. Also, how can I access MongoDB?
-    -   *Agent Action:* Started generating audio for the remaining books and testing the progress sync feature.
-3.  **User:** (Implicitly approving audio generation) The agent's plan included generating audio and implementing authentication.
-    -   *Agent Action:* Finished audio generation, then asked the user to choose an authentication method.
-4.  **User:** The app is for app stores with subscriptions. Which auth is best?
-    -   *Agent Action:* Recommended Google Social Login, explained why it's suitable for app store subscriptions, and started implementing it.
-5.  **User:** Go with the Next Action Items.
-    -   *Agent Action:* Completed the user authentication and premium subscription system, including UI for locked content.
-6.  **User:** Test the full OAuth flow and then add subscription management UI.
-    -   *Agent Action:* The user's message was a bit out of sync. The agent had already added the subscription UI. It explained the OAuth flow and how to test it.
-7.  **User:** Fix search (Annemin Elleri not found). Then test the OAuth flow and add premium badges to the library view.
-    -   *Agent Action:* Fixed the search modal to use the backend API, added premium badges to , and provided the preview URL for the user to test the OAuth flow.
-8.  **User:** How does category CRUD integrate with the IslandMap? Sort that out, then we can verify OAuth and add loading animations.
-    -   *Agent Action:* Refactored  to dynamically fetch categories from the API, ensuring it reflects changes from the admin panel. Tested the fix.
-9.  **User:** (Message not in history, but implied by the agent moving on) - User approved the IslandMap fix.
-    -   *Agent Action:* The agent was about to proceed with the user's previously stated next steps (verifying OAuth and adding loading animations). This is the current state.
-10. **(No more user messages)**
+-   **10. (LATEST)** User provided detailed console logs for multiple complex scenarios where the book reader audio sync fails, including toggling auto-play, re-reading books, and encountering pages without images. **This is the current active bug.**
+-   **9.** User reported the 3s audio delay isn't working, the premium status toggle in the CMS didn't work, and asked what the Deploy button does.
+-   **8.** User requested a 3s audio delay, and a feature to invalidate/regenerate audio in the CMS when a page's text is changed.
+-   **7.** User reported that when logged out, the UI still shows hardcoded Elif profile data. Correct fallback should be Sizin için öneriler.
+-   **6.** User confirmed profile management is okay, requested an editable username field in the future, and noted that progress is saved correctly. They also asked to make Elif için öneriler dynamic.
+-   **5.** User asked for a 2.5s audio delay.
+-   **4.** User requested a Finish Book button on the last page instead of an abrupt transition to the celebration screen.
+-   **3.** User stated the  API fix did not work and they need audio to start *after* the image is fully rendered/painted.
+-   **2.** User confirmed the audio re-start is fixed but it still begins before the image is fully loaded.
+-   **1.** User noted that styling and page deletion in the admin panel are okay, but the audio restarting bug resurfaced when using large images.
 
 **Project Health Check:**
--   **Broken:** None.
+-   **Broken:** The core book reader feature has a critical, recurring audio synchronization bug.
 -   **Mocked:** None.
 
 **3rd Party Integrations**
--   **ElevenLabs (Text-to-Speech):** Used via an offline script () for pre-generating audio. Requires a User API Key for the generation script.
--   **Emergent-managed Google Auth:** Used for user login and account management. Integrated via the  subagent.
+-   **ElevenLabs (Text-to-Speech):** Used via an offline script for pre-generating audio.
+-   **Emergent-managed Google Auth:** Used for user login and account management.
+-   **Capacitor:** For native mobile app wrapping.
+    -   : Installed for handling mobile payments (not fully implemented).
 
 **Testing status**
--   Testing agent used after significant changes: YES (for the critical auto-play bug fix).
--   Troubleshoot agent used after agent stuck in loop: NO.
--   Test files created: None new in this session.
--   Known regressions: None.
+-   Testing agent used after significant changes: Yes.
+-   Troubleshoot agent used after agent stuck in loop: No.
+-   Test files created: 
+-   Known regressions: A major, recurring audio synchronization bug in the book reader.
 
 **Credentials to test flow:**
-The application uses Google OAuth for login, so no credentials are required for the user flow. A test user  exists in the database. The  is present in  for running audio generation scripts.
+-   Log in with any Google account for the standard user flow.
+-   To access the admin panel, the app is hardcoded to grant access to the user with the email .
 
 **What agent forgot to execute**
-The agent has successfully executed all user requests up to this point. The next tasks are to guide the user through testing the OAuth flow and to implement the requested loading animations.</analysis>
+The agent has been persistent but has so far failed to deliver a permanently stable solution for the complex audio synchronization logic in the book reader. The last fix was implemented based on user logs but was not verified before the session ended.</analysis>
