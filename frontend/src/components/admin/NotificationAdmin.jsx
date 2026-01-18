@@ -287,7 +287,7 @@ const NotificationAdmin = () => {
                   value={newNotification.title}
                   onChange={(e) => setNewNotification(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Bildirim başlığı"
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   required
                 />
               </div>
@@ -302,7 +302,7 @@ const NotificationAdmin = () => {
                   onChange={(e) => setNewNotification(prev => ({ ...prev, message: e.target.value }))}
                   placeholder="Bildirim mesajı"
                   rows={3}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                   required
                 />
               </div>
@@ -317,7 +317,7 @@ const NotificationAdmin = () => {
                   value={newNotification.link}
                   onChange={(e) => setNewNotification(prev => ({ ...prev, link: e.target.value }))}
                   placeholder="Kitap ID veya kategori slug"
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 bg-white placeholder-gray-400 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                 />
               </div>
 
