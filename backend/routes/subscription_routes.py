@@ -189,11 +189,33 @@ async def get_subscription_status(user_id: str, request: Request):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     
+    # Check trial status
+    is_trial = user.get("is_trial", False)
+    trial_ends_at = user.get("trial_ends_at")
+    trial_used = user.get("trial_used", False)
+    
+    # Check if trial has expired
+    if is_trial and trial_ends_at:
+        try:
+            trial_end_date = datetime.fromisoformat(trial_ends_at.replace('Z', '+00:00'))
+            if trial_end_date < datetime.now(timezone.utc):
+                is_trial = False
+                # Update user - trial expired
+                await db.users.update_one(
+                    {"user_id": user_id},
+                    {"$set": {
+                        "is_trial": False,
+                        "subscription_tier": "free"
+                    }}
+                )
+        except Exception:
+            pass
+    
     # Check if subscription has expired
-    is_active = user.get("subscription_tier") == "premium"
+    is_active = user.get("subscription_tier") == "premium" or is_trial
     expires_at = user.get("subscription_expires_at")
     
-    if expires_at:
+    if expires_at and not is_trial:
         try:
             expiry_date = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
             if expiry_date < datetime.now(timezone.utc):
@@ -210,10 +232,112 @@ async def get_subscription_status(user_id: str, request: Request):
         is_active=is_active,
         subscription_tier=user.get("subscription_tier", "free"),
         product_id=user.get("subscription_product_id"),
-        expires_at=expires_at,
+        expires_at=trial_ends_at if is_trial else expires_at,
         platform=user.get("subscription_platform"),
-        auto_renewing=user.get("subscription_auto_renewing", False)
+        auto_renewing=user.get("subscription_auto_renewing", False),
+        is_trial=is_trial,
+        trial_ends_at=trial_ends_at,
+        trial_used=trial_used
     )
+
+
+@router.post("/start-trial")
+async def start_free_trial(trial_request: StartTrialRequest, request: Request):
+    """
+    Start a 7-day free trial for a user.
+    Each user can only use the trial once.
+    """
+    db = get_db()
+    
+    # Get authenticated user
+    user = await get_user_from_request(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
+    if user["user_id"] != trial_request.user_id:
+        raise HTTPException(status_code=403, detail="User ID mismatch")
+    
+    # Check if user has already used trial
+    if user.get("trial_used", False):
+        raise HTTPException(
+            status_code=400, 
+            detail="Ücretsiz deneme hakkınızı daha önce kullandınız"
+        )
+    
+    # Check if user already has active subscription
+    if user.get("subscription_tier") == "premium" and not user.get("is_trial"):
+        raise HTTPException(
+            status_code=400,
+            detail="Zaten aktif bir aboneliğiniz var"
+        )
+    
+    # Calculate trial end date
+    trial_ends_at = datetime.now(timezone.utc) + timedelta(days=TRIAL_DURATION_DAYS)
+    
+    # Update user with trial status
+    await db.users.update_one(
+        {"user_id": trial_request.user_id},
+        {
+            "$set": {
+                "subscription_tier": "premium",
+                "is_trial": True,
+                "trial_used": True,
+                "trial_started_at": datetime.now(timezone.utc).isoformat(),
+                "trial_ends_at": trial_ends_at.isoformat()
+            }
+        }
+    )
+    
+    # Log trial start
+    await db.trial_logs.insert_one({
+        "user_id": trial_request.user_id,
+        "started_at": datetime.now(timezone.utc).isoformat(),
+        "ends_at": trial_ends_at.isoformat(),
+        "duration_days": TRIAL_DURATION_DAYS
+    })
+    
+    return {
+        "success": True,
+        "message": f"{TRIAL_DURATION_DAYS} günlük ücretsiz denemeniz başladı!",
+        "trial": {
+            "is_active": True,
+            "ends_at": trial_ends_at.isoformat(),
+            "days_remaining": TRIAL_DURATION_DAYS
+        }
+    }
+
+
+@router.get("/trial-status/{user_id}")
+async def get_trial_status(user_id: str, request: Request):
+    """Get trial status for a user"""
+    db = get_db()
+    
+    user = await db.users.find_one({"user_id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    is_trial = user.get("is_trial", False)
+    trial_ends_at = user.get("trial_ends_at")
+    trial_used = user.get("trial_used", False)
+    
+    days_remaining = 0
+    if is_trial and trial_ends_at:
+        try:
+            trial_end_date = datetime.fromisoformat(trial_ends_at.replace('Z', '+00:00'))
+            if trial_end_date > datetime.now(timezone.utc):
+                days_remaining = (trial_end_date - datetime.now(timezone.utc)).days
+            else:
+                is_trial = False
+        except Exception:
+            pass
+    
+    return {
+        "is_trial": is_trial,
+        "trial_used": trial_used,
+        "trial_ends_at": trial_ends_at,
+        "days_remaining": days_remaining,
+        "can_start_trial": not trial_used and user.get("subscription_tier") != "premium"
+    }
 
 
 @router.post("/restore")
