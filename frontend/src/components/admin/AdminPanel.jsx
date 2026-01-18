@@ -893,10 +893,10 @@ const AdminPanel = ({ onBack }) => {
       {showEditPage && editingPage && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-lg">Sayfayı Düzenle (Sayfa {editingPage.pageNumber})</h3>
-              <button onClick={() => { setShowEditPage(false); setEditingPage(null); }} className="p-1 hover:bg-gray-100 rounded">
-                <X size={20} />
+            <div className="flex justify-between items-center mb-4 pb-2 border-b">
+              <h3 className="font-bold text-lg text-gray-800">Sayfayı Düzenle (Sayfa {editingPage.pageNumber})</h3>
+              <button onClick={() => { setShowEditPage(false); setEditingPage(null); }} className="p-2 hover:bg-gray-100 rounded-full">
+                <X size={20} className="text-gray-600" />
               </button>
             </div>
 
@@ -906,7 +906,7 @@ const AdminPanel = ({ onBack }) => {
                 <textarea
                   value={editPage.text}
                   onChange={(e) => setEditPage({...editPage, text: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
                   rows={4}
                 />
               </div>
@@ -923,14 +923,14 @@ const AdminPanel = ({ onBack }) => {
             <div className="flex gap-2 mt-6">
               <button
                 onClick={() => { setShowEditPage(false); setEditingPage(null); }}
-                className="flex-1 py-2 border rounded-lg hover:bg-gray-50"
+                className="flex-1 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
               >
                 İptal
               </button>
               <button
                 onClick={updatePage}
                 disabled={isSaving || !editPage.text}
-                className="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
               >
                 {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 Güncelle
