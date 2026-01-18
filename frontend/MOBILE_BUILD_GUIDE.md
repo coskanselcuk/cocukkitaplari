@@ -1,5 +1,8 @@
 # Çocuk Kitapları - Mobile App Build Guide
 
+## Production Backend
+**API URL:** `https://cocukkitaplari-production.up.railway.app`
+
 ## Overview
 This guide explains how to build and deploy the Çocuk Kitapları app to iOS App Store and Google Play Store using Capacitor.
 
