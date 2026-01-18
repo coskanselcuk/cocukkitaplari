@@ -732,6 +732,21 @@ const AdminPanel = ({ onBack }) => {
                   />
                 </div>
               </div>
+              
+              {/* Premium Toggle */}
+              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                <div className="flex items-center gap-2">
+                  <Crown size={18} className="text-yellow-600" />
+                  <span className="font-medium text-gray-700">Premium İçerik</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setNewBook({...newBook, isPremium: !newBook.isPremium})}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${newBook.isPremium ? 'bg-yellow-500' : 'bg-gray-300'}`}
+                >
+                  <span className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${newBook.isPremium ? 'left-7' : 'left-1'}`} />
+                </button>
+              </div>
             </div>
 
             <div className="flex gap-3 mt-6 pt-4 border-t">
