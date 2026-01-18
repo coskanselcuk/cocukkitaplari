@@ -801,7 +801,7 @@ const AdminPanel = ({ onBack }) => {
                   type="text"
                   value={editBook.title}
                   onChange={(e) => setEditBook({...editBook, title: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
                 />
               </div>
               <div>
@@ -810,7 +810,7 @@ const AdminPanel = ({ onBack }) => {
                   type="text"
                   value={editBook.author}
                   onChange={(e) => setEditBook({...editBook, author: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
                 />
               </div>
               <div>
@@ -818,7 +818,7 @@ const AdminPanel = ({ onBack }) => {
                 <select
                   value={editBook.category}
                   onChange={(e) => setEditBook({...editBook, category: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
                 >
                   {categories.map(cat => (
                     <option key={cat.id} value={cat.slug}>{cat.name}</option>
@@ -838,7 +838,7 @@ const AdminPanel = ({ onBack }) => {
                 <textarea
                   value={editBook.description}
                   onChange={(e) => setEditBook({...editBook, description: e.target.value})}
-                  className="w-full border rounded-lg px-3 py-2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
                   rows={2}
                 />
               </div>
@@ -848,7 +848,7 @@ const AdminPanel = ({ onBack }) => {
                   <select
                     value={editBook.ageGroup}
                     onChange={(e) => setEditBook({...editBook, ageGroup: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
                   >
                     <option value="3-5">3-5 yaş</option>
                     <option value="4-6">4-6 yaş</option>
