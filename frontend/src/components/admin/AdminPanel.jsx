@@ -615,7 +615,7 @@ const AdminPanel = ({ onBack }) => {
                                 {page.voiceId && (
                                   <span className="flex items-center gap-1 text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded">
                                     <Mic size={10} />
-                                    {voices.find(v => v.voice_id === page.voiceId)?.name || 'Özel ses'}
+                                    {voices.find(v => v.elevenlabs_id === page.voiceId)?.name || page.voiceId.substring(0, 8) + '...'}
                                   </span>
                                 )}
                               </div>
