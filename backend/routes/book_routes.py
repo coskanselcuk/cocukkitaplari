@@ -19,6 +19,8 @@ class BookUpdate(BaseModel):
     description: Optional[str] = None
     ageGroup: Optional[str] = None
     duration: Optional[str] = None
+    isPremium: Optional[bool] = None
+    isNew: Optional[bool] = None
 
 
 class PageUpdate(BaseModel):
