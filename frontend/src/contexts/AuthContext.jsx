@@ -59,6 +59,10 @@ export const AuthProvider = ({ children }) => {
       if (result.success && result.user) {
         setUser(result.user);
         setIsAuthenticated(true);
+        // Set user ID for IAP tracking
+        if (result.user.user_id) {
+          setIapUserId(result.user.user_id);
+        }
       }
     } catch (error) {
       console.error('Session exchange failed:', error);
