@@ -293,14 +293,20 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## Prioritized Backlog
 
+### P0 - Critical (Completed)
+- [x] Audio synchronization bug in book reader ✅ FIXED
+
 ### P1 - High Priority
 - [x] Wire up reading progress API to frontend (sync across devices) ✅
 - [x] Add CRUD for categories in admin panel ✅
 - [x] Generate audio for newly seeded books ✅ (Book 4 done, others pending)
 - [x] Test progress sync ✅
+- [x] Backend subscription/purchase verification API ✅ COMPLETED
+- [x] IAP service backend integration ✅ COMPLETED
 
 ### P2 - Medium Priority
-- [ ] Native in-app purchase integration (Apple StoreKit / Google Play Billing)
+- [ ] Complete native in-app purchase testing (requires App Store Connect & Play Console setup)
+- [ ] Apple/Google receipt validation (production keys needed)
 - [ ] Bookshelf-themed loading animation
 - [ ] Add more books to database
 - [ ] Child-friendly profile avatars
@@ -317,6 +323,7 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 - [x] **Local image upload for book covers and pages** ✅ COMPLETED
 - [ ] Drag-and-drop page reordering in admin panel
 - [ ] Book preview mode in admin before publishing
+- [ ] Profile settings page with editable username
 
 ## Testing Notes
 - Backend tests: `/app/tests/test_backend_api.py`, `/app/tests/test_upload_api.py`
