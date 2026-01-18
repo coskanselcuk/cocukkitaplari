@@ -93,22 +93,23 @@ async def get_user_notifications(request: Request, limit: int = 20, unread_only:
     # Build query for notifications
     # Get notifications that target: 'all', or user's specific tier, or are user-specific
     query = {
-        "$or": [
-            {"target_audience": "all"},
-            {"target_audience": user_tier},
-            {"target_user_id": user_id}
+        "$and": [
+            {
+                "$or": [
+                    {"target_audience": "all"},
+                    {"target_audience": user_tier},
+                    {"target_user_id": user_id}
+                ]
+            },
+            {
+                "$or": [
+                    {"expires_at": None},
+                    {"expires_at": {"$exists": False}},
+                    {"expires_at": {"$gt": datetime.now(timezone.utc).isoformat()}}
+                ]
+            }
         ]
     }
-    
-    # Filter expired notifications
-    query["$and"] = [
-        {
-            "$or": [
-                {"expires_at": None},
-                {"expires_at": {"$gt": datetime.now(timezone.utc).isoformat()}}
-            ]
-        }
-    ]
     
     # Check read status
     user_reads = await db.notification_reads.find(
