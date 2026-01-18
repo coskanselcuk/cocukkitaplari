@@ -120,16 +120,17 @@ const BookReaderLandscape = ({ book, onClose }) => {
     };
   }, [book?.id, currentPage, resumeContinue, progressLoaded, userId]);
 
-  // Handle image load - wait for actual render before marking as loaded
-  const handleImageLoad = useCallback(() => {
-    // Use requestAnimationFrame to wait for the browser to paint the image
-    // This ensures the image is actually visible before we start audio
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        // Double rAF ensures the paint has completed
-        setIsImageLoaded(true);
-      });
-    });
+  // Handle image load - use decode() to ensure image is fully rendered
+  const handleImageLoad = useCallback((e) => {
+    const img = e.target;
+    // decode() returns a promise that resolves when image is fully ready for display
+    if (img.decode) {
+      img.decode()
+        .then(() => setIsImageLoaded(true))
+        .catch(() => setIsImageLoaded(true));
+    } else {
+      setIsImageLoaded(true);
+    }
   }, []);
 
   // Stop audio when page changes and reset tracking
