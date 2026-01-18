@@ -1107,13 +1107,13 @@ const AdminPanel = ({ onBack }) => {
                 >
                   <option value="">Varsayılan (Irem - Audiobook)</option>
                   {voices.map((voice) => (
-                    <option key={voice.voice_id} value={voice.voice_id}>
-                      {voice.name} {voice.category ? `(${voice.category})` : ''}
+                    <option key={voice.id} value={voice.elevenlabs_id}>
+                      {voice.name} {voice.is_default ? '⭐' : ''} {voice.description ? `- ${voice.description}` : ''}
                     </option>
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
-                  {voicesLoading ? 'Sesler yükleniyor...' : `${voices.length} ses mevcut. Boş bırakılırsa varsayılan ses kullanılır.`}
+                  {voicesLoading ? 'Sesler yükleniyor...' : voices.length === 0 ? 'Özel ses eklemek için "Sesler" sekmesine gidin.' : `${voices.length} özel ses mevcut.`}
                 </p>
               </div>
             </div>
