@@ -787,10 +787,10 @@ const AdminPanel = ({ onBack }) => {
       {showEditBook && selectedBook && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-lg">Kitabı Düzenle</h3>
-              <button onClick={() => setShowEditBook(false)} className="p-1 hover:bg-gray-100 rounded">
-                <X size={20} />
+            <div className="flex justify-between items-center mb-4 pb-2 border-b">
+              <h3 className="font-bold text-lg text-gray-800">Kitabı Düzenle</h3>
+              <button onClick={() => setShowEditBook(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                <X size={20} className="text-gray-600" />
               </button>
             </div>
 
