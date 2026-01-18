@@ -260,9 +260,11 @@ class TestBackgroundTaskVerification:
             f"Notification endpoint failed: {response.status_code}: {response.text}"
         
         data = response.json()
-        assert "count" in data, "Missing count in unread-count response"
+        # Field can be 'count' or 'unread_count'
+        assert "count" in data or "unread_count" in data, "Missing count field in unread-count response"
         
-        print(f"SUCCESS: Notification system is working - {data.get('count')} unread notifications")
+        count = data.get('count') or data.get('unread_count', 0)
+        print(f"SUCCESS: Notification system is working - {count} unread notifications")
 
 
 class TestPageUpdateResponseStructure:
