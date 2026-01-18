@@ -129,8 +129,13 @@ const BookReaderLandscape = ({ book, onClose }) => {
     const img = e.target;
     
     const markLoaded = () => {
-      // 3 second delay after decode to ensure paint has completed
-      setTimeout(() => setIsImageLoaded(true), 3000);
+      // Calculate how much time has passed since page changed
+      const timeSincePageChange = Date.now() - pageChangeTimeRef.current;
+      const minimumDelay = 3000; // 3 seconds minimum from page change
+      const remainingDelay = Math.max(0, minimumDelay - timeSincePageChange);
+      
+      // Wait for remaining delay to ensure 3 seconds from page change
+      setTimeout(() => setIsImageLoaded(true), remainingDelay);
     };
     
     if (img.decode) {
@@ -150,8 +155,9 @@ const BookReaderLandscape = ({ book, onClose }) => {
     setIsPlaying(false);
     setIsImageLoaded(false);
     // Reset the audio started tracker when page changes
-    // This allows audio to start fresh on the new page
     audioStartedForPageRef.current = -1;
+    // Record when page changed for delay calculation
+    pageChangeTimeRef.current = Date.now();
   }, [currentPage]);
 
   // Auto-start audio when image loads (only once per page)
