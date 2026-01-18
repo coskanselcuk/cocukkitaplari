@@ -33,8 +33,158 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app without a prefix
-app = FastAPI()
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+
+# ============ TRIAL EXPIRATION NOTIFICATION TASK ============
+
+async def check_expiring_trials():
+    """
+    Background task to check for expiring trials and send notifications.
+    Runs every hour and notifies users when:
+    - Trial expires in 3 days (first reminder)
+    - Trial expires in 1 day (urgent reminder)
+    - Trial has expired (final notice)
+    """
+    from routes.notification_routes import create_system_notification
+    
+    while True:
+        try:
+            logger.info("Checking for expiring trials...")
+            
+            now = datetime.now(timezone.utc)
+            
+            # Find users with active trials
+            trial_users = await db.users.find({
+                "is_trial": True,
+                "trial_ends_at": {"$exists": True}
+            }, {"_id": 0}).to_list(length=1000)
+            
+            for user in trial_users:
+                user_id = user.get("user_id")
+                trial_ends_at_str = user.get("trial_ends_at")
+                
+                if not trial_ends_at_str:
+                    continue
+                
+                try:
+                    trial_ends_at = datetime.fromisoformat(trial_ends_at_str.replace('Z', '+00:00'))
+                except Exception:
+                    continue
+                
+                days_remaining = (trial_ends_at - now).days
+                hours_remaining = (trial_ends_at - now).total_seconds() / 3600
+                
+                # Check if we already sent a notification for this milestone
+                notification_key = f"trial_reminder_{user_id}_{days_remaining}"
+                existing_notif = await db.sent_trial_notifications.find_one({
+                    "user_id": user_id,
+                    "days_remaining": days_remaining
+                })
+                
+                if existing_notif:
+                    continue  # Already sent notification for this milestone
+                
+                # Determine notification type based on days remaining
+                if days_remaining == 3:
+                    await create_system_notification(
+                        title="Deneme Süreniz Bitiyor! ⏰",
+                        message="Premium denemeniz 3 gün içinde sona erecek. Abone olarak tüm kitaplara erişiminizi sürdürün!",
+                        notif_type="trial",
+                        target_user_id=user_id
+                    )
+                    await db.sent_trial_notifications.insert_one({
+                        "user_id": user_id,
+                        "days_remaining": 3,
+                        "sent_at": now.isoformat()
+                    })
+                    logger.info(f"Sent 3-day trial reminder to user {user_id}")
+                    
+                elif days_remaining == 1:
+                    await create_system_notification(
+                        title="Son 1 Gün! ⚠️",
+                        message="Premium denemeniz yarın sona eriyor! Hemen abone olun ve kesintisiz okumaya devam edin.",
+                        notif_type="trial",
+                        target_user_id=user_id
+                    )
+                    await db.sent_trial_notifications.insert_one({
+                        "user_id": user_id,
+                        "days_remaining": 1,
+                        "sent_at": now.isoformat()
+                    })
+                    logger.info(f"Sent 1-day trial reminder to user {user_id}")
+                    
+                elif days_remaining <= 0 and hours_remaining > -24:
+                    # Trial just expired (within last 24 hours)
+                    existing_expired = await db.sent_trial_notifications.find_one({
+                        "user_id": user_id,
+                        "days_remaining": 0
+                    })
+                    if not existing_expired:
+                        await create_system_notification(
+                            title="Deneme Süreniz Bitti 😔",
+                            message="Premium denemeniz sona erdi. Premium kitaplara erişmek için abone olun!",
+                            notif_type="trial",
+                            target_user_id=user_id
+                        )
+                        await db.sent_trial_notifications.insert_one({
+                            "user_id": user_id,
+                            "days_remaining": 0,
+                            "sent_at": now.isoformat()
+                        })
+                        logger.info(f"Sent trial expired notification to user {user_id}")
+                        
+                        # Update user's trial status
+                        await db.users.update_one(
+                            {"user_id": user_id},
+                            {"$set": {
+                                "is_trial": False,
+                                "subscription_tier": "free"
+                            }}
+                        )
+            
+            logger.info(f"Trial check complete. Checked {len(trial_users)} users.")
+            
+        except Exception as e:
+            logger.error(f"Error in trial expiration check: {e}")
+        
+        # Run every hour
+        await asyncio.sleep(3600)
+
+
+# Background task reference
+trial_check_task = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup/shutdown events"""
+    global trial_check_task
+    
+    # Startup
+    logger.info("Starting trial expiration notification task...")
+    trial_check_task = asyncio.create_task(check_expiring_trials())
+    
+    yield
+    
+    # Shutdown
+    logger.info("Shutting down trial expiration notification task...")
+    if trial_check_task:
+        trial_check_task.cancel()
+        try:
+            await trial_check_task
+        except asyncio.CancelledError:
+            pass
+    client.close()
+
+
+# Create the main app with lifespan
+app = FastAPI(lifespan=lifespan)
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
