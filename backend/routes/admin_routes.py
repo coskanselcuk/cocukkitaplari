@@ -65,6 +65,37 @@ async def generate_audio_for_book(book_id: str):
     }
 
 
+@router.post("/generate-audio/{book_id}/page/{page_id}")
+async def generate_audio_for_page(book_id: str, page_id: str):
+    """Generate TTS audio for a single page"""
+    db = get_db()
+    
+    # Find the page
+    page = await db.pages.find_one({"id": page_id, "bookId": book_id})
+    
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+    
+    text = page.get('text', '')
+    if not text:
+        raise HTTPException(status_code=400, detail="Page has no text")
+    
+    try:
+        result = await generate_tts_audio(text)
+        audio_url = result.get('audio_url')
+        
+        if audio_url:
+            await db.pages.update_one(
+                {"id": page_id},
+                {"$set": {"audioUrl": audio_url}}
+            )
+            return {"success": True, "message": "Audio generated successfully", "audioUrl": audio_url}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to generate audio")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating audio: {str(e)}")
+
+
 @router.delete("/books/{book_id}")
 async def delete_book(book_id: str):
     """Delete a book and all its pages"""
