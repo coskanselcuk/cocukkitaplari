@@ -863,7 +863,7 @@ const AdminPanel = ({ onBack }) => {
                     type="text"
                     value={editBook.duration}
                     onChange={(e) => setEditBook({...editBook, duration: e.target.value})}
-                    className="w-full border rounded-lg px-3 py-2"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
                   />
                 </div>
               </div>
@@ -872,7 +872,7 @@ const AdminPanel = ({ onBack }) => {
             <div className="flex gap-2 mt-6">
               <button
                 onClick={() => setShowEditBook(false)}
-                className="flex-1 py-2 border rounded-lg hover:bg-gray-50"
+                className="flex-1 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium"
               >
                 İptal
               </button>
