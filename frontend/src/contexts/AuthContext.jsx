@@ -27,6 +27,10 @@ export const AuthProvider = ({ children }) => {
         const userData = await authApi.getCurrentUser();
         setUser(userData);
         setIsAuthenticated(true);
+        // Set user ID for IAP tracking
+        if (userData?.user_id) {
+          setIapUserId(userData.user_id);
+        }
       } catch (error) {
         // Not authenticated - that's fine
         setUser(null);
