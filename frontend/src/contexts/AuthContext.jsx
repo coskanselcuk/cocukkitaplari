@@ -91,6 +91,8 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setUser(null);
       setIsAuthenticated(false);
+      // Clear IAP user ID
+      clearIapUserId();
     }
   }, []);
 
