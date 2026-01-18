@@ -70,6 +70,15 @@ async def create_category(category_data: CategoryCreate):
     
     await db.categories.insert_one(doc)
     
+    # Create notification for new category
+    try:
+        await notify_new_category(
+            category_name=doc.get('name', 'Yeni Kategori'),
+            category_slug=doc.get('slug')
+        )
+    except Exception as e:
+        print(f"Failed to create notification: {e}")
+    
     return CategoryResponse(**doc)
 
 
