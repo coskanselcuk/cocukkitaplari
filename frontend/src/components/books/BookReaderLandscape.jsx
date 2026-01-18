@@ -141,6 +141,14 @@ const BookReaderLandscape = ({ book, onClose }) => {
     }
   }, []);
 
+  // If page has no image, mark as loaded immediately
+  useEffect(() => {
+    if (!currentPageData?.image) {
+      console.log('Page has no image, marking as loaded');
+      setIsImageLoaded(true);
+    }
+  }, [currentPageData?.image, currentPage]);
+
   // Stop audio when page changes and reset tracking
   useEffect(() => {
     const audio = audioRef.current;
