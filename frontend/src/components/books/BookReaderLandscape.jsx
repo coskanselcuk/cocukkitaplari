@@ -295,8 +295,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
                 src={currentPageData.image} 
                 alt={`Sayfa ${currentPage + 1}`}
                 className="w-full h-full object-cover"
-                onLoad={() => setIsImageLoaded(true)}
-                onError={() => setIsImageLoaded(true)}
+                onLoad={handleImageLoad}
+                onError={handleImageLoad}
               />
               {!isImageLoaded && (
                 <div className="absolute inset-0 bg-amber-100 flex items-center justify-center">
