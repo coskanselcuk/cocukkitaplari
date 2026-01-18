@@ -119,6 +119,16 @@ async def create_book(book_data: BookCreate):
     
     await db.books.insert_one(doc)
     
+    # Create notification for new book
+    try:
+        await notify_new_book(
+            book_title=doc.get('title', 'Yeni Kitap'),
+            book_id=doc.get('id'),
+            is_premium=doc.get('isPremium', False)
+        )
+    except Exception as e:
+        print(f"Failed to create notification: {e}")
+    
     return BookResponse(**doc)
 
 
