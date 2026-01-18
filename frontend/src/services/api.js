@@ -84,6 +84,44 @@ export const ttsApi = {
   },
 };
 
+// Custom Voices API
+export const voicesApi = {
+  getAll: async () => {
+    const response = await api.get('/voices');
+    return response.data;
+  },
+  
+  create: async (voiceData) => {
+    const response = await api.post('/voices', voiceData);
+    return response.data;
+  },
+  
+  update: async (voiceId, voiceData) => {
+    const response = await api.put(`/voices/${voiceId}`, voiceData);
+    return response.data;
+  },
+  
+  delete: async (voiceId) => {
+    const response = await api.delete(`/voices/${voiceId}`);
+    return response.data;
+  },
+  
+  verify: async (voiceId) => {
+    const response = await api.post(`/voices/${voiceId}/verify`);
+    return response.data;
+  },
+  
+  setDefault: async (voiceId) => {
+    const response = await api.post(`/voices/set-default/${voiceId}`);
+    return response.data;
+  },
+  
+  getDefault: async () => {
+    const response = await api.get('/voices/default');
+    return response.data;
+  }
+};
+
 export const authApi = {
   exchangeSession: async (sessionId) => {
     const response = await api.post('/auth/session', { session_id: sessionId });
