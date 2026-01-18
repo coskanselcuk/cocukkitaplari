@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Trash2, Edit, Save, X, BookOpen, 
-  FileText, Image, Volume2, Loader2, Check, AlertTriangle, Crown, Bell
+  FileText, Image, Volume2, Loader2, Check, AlertTriangle, Crown, Bell, Mic
 } from 'lucide-react';
-import { booksApi, categoriesApi } from '../../services/api';
+import { booksApi, categoriesApi, ttsApi } from '../../services/api';
 import axios from 'axios';
 import ImageUpload from './ImageUpload';
 import NotificationAdmin from './NotificationAdmin';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+// Default voice ID (Irem)
+const DEFAULT_VOICE_ID = 'NsFK0aDGLbVusA7tQfOB';
 
 const AdminPanel = ({ onBack }) => {
   const [books, setBooks] = useState([]);
@@ -30,6 +33,8 @@ const AdminPanel = ({ onBack }) => {
   const [editingPage, setEditingPage] = useState(null);
   const [editingCategory, setEditingCategory] = useState(null);
   const [regeneratingPageId, setRegeneratingPageId] = useState(null);
+  const [voices, setVoices] = useState([]);
+  const [voicesLoading, setVoicesLoading] = useState(false);
 
   // New book form
   const [newBook, setNewBook] = useState({
