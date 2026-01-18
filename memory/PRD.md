@@ -46,6 +46,34 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### January 18, 2026 - Audio Bug Fix, Badge Removal & In-App Purchase Backend
+- **Audio Sync Bug Fixed**: Critical fix for book reader audio synchronization
+  - Fixed issue where audio played from previous page after pausing, toggling auto-play, and navigating
+  - Root cause: `audio.src` was not being cleared on page change
+  - Solution: Clear `audio.src = ''` on page change and always verify correct audio URL before playing
+- **"Made with Emergent" Badge Removed**: Hidden via CSS for production app
+  - Added `#emergent-badge { display: none !important; }` to index.html
+- **Subscription Backend Complete**: Full backend API for in-app purchases
+  - POST `/api/subscriptions/verify-purchase` - Verify and record purchases
+  - GET `/api/subscriptions/status/{user_id}` - Get subscription status
+  - POST `/api/subscriptions/restore` - Restore previous purchases
+  - POST `/api/subscriptions/cancel/{user_id}` - Mark subscription cancelled
+  - GET `/api/subscriptions/history/{user_id}` - Get purchase history
+  - POST `/api/subscriptions/webhook/apple` - Apple Server Notifications
+  - POST `/api/subscriptions/webhook/google` - Google Play RTDN
+  - GET `/api/subscriptions/admin/stats` - Admin subscription statistics
+- **IAP Service Enhanced**: Updated `iapService.js` with backend integration
+  - Purchase verification syncs with backend
+  - User ID tracking for purchase attribution
+  - Restore purchases syncs with backend
+  - Platform detection (iOS/Android/Web)
+- **Subscription Modal Updated**: Better UX with auth integration
+  - Shows premium status if already subscribed
+  - Requires authentication for purchases
+  - Manage subscription button for premium users
+  - Better error handling and success messages
+- **AuthContext IAP Integration**: User ID syncs with IAP service on login/logout
+
 ### January 18, 2026 - App Store Assets & Branding
 - **App Icon**: Generated colorful children's book app icon (1024x1024)
   - Magical open book with floating stars design
