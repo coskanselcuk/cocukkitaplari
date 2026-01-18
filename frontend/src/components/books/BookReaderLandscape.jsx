@@ -126,8 +126,8 @@ const BookReaderLandscape = ({ book, onClose }) => {
     const img = e.target;
     
     const markLoaded = () => {
-      // 1 second delay after decode to ensure paint has completed
-      setTimeout(() => setIsImageLoaded(true), 1000);
+      // 2.5 second delay after decode to ensure paint has completed
+      setTimeout(() => setIsImageLoaded(true), 2500);
     };
     
     if (img.decode) {
