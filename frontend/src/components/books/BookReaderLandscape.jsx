@@ -120,7 +120,7 @@ const BookReaderLandscape = ({ book, onClose }) => {
     };
   }, [book?.id, currentPage, resumeContinue, progressLoaded, userId]);
 
-  // Stop audio when page changes
+  // Stop audio when page changes and reset tracking
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
@@ -129,20 +129,36 @@ const BookReaderLandscape = ({ book, onClose }) => {
     }
     setIsPlaying(false);
     setIsImageLoaded(false);
+    // Reset the audio started tracker when page changes
+    // This allows audio to start fresh on the new page
+    audioStartedForPageRef.current = -1;
   }, [currentPage]);
 
-  // Auto-start audio when image loads
+  // Auto-start audio when image loads (only once per page)
   useEffect(() => {
+    // Skip if autoPlay is off, image not loaded, or no audio
     if (!autoPlay || !isImageLoaded || !currentPageData?.audioUrl) return;
+    
+    // Skip if audio was already started for this page (prevents restart on re-render)
+    if (audioStartedForPageRef.current === currentPage) {
+      return;
+    }
     
     const audio = audioRef.current;
     if (!audio) return;
     
+    // Mark that we're starting audio for this page
+    audioStartedForPageRef.current = currentPage;
+    
     audio.src = currentPageData.audioUrl;
     audio.play()
       .then(() => setIsPlaying(true))
-      .catch(() => setIsPlaying(false));
-  }, [autoPlay, isImageLoaded, currentPageData?.audioUrl]);
+      .catch(() => {
+        setIsPlaying(false);
+        // Reset tracker if play failed so user can manually retry
+        audioStartedForPageRef.current = -1;
+      });
+  }, [autoPlay, isImageLoaded, currentPageData?.audioUrl, currentPage]);
 
   // AUDIO ENDED HANDLER - uses refs to access latest state values
   const handleAudioEnded = useCallback(() => {
