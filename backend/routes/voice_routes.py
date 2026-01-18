@@ -67,23 +67,24 @@ async def create_voice(voice_data: VoiceCreate):
     if existing:
         raise HTTPException(status_code=400, detail="Bu ses ID'si zaten eklenmiş")
     
-    # Optionally verify the voice exists in ElevenLabs
+    # Try to verify the voice exists in ElevenLabs (but don't fail if it doesn't)
     verified = False
+    elevenlabs_name = None
+    
     if ELEVENLABS_API_KEY:
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                # Try direct voice endpoint first
                 response = await client.get(
                     f"https://api.elevenlabs.io/v1/voices/{voice_data.elevenlabs_id}",
                     headers={"xi-api-key": ELEVENLABS_API_KEY}
                 )
                 if response.status_code == 200:
                     verified = True
-                    # Get the actual name from ElevenLabs if user didn't provide one
                     el_data = response.json()
-                    if not voice_data.name:
-                        voice_data.name = el_data.get("name", "Unknown Voice")
+                    elevenlabs_name = el_data.get("name")
         except Exception as e:
-            print(f"Could not verify voice: {e}")
+            print(f"Could not verify voice (will add anyway): {e}")
     
     # If this is set as default, unset other defaults
     if voice_data.is_default:
@@ -91,10 +92,13 @@ async def create_voice(voice_data: VoiceCreate):
     
     voice_id = f"voice_{uuid.uuid4().hex[:12]}"
     
+    # Use user-provided name, or ElevenLabs name if available
+    display_name = voice_data.name if voice_data.name else (elevenlabs_name or "Unnamed Voice")
+    
     voice_doc = {
         "id": voice_id,
         "elevenlabs_id": voice_data.elevenlabs_id,
-        "name": voice_data.name,
+        "name": display_name,
         "description": voice_data.description or "",
         "is_default": voice_data.is_default,
         "verified": verified,
