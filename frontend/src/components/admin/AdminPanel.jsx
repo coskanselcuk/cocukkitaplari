@@ -462,7 +462,7 @@ const AdminPanel = ({ onBack }) => {
 
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2 mb-6 flex-wrap">
           <button
             onClick={() => setActiveTab('books')}
             className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'books' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700'}`}
@@ -475,6 +475,13 @@ const AdminPanel = ({ onBack }) => {
             className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'categories' ? 'bg-orange-500 text-white' : 'bg-white text-gray-700'}`}
           >
             Kategoriler ({categories.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('voices')}
+            className={`px-4 py-2 rounded-lg font-medium ${activeTab === 'voices' ? 'bg-purple-500 text-white' : 'bg-white text-gray-700'}`}
+          >
+            <Mic size={18} className="inline mr-2" />
+            Sesler
           </button>
           <button
             onClick={() => setActiveTab('notifications')}
