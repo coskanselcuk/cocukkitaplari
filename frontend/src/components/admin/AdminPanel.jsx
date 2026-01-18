@@ -1090,7 +1090,7 @@ const AdminPanel = ({ onBack }) => {
       {/* Add Category Modal */}
       {showAddCategory && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 pb-2 border-b">
               <h3 className="font-bold text-lg text-gray-800">Yeni Kategori Ekle</h3>
               <button onClick={() => setShowAddCategory(false)} className="p-2 hover:bg-gray-100 rounded-full">
@@ -1120,31 +1120,62 @@ const AdminPanel = ({ onBack }) => {
                 />
                 <p className="text-xs text-gray-500 mt-1">URL dostu isim (küçük harf, tire ile)</p>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">İkon</label>
-                  <input
-                    type="text"
-                    value={newCategory.icon}
-                    onChange={(e) => setNewCategory({...newCategory, icon: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white text-center text-2xl"
-                    placeholder="📚"
-                  />
+              
+              {/* Icon Section - Emoji or Image */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Kategori İkonu</label>
+                <div className="space-y-3">
+                  {/* Emoji Option */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-600 w-16">Emoji:</span>
+                    <input
+                      type="text"
+                      value={newCategory.icon}
+                      onChange={(e) => setNewCategory({...newCategory, icon: e.target.value})}
+                      className="w-20 border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white text-center text-2xl"
+                      placeholder="📚"
+                    />
+                    <span className="text-xs text-gray-400">veya</span>
+                  </div>
+                  
+                  {/* Image Upload Option */}
+                  <div>
+                    <span className="text-sm text-gray-600 mb-1 block">Görsel:</span>
+                    <ImageUpload 
+                      value={newCategory.iconImage}
+                      onChange={(url) => setNewCategory({...newCategory, iconImage: url})}
+                      placeholder="Kategori ikonu yükle veya URL yapıştır"
+                    />
+                    {newCategory.iconImage && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <img src={newCategory.iconImage} alt="İkon önizleme" className="w-12 h-12 object-cover rounded-lg" />
+                        <button 
+                          type="button"
+                          onClick={() => setNewCategory({...newCategory, iconImage: ''})}
+                          className="text-red-500 text-xs hover:underline"
+                        >
+                          Kaldır
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Yaş Grubu</label>
-                  <select
-                    value={newCategory.ageGroup}
-                    onChange={(e) => setNewCategory({...newCategory, ageGroup: e.target.value})}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
-                  >
-                    <option value="3-5">3-5 yaş</option>
-                    <option value="4-6">4-6 yaş</option>
-                    <option value="5-7">5-7 yaş</option>
-                    <option value="6-8">6-8 yaş</option>
-                    <option value="tümü">Tüm yaşlar</option>
-                  </select>
-                </div>
+                <p className="text-xs text-gray-500 mt-2">Görsel yüklenmişse emoji yerine görsel kullanılır</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Yaş Grubu</label>
+                <select
+                  value={newCategory.ageGroup}
+                  onChange={(e) => setNewCategory({...newCategory, ageGroup: e.target.value})}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white"
+                >
+                  <option value="3-5">3-5 yaş</option>
+                  <option value="4-6">4-6 yaş</option>
+                  <option value="5-7">5-7 yaş</option>
+                  <option value="6-8">6-8 yaş</option>
+                  <option value="tümü">Tüm yaşlar</option>
+                </select>
               </div>
             </div>
 
