@@ -72,6 +72,15 @@ function AppContent() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Get display name - prefer authenticated user's name, fallback to profile
+  const displayName = useMemo(() => {
+    if (isAuthenticated && user?.name) {
+      // Get first name only
+      return user.name.split(' ')[0];
+    }
+    return currentProfile?.name || 'Sana';
+  }, [isAuthenticated, user?.name, currentProfile?.name]);
+
   // Memoized book lists derived from API data
   const newBooks = useMemo(() => books.filter(book => book.isNew), [books]);
   const popularBooks = useMemo(() => [...books].sort((a, b) => (b.readCount || 0) - (a.readCount || 0)).slice(0, 6), [books]);
