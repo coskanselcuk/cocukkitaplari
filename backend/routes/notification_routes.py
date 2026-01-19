@@ -177,16 +177,22 @@ async def get_unread_count(request: Request):
     
     # Count unread notifications targeting this user
     count = await db.notifications.count_documents({
-        "$or": [
-            {"target_audience": "all"},
-            {"target_audience": user_tier},
-            {"target_user_id": user_id}
+        "$and": [
+            {
+                "$or": [
+                    {"target_audience": "all"},
+                    {"target_audience": user_tier},
+                    {"target_user_id": user_id}
+                ]
+            },
+            {
+                "$or": [
+                    {"expires_at": None},
+                    {"expires_at": {"$gt": datetime.now(timezone.utc).isoformat()}}
+                ]
+            }
         ],
-        "id": {"$nin": read_ids},
-        "$or": [
-            {"expires_at": None},
-            {"expires_at": {"$gt": datetime.now(timezone.utc).isoformat()}}
-        ]
+        "id": {"$nin": read_ids}
     })
     
     return {"unread_count": count}
