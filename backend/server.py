@@ -28,15 +28,76 @@ from routes.voice_routes import router as voice_router
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection - validate required environment variables
+
+# ============ ENVIRONMENT VARIABLE VALIDATION ============
+
+def validate_env_vars():
+    """Validate all required environment variables at startup"""
+    required_vars = {
+        'MONGO_URL': 'MongoDB connection string (e.g., mongodb+srv://...)',
+        'DB_NAME': 'Database name (e.g., cocuk_kitaplari)',
+    }
+    
+    optional_vars = {
+        'CORS_ORIGINS': ('Allowed CORS origins', '*'),
+        'ELEVENLABS_API_KEY': ('ElevenLabs API key for TTS', None),
+        'CLOUDINARY_CLOUD_NAME': ('Cloudinary cloud name', None),
+        'CLOUDINARY_API_KEY': ('Cloudinary API key', None),
+        'CLOUDINARY_API_SECRET': ('Cloudinary API secret', None),
+        'AUTH_SERVICE_URL': ('OAuth service URL', 'https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data'),
+    }
+    
+    missing = []
+    warnings = []
+    
+    # Check required variables
+    for var, description in required_vars.items():
+        value = os.environ.get(var)
+        if not value:
+            missing.append(f"  - {var}: {description}")
+    
+    # Check optional variables and warn if missing
+    for var, (description, default) in optional_vars.items():
+        value = os.environ.get(var)
+        if not value and default is None:
+            warnings.append(f"  - {var}: {description}")
+    
+    # Report errors
+    if missing:
+        error_msg = (
+            "\n" + "=" * 60 + "\n"
+            "❌ MISSING REQUIRED ENVIRONMENT VARIABLES\n"
+            "=" * 60 + "\n"
+            "The following required variables are not set:\n\n"
+            + "\n".join(missing) + "\n\n"
+            "Please create a .env file in the backend directory.\n"
+            "See backend/.env.example for reference.\n"
+            "=" * 60
+        )
+        raise ValueError(error_msg)
+    
+    # Report warnings
+    if warnings:
+        warning_msg = (
+            "\n" + "=" * 60 + "\n"
+            "⚠️  OPTIONAL ENVIRONMENT VARIABLES NOT SET\n"
+            "=" * 60 + "\n"
+            "The following optional features may not work:\n\n"
+            + "\n".join(warnings) + "\n\n"
+            "See backend/.env.example for reference.\n"
+            "=" * 60
+        )
+        print(warning_msg)
+    
+    return True
+
+
+# Run validation at startup
+validate_env_vars()
+
+# MongoDB connection
 mongo_url = os.environ.get('MONGO_URL')
 db_name = os.environ.get('DB_NAME')
-
-if not mongo_url:
-    raise ValueError("MONGO_URL environment variable is required. Please check your .env file.")
-if not db_name:
-    raise ValueError("DB_NAME environment variable is required. Please check your .env file.")
-
 client = AsyncIOMotorClient(mongo_url)
 db = client[db_name]
 
