@@ -39,6 +39,7 @@ const NotificationPanel = ({ isOpen, onClose, onUnreadCountChange }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isMarkingAll, setIsMarkingAll] = useState(false);
+  const [isClearingAll, setIsClearingAll] = useState(false);
 
   const fetchNotifications = useCallback(async () => {
     try {
