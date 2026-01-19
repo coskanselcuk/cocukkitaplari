@@ -203,6 +203,15 @@ export const authApi = {
   logout: async () => {
     const response = await api.post('/auth/logout');
     return response.data;
+  },
+  // Apple Sign-In
+  verifyAppleToken: async (appleData) => {
+    const response = await api.post('/auth/apple/verify', appleData);
+    return response.data;
+  },
+  getAppleConfig: async () => {
+    const response = await api.get('/auth/apple/config');
+    return response.data;
   }
 };
 
