@@ -158,8 +158,9 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
                 </button>
               )}
               
-              {/* Google Sign-In */}
+              {/* Google Sign-In Button */}
               <button
+                id="google-signin-btn"
                 onClick={loginWithGoogle}
                 disabled={isLoading}
                 className="w-full flex items-center justify-center gap-2 bg-white border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 disabled:opacity-50 transition-colors"
