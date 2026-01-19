@@ -10,6 +10,75 @@ const api = axios.create({
   },
 });
 
+// ============ Global Error Interceptor ============
+api.interceptors.response.use(
+  // Success handler - pass through
+  (response) => response,
+  
+  // Error handler
+  (error) => {
+    const status = error.response?.status;
+    const message = error.response?.data?.detail || error.message;
+    
+    // Handle specific error codes
+    switch (status) {
+      case 401:
+        // Unauthorized - clear auth and redirect to login
+        console.warn('Unauthorized access - session may have expired');
+        // Clear stored session if exists
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('session_token');
+          // Optionally dispatch a custom event for auth context to handle
+          window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+        }
+        break;
+        
+      case 403:
+        // Forbidden - user doesn't have permission
+        console.warn('Access forbidden:', message);
+        break;
+        
+      case 404:
+        // Not found - resource doesn't exist
+        console.warn('Resource not found:', error.config?.url);
+        break;
+        
+      case 500:
+      case 502:
+      case 503:
+        // Server error
+        console.error('Server error:', message);
+        break;
+        
+      default:
+        // Network error or other issues
+        if (!error.response) {
+          console.error('Network error - please check your connection');
+        }
+    }
+    
+    // Always reject to let calling code handle the error too
+    return Promise.reject(error);
+  }
+);
+
+// ============ Request Interceptor (add auth token) ============
+api.interceptors.request.use(
+  (config) => {
+    // Add session token if available
+    const token = typeof window !== 'undefined' 
+      ? localStorage.getItem('session_token') 
+      : null;
+    
+    if (token) {
+      config.headers['X-Session-Token'] = token;
+    }
+    
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Books API
 export const booksApi = {
   getAll: async (params = {}) => {
