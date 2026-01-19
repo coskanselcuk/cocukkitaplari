@@ -53,6 +53,13 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
   - **Admin Panel**: Added "Tümünü Sil" (Delete All) button to permanently delete all notifications
   - **Backend**: Added `/api/notifications/clear-all` (user) and `/api/notifications/admin/delete-all` (admin) endpoints
   - **Database**: Uses `notification_cleared` collection to track user-specific cleared notifications
+- ✅ **Apple Sign-In (Sign in with Apple) Integration**:
+  - **Backend**: New `/api/auth/apple/verify` endpoint for Apple identity token verification
+  - **Backend**: New `/api/auth/apple/config` endpoint for frontend configuration
+  - **Frontend**: Updated AuthContext with `loginWithApple` method using `@capacitor-community/apple-sign-in` plugin
+  - **Frontend**: Profile page shows Apple Sign-In button (black) on iOS, Google Sign-In for all platforms
+  - **Database**: Users collection extended with `apple_user_id` and `auth_providers` fields
+  - **Account Linking**: If user signs in with Apple using an email that exists (from Google), accounts are linked
 
 ### Previous Sessions
 
