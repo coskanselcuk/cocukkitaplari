@@ -91,6 +91,13 @@ async def get_user_notifications(request: Request, limit: int = 20, unread_only:
     user_id = user["user_id"] if user else "guest"
     user_tier = user.get("subscription_tier", "free") if user else "free"
     
+    # Get cleared notification IDs for this user
+    user_cleared = await db.notification_cleared.find(
+        {"user_id": user_id},
+        {"notification_id": 1}
+    ).to_list(length=1000)
+    cleared_ids = [c["notification_id"] for c in user_cleared]
+    
     # Build query for notifications
     # Get notifications that target: 'all', or user's specific tier, or are user-specific
     query = {
@@ -112,6 +119,10 @@ async def get_user_notifications(request: Request, limit: int = 20, unread_only:
         ]
     }
     
+    # Exclude cleared notifications
+    if cleared_ids:
+        query["id"] = {"$nin": cleared_ids}
+    
     # Check read status
     user_reads = await db.notification_reads.find(
         {"user_id": user_id},
@@ -120,7 +131,11 @@ async def get_user_notifications(request: Request, limit: int = 20, unread_only:
     read_ids = {r["notification_id"] for r in user_reads}
     
     if unread_only:
-        query["id"] = {"$nin": list(read_ids)}
+        if "id" in query:
+            # Combine with existing $nin
+            query["id"]["$nin"] = list(set(query["id"]["$nin"] + list(read_ids)))
+        else:
+            query["id"] = {"$nin": list(read_ids)}
     
     # Fetch notifications
     notifications = await db.notifications.find(
