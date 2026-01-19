@@ -28,7 +28,6 @@ next-env.d.ts
 # Production builds
 /build
 dist/
-dist
 
 # Environment files - IMPORTANT: Contains secrets!
 .env
@@ -53,7 +52,7 @@ dump.rdb
 
 # Python
 __pycache__/
-*pyc*
+*.pyc
 venv/
 .venv/
 
@@ -83,65 +82,15 @@ agenthub/agents/youtube/db
 
 # Mobile development
 android-sdk/
+ios/
+android/
 
 # Local uploads (migrated to Cloudinary)
 backend/uploads/
 
 # Migration backup (contains data)
 backend/migration_backup.json
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
+
+# Capacitor native builds (generated, not tracked)
+frontend/ios/
+frontend/android/
