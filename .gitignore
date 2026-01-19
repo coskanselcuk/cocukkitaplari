@@ -94,3 +94,7 @@ backend/migration_backup.json
 # Capacitor native builds (generated, not tracked)
 frontend/ios/
 frontend/android/
+-e 
+# Environment files
+*.env
+*.env.*
