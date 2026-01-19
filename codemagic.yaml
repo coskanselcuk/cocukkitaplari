@@ -16,6 +16,9 @@ workflows:
         bundle_identifier: com.cocukkitaplari.app
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
+        # Google Sign-In - Reversed iOS Client ID for URL scheme
+        GOOGLE_IOS_CLIENT_ID: "60785703056-7tdok72tch0lsvvoghcbfgc8l4kbtu8r.apps.googleusercontent.com"
+        GOOGLE_REVERSED_CLIENT_ID: "com.googleusercontent.apps.60785703056-7tdok72tch0lsvvoghcbfgc8l4kbtu8r"
       node: 20
       xcode: latest
       cocoapods: default
@@ -37,6 +40,35 @@ workflows:
           cd frontend
           npx cap add ios || true
           npx cap sync ios
+      
+      - name: Configure Google Sign-In URL Scheme
+        script: |
+          cd frontend/ios/App/App
+          # Add Google reversed client ID to Info.plist for Google Sign-In
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes array" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0 dict" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string $GOOGLE_REVERSED_CLIENT_ID" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLName string com.cocukkitaplari.app" Info.plist || true
+          echo "Google Sign-In URL scheme configured"
+      
+      - name: Configure Apple Sign-In Capability
+        script: |
+          cd frontend/ios/App/App
+          # Create or update entitlements file for Sign in with Apple
+          cat > App.entitlements << 'ENTITLEMENTS'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>com.apple.developer.applesignin</key>
+              <array>
+                  <string>Default</string>
+              </array>
+          </dict>
+          </plist>
+          ENTITLEMENTS
+          echo "Apple Sign-In entitlement configured"
       
       - name: Install CocoaPods
         script: |
@@ -75,6 +107,8 @@ workflows:
         - cocukkitaplari_keystore  # Must be uploaded to Codemagic first!
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
+        # Google Sign-In Web Client ID (required for Android)
+        GOOGLE_WEB_CLIENT_ID: "60785703056-d07ioivj55tmk45p1evgc8o873q1um1q.apps.googleusercontent.com"
       node: 20
       java: 17
     
@@ -99,6 +133,15 @@ workflows:
       - name: Set Android SDK location
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > frontend/android/local.properties
+      
+      - name: Configure Google Sign-In for Android
+        script: |
+          cd frontend/android/app/src/main
+          # Add Google Sign-In configuration to strings.xml
+          if ! grep -q "server_client_id" res/values/strings.xml; then
+            sed -i 's|</resources>|    <string name="server_client_id">'"$GOOGLE_WEB_CLIENT_ID"'</string>\n</resources>|' res/values/strings.xml
+          fi
+          echo "Google Sign-In configured for Android"
       
       - name: Build Android AAB (signed)
         script: |
@@ -133,6 +176,9 @@ workflows:
         bundle_identifier: com.cocukkitaplari.app
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
+        # Google Sign-In - Reversed iOS Client ID for URL scheme
+        GOOGLE_IOS_CLIENT_ID: "60785703056-7tdok72tch0lsvvoghcbfgc8l4kbtu8r.apps.googleusercontent.com"
+        GOOGLE_REVERSED_CLIENT_ID: "com.googleusercontent.apps.60785703056-7tdok72tch0lsvvoghcbfgc8l4kbtu8r"
       node: 20
       xcode: latest
       cocoapods: default
@@ -154,6 +200,35 @@ workflows:
           cd frontend
           npx cap add ios || true
           npx cap sync ios
+      
+      - name: Configure Google Sign-In URL Scheme
+        script: |
+          cd frontend/ios/App/App
+          # Add Google reversed client ID to Info.plist for Google Sign-In
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes array" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0 dict" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string $GOOGLE_REVERSED_CLIENT_ID" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :CFBundleURLTypes:0:CFBundleURLName string com.cocukkitaplari.app" Info.plist || true
+          echo "Google Sign-In URL scheme configured"
+      
+      - name: Configure Apple Sign-In Capability
+        script: |
+          cd frontend/ios/App/App
+          # Create or update entitlements file for Sign in with Apple
+          cat > App.entitlements << 'ENTITLEMENTS'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>com.apple.developer.applesignin</key>
+              <array>
+                  <string>Default</string>
+              </array>
+          </dict>
+          </plist>
+          ENTITLEMENTS
+          echo "Apple Sign-In entitlement configured"
       
       - name: Install CocoaPods
         script: |
@@ -217,6 +292,8 @@ workflows:
         - google_play  # Must contain GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
+        # Google Sign-In Web Client ID (required for Android)
+        GOOGLE_WEB_CLIENT_ID: "60785703056-d07ioivj55tmk45p1evgc8o873q1um1q.apps.googleusercontent.com"
       node: 20
       java: 17
     
@@ -241,6 +318,15 @@ workflows:
       - name: Set Android SDK location
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > frontend/android/local.properties
+      
+      - name: Configure Google Sign-In for Android
+        script: |
+          cd frontend/android/app/src/main
+          # Add Google Sign-In configuration to strings.xml
+          if ! grep -q "server_client_id" res/values/strings.xml; then
+            sed -i 's|</resources>|    <string name="server_client_id">'"$GOOGLE_WEB_CLIENT_ID"'</string>\n</resources>|' res/values/strings.xml
+          fi
+          echo "Google Sign-In configured for Android"
       
       - name: Build Android AAB (signed)
         script: |
