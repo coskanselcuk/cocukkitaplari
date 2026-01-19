@@ -39,6 +39,12 @@ workflows:
         script: |
           cd frontend
           npx cap add ios || true
+          
+          # Update iOS deployment target to 14.0 for Apple Sign-In compatibility
+          cd ios/App
+          sed -i '' "s/platform :ios, '.*'/platform :ios, '14.0'/" Podfile
+          
+          cd ../..
           npx cap sync ios
       
       - name: Configure Google Sign-In URL Scheme
@@ -199,6 +205,12 @@ workflows:
         script: |
           cd frontend
           npx cap add ios || true
+          
+          # Update iOS deployment target to 14.0 for Apple Sign-In compatibility
+          cd ios/App
+          sed -i '' "s/platform :ios, '.*'/platform :ios, '14.0'/" Podfile
+          
+          cd ../..
           npx cap sync ios
       
       - name: Configure Google Sign-In URL Scheme
