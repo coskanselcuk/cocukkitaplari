@@ -311,6 +311,68 @@ async def delete_notification(notification_id: str, request: Request):
     return {"success": True}
 
 
+@router.delete("/admin/delete-all")
+async def delete_all_notifications(request: Request):
+    """Admin: Delete all notifications"""
+    db = get_db()
+    
+    # Verify admin
+    user = await get_user_from_request(request)
+    if not user or user.get("email") != "coskanselcuk@gmail.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Delete all notifications
+    result = await db.notifications.delete_many({})
+    
+    # Also delete all read records
+    await db.notification_reads.delete_many({})
+    
+    return {"success": True, "deleted_count": result.deleted_count}
+
+
+@router.delete("/clear-all")
+async def clear_user_notifications(request: Request):
+    """User: Clear all notifications (removes from user's view)"""
+    db = get_db()
+    
+    user = await get_user_from_request(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
+    user_id = user["user_id"]
+    user_tier = user.get("subscription_tier", "free")
+    
+    # Get all notification IDs that target this user
+    notifications = await db.notifications.find(
+        {
+            "$or": [
+                {"target_audience": "all"},
+                {"target_audience": user_tier},
+                {"target_user_id": user_id}
+            ]
+        },
+        {"id": 1}
+    ).to_list(length=1000)
+    
+    notification_ids = [n["id"] for n in notifications]
+    
+    # Mark all as cleared (we use a special "cleared" collection to hide them)
+    for notif_id in notification_ids:
+        await db.notification_cleared.update_one(
+            {"user_id": user_id, "notification_id": notif_id},
+            {
+                "$set": {
+                    "user_id": user_id,
+                    "notification_id": notif_id,
+                    "cleared_at": datetime.now(timezone.utc).isoformat()
+                }
+            },
+            upsert=True
+        )
+    
+    return {"success": True, "cleared_count": len(notification_ids)}
+
+
 # ============ AUTO-NOTIFICATION HELPERS ============
 
 async def create_system_notification(
