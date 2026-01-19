@@ -11,6 +11,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 mongo_url = os.environ.get('MONGO_URL')
 db_name = os.environ.get('DB_NAME')
+# Emergent OAuth service URL - defaults to production
+AUTH_SERVICE_URL = os.environ.get('AUTH_SERVICE_URL', 'https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data')
 
 
 def get_db():
@@ -40,7 +42,7 @@ async def exchange_session(request: SessionRequest, response: Response):
     async with httpx.AsyncClient() as client:
         try:
             auth_response = await client.get(
-                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                AUTH_SERVICE_URL,
                 headers={"X-Session-ID": request.session_id}
             )
             
