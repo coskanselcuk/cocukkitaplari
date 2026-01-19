@@ -14,7 +14,7 @@ import {
   generateSrcSet,
   getSizesAttribute,
   getPlaceholderUrl,
-} from '../utils/cloudinaryHelper';
+} from '../../utils/cloudinaryHelper';
 
 const OptimizedImage = ({
   src,
