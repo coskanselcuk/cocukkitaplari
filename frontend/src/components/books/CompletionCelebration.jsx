@@ -24,6 +24,7 @@ const CompletionCelebration = ({ book, onClose, onRestart }) => {
       size: 8 + (i % 4) * 4,
       isCircle: i % 2 === 0
     }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   , []);
 
   // Generate stars with useMemo
