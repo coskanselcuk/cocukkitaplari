@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Bell, X, Check, CheckCheck, Book, FolderOpen, Crown, 
-  Star, Megaphone, Gift, Clock, Loader2 
+  Star, Megaphone, Gift, Clock, Loader2, Trash2 
 } from 'lucide-react';
 import { notificationsApi } from '../../services/api';
 
