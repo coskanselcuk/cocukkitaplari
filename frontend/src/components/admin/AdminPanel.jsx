@@ -1363,6 +1363,7 @@ const AdminPanel = ({ onBack }) => {
                       value={editCategory.iconImage}
                       onChange={(url) => setEditCategory({...editCategory, iconImage: url})}
                       placeholder="Kategori ikonu yükle veya URL yapıştır"
+                      imageType="icon"
                     />
                     {editCategory.iconImage && (
                       <div className="mt-2 flex items-center gap-2">
