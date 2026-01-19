@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { Capacitor } from '@capacitor/core';
 import { authApi } from '../services/api';
 import { setUserId as setIapUserId, clearUserId as clearIapUserId } from '../services/iapService';
 
@@ -19,6 +20,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authError, setAuthError] = useState(null);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -69,7 +71,6 @@ export const AuthProvider = ({ children }) => {
         }
       }
     } catch (error) {
-      console.error('Session exchange failed:', error);
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -77,23 +78,96 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = useCallback(() => {
+  // Google Sign-In (existing Emergent auth)
+  const loginWithGoogle = useCallback(() => {
+    setAuthError(null);
     // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
     const redirectUrl = window.location.origin;
     window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
   }, []);
 
+  // Apple Sign-In
+  const loginWithApple = useCallback(async () => {
+    setAuthError(null);
+    setIsLoading(true);
+    
+    try {
+      const platform = Capacitor.getPlatform();
+      
+      if (platform === 'ios') {
+        // Native iOS Apple Sign-In
+        const { SignInWithApple } = await import('@capacitor-community/apple-sign-in');
+        
+        const result = await SignInWithApple.authorize({
+          clientId: 'com.cocukkitaplari.app',
+          redirectURI: '',
+          scopes: 'email name',
+          state: '',
+          nonce: ''
+        });
+        
+        if (result.response && result.response.identityToken) {
+          // Send identity token to backend for verification
+          const response = await authApi.verifyAppleToken({
+            identityToken: result.response.identityToken,
+            userIdentifier: result.response.user,
+            email: result.response.email,
+            fullName: result.response.givenName || result.response.familyName ? {
+              givenName: result.response.givenName,
+              familyName: result.response.familyName
+            } : null,
+            authorizationCode: result.response.authorizationCode
+          });
+          
+          if (response.success && response.user) {
+            setUser(response.user);
+            setIsAuthenticated(true);
+            if (response.user.user_id) {
+              setIapUserId(response.user.user_id);
+            }
+          } else {
+            throw new Error('Apple Sign-In verification failed');
+          }
+        } else {
+          throw new Error('No identity token received from Apple');
+        }
+      } else {
+        // Web/Android - show message that Apple Sign-In is only available on iOS
+        setAuthError('Apple ile giriş sadece iOS cihazlarda kullanılabilir. Lütfen Google ile giriş yapın.');
+      }
+    } catch (error) {
+      if (error.message?.includes('cancelled') || error.code === 1001) {
+        // User cancelled - not an error
+        setAuthError(null);
+      } else {
+        setAuthError(error.message || 'Apple ile giriş başarısız oldu');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Legacy login function - defaults to Google
+  const login = useCallback(() => {
+    loginWithGoogle();
+  }, [loginWithGoogle]);
+
   const logout = useCallback(async () => {
     try {
       await authApi.logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      // Ignore logout errors
     } finally {
       setUser(null);
       setIsAuthenticated(false);
+      setAuthError(null);
       // Clear IAP user ID
       clearIapUserId();
     }
+  }, []);
+
+  const clearAuthError = useCallback(() => {
+    setAuthError(null);
   }, []);
 
   // Check if user has premium access
@@ -109,15 +183,23 @@ export const AuthProvider = ({ children }) => {
     return isPremiumUser; // Premium users can access premium books
   }, [isAuthenticated, isPremiumUser]);
 
+  // Check if running on iOS
+  const isIOS = Capacitor.getPlatform() === 'ios';
+
   const value = {
     user,
     isLoading,
     isAuthenticated,
     isPremiumUser,
     isAdmin,
+    isIOS,
+    authError,
     login,
+    loginWithGoogle,
+    loginWithApple,
     logout,
-    canAccessBook
+    canAccessBook,
+    clearAuthError
   };
 
   return (
