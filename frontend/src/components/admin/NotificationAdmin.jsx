@@ -155,13 +155,29 @@ const NotificationAdmin = () => {
           <Bell size={24} />
           Bildirim Yönetimi
         </h2>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
-        >
-          <Plus size={18} />
-          Yeni Bildirim
-        </button>
+        <div className="flex gap-2">
+          {notifications.length > 0 && (
+            <button
+              onClick={handleDeleteAll}
+              disabled={isDeletingAll}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+            >
+              {isDeletingAll ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Trash2 size={18} />
+              )}
+              Tümünü Sil
+            </button>
+          )}
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
+          >
+            <Plus size={18} />
+            Yeni Bildirim
+          </button>
+        </div>
       </div>
 
       {/* Success/Error Messages */}
