@@ -281,14 +281,21 @@ const BookReaderLandscape = ({ book, onClose }) => {
       audio.pause();
       setIsPlaying(false);
     } else {
+      // Mark that audio has been started for this page (prevents auto-play from restarting)
+      audioStartedForPageRef.current = currentPage;
+      
       // Always set the correct audio source for the current page
       // This ensures we play the right audio even after page changes
-      if (audio.src !== currentPageData.audioUrl) {
+      if (!audio.src || audio.src !== currentPageData.audioUrl) {
         audio.src = currentPageData.audioUrl;
       }
       audio.play()
         .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
+        .catch(() => {
+          setIsPlaying(false);
+          // Reset tracker if play failed so user can retry
+          audioStartedForPageRef.current = -1;
+        });
     }
   };
 
