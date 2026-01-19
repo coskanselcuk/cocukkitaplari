@@ -10,8 +10,10 @@ from typing import Optional
 import os
 import uuid
 import httpx
+import logging
 
 router = APIRouter(prefix="/voices", tags=["voices"])
+logger = logging.getLogger(__name__)
 
 mongo_url = os.environ.get('MONGO_URL')
 db_name = os.environ.get('DB_NAME')
