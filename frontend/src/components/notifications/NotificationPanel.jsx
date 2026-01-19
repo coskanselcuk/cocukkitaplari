@@ -88,6 +88,20 @@ const NotificationPanel = ({ isOpen, onClose, onUnreadCountChange }) => {
     }
   };
 
+  const handleClearAll = async () => {
+    try {
+      setIsClearingAll(true);
+      await notificationsApi.clearAll();
+      setNotifications([]);
+      setUnreadCount(0);
+      onUnreadCountChange?.(0);
+    } catch (error) {
+      console.error('Failed to clear notifications:', error);
+    } finally {
+      setIsClearingAll(false);
+    }
+  };
+
   const formatTimeAgo = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
