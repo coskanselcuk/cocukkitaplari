@@ -78,6 +78,30 @@ const webpackConfig = {
         ],
       };
 
+      // Disable error overlay for third-party errors (PostHog, analytics)
+      // This only affects development mode
+      if (webpackConfig.devServer) {
+        webpackConfig.devServer.client = {
+          ...webpackConfig.devServer.client,
+          overlay: {
+            errors: true,
+            warnings: false,
+            runtimeErrors: (error) => {
+              // Suppress PostHog/analytics errors
+              if (
+                error?.message?.includes('PerformanceServerTiming') ||
+                error?.message?.includes('DataCloneError') ||
+                error?.message?.includes('posthog') ||
+                error?.stack?.includes('posthog')
+              ) {
+                return false;
+              }
+              return true;
+            },
+          },
+        };
+      }
+
       // Add health check plugin to webpack if enabled
       if (config.enableHealthCheck && healthPluginInstance) {
         webpackConfig.plugins.push(healthPluginInstance);
