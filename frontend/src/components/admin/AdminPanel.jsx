@@ -1105,6 +1105,7 @@ const AdminPanel = ({ onBack }) => {
                   onChange={(url) => setEditPage({...editPage, image: url})}
                   label="Sayfa Resmi"
                   placeholder="https://images.unsplash.com/..."
+                  imageType="page"
                 />
               </div>
               
