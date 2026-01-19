@@ -61,18 +61,20 @@ workflows:
   # ============================================
   # Android Build (Build Only - No Publishing)
   # ============================================
+  # IMPORTANT: Before running this workflow, you MUST:
+  # 1. Generate a keystore locally (see KEYSTORE_SETUP.md)
+  # 2. Upload the keystore to Codemagic: Teams > Your Team > Code signing identities > Android keystores
+  # 3. Name it "cocukkitaplari_keystore" with alias "cocukkitaplari"
   android-build:
     name: Android Build
     max_build_duration: 60
     instance_type: mac_mini_m1
     
     environment:
+      android_signing:
+        - cocukkitaplari_keystore  # Must be uploaded to Codemagic first!
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
-        # Keystore credentials - set these in Codemagic app settings > Environment variables
-        CM_KEYSTORE_PASSWORD: $CM_KEYSTORE_PASSWORD
-        CM_KEY_ALIAS: $CM_KEY_ALIAS
-        CM_KEY_PASSWORD: $CM_KEY_PASSWORD
       node: 20
       java: 17
     
@@ -98,53 +100,13 @@ workflows:
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > frontend/android/local.properties
       
-      - name: Generate keystore
-        script: |
-          # Generate keystore if not exists
-          KEYSTORE_PATH=$CM_BUILD_DIR/frontend/android/app/cocukkitaplari.keystore
-          keytool -genkey -v \
-            -keystore $KEYSTORE_PATH \
-            -alias cocukkitaplari \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass android123 \
-            -keypass android123 \
-            -dname "CN=Cocuk Kitaplari, OU=Mobile, O=Cocuk Kitaplari, L=Istanbul, ST=Istanbul, C=TR"
-      
-      - name: Configure signing
-        script: |
-          cd frontend/android
-          cat > app/signing.gradle << 'SIGNING'
-          android {
-              signingConfigs {
-                  release {
-                      storeFile file("cocukkitaplari.keystore")
-                      storePassword "android123"
-                      keyAlias "cocukkitaplari"
-                      keyPassword "android123"
-                  }
-              }
-              buildTypes {
-                  release {
-                      signingConfig signingConfigs.release
-                  }
-              }
-          }
-          SIGNING
-          
-          # Add signing config to build.gradle if not present
-          if ! grep -q "signing.gradle" app/build.gradle; then
-            echo 'apply from: "signing.gradle"' >> app/build.gradle
-          fi
-      
-      - name: Build Android AAB
+      - name: Build Android AAB (signed)
         script: |
           cd frontend/android
           chmod +x gradlew
           ./gradlew bundleRelease
       
-      - name: Build Android APK
+      - name: Build Android APK (signed)
         script: |
           cd frontend/android
           ./gradlew assembleRelease
@@ -239,7 +201,9 @@ workflows:
 
   # ============================================
   # Android with Play Store Publishing
-  # Requires: Google Play API credentials in Codemagic
+  # Requires: 
+  # 1. Keystore uploaded to Codemagic (cocukkitaplari_keystore)
+  # 2. Google Play API credentials in Codemagic (google_play group)
   # ============================================
   android-publish:
     name: Android Build + Play Store
@@ -248,9 +212,9 @@ workflows:
     
     environment:
       android_signing:
-        - cocukkitaplari_keystore
+        - cocukkitaplari_keystore  # Must be uploaded to Codemagic first!
       groups:
-        - google_play
+        - google_play  # Must contain GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
       node: 20
@@ -278,7 +242,7 @@ workflows:
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > frontend/android/local.properties
       
-      - name: Build Android AAB
+      - name: Build Android AAB (signed)
         script: |
           cd frontend/android
           chmod +x gradlew
