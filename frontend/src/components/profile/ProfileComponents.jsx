@@ -274,6 +274,12 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
           </button>
         )}
       </div>
+      
+      {/* Subscription Modal */}
+      <SubscriptionModal 
+        isOpen={showSubscriptionModal} 
+        onClose={() => setShowSubscriptionModal(false)} 
+      />
     </div>
   );
 };
