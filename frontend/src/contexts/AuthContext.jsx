@@ -172,7 +172,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [handleGoogleCallback]);
+  }, []);
 
   // Apple Sign-In - Only on iOS
   const loginWithApple = useCallback(async () => {
