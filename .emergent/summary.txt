@@ -14,108 +14,87 @@ The user wants to build a pixel-perfect clone of the TRT Çocuk Kitaplık mobile
 **User's preferred language**: The user communicates in English. However, the application's content and UI text are in **Turkish**. The next agent must continue to use Turkish for all user-facing text in the app.
 
 **what currently exists?**
-A full-stack hybrid mobile application built with React (and Capacitor), FastAPI, and MongoDB. The app is feature-rich and nearing completion of its core functionality.
--   **Core App:** The main screens (Home, Library, Search) are dynamic. The book reader's critical audio-sync bug has been fixed and verified.
--   **Authentication:** Emergent-managed Google Social Login is integrated.
--   **Monetization:** A premium book model is in place. The foundation for native in-app purchases (iOS/Android) has been built on both backend and frontend, including a 7-day free trial system that requires user login.
--   **Admin Panel:** A comprehensive  panel allows full CRUD for Books, Pages, and Categories.
-    -   **Notifications:** A Bildirimler tab allows creating/deleting custom announcements. New books/categories automatically generate notifications.
-    -   **Custom Voices:** A Sesler tab allows the user to add, verify against ElevenLabs, and delete custom voice IDs.
-    -   **Per-Page Voice:** The page editor in the admin panel now includes a dropdown to select a custom voice for audio generation.
-    -   **Image Uploads:** Categories and Pages support custom image uploads.
--   **Mobile Readiness:** Capacitor is integrated, with guides for building and store submission.
+A feature-rich full-stack application built with React, FastAPI, and now running on a production-ready stack.
+-   **Infrastructure:** The backend is configured for deployment on Railway, the database has been migrated to a user-provided MongoDB Atlas cluster, and all image assets are now stored and served from a user-provided Cloudinary account.
+-   **CI/CD:** A  file is configured to handle iOS and Android builds and publishing, with workflows for building, code signing, and publishing to TestFlight/Play Store.
+-   **Core App:** The main application screens, book reader, authentication, and admin panel for content management (Books, Pages, Categories, Voices, Notifications) are fully functional.
+-   **Code Quality:** Multiple code review passes have been completed, fixing issues related to hardcoded secrets, removing debug logs from production builds, cleaning up  files, implementing environment variable validation, and organizing one-off scripts.
 
 **Last working item**:
--   Last item agent was working: Fixing an issue where changing a page's voice in the admin panel did not invalidate the existing audio file. The user would change the voice, but the old audio would still play.
+-   Last item agent was working: At the user's request, the agent was performing a final code review to find and remove any remaining references to the original cloned app, TRT Çocuk Kitaplık, to ensure the final product is de-branded. The agent began searching for the string TRT.
 -   Status: IN PROGRESS
 -   Agent Testing Done: N
--   Which testing method agent to use? Manual testing. The user should verify the complete flow:
-    1.  Log in as admin.
-    2.  Go to the admin panel, select a book, and edit a page that has audio.
-    3.  Change the voice from the dropdown and click Güncelle (Update).
-    4.  **Crucially, verify that the UI updates to show Ses Yok (No Audio) or a similar indicator for that page, signifying the old audio was cleared.**
-    5.  Regenerate the audio for that page.
-    6.  Open the book as a user and confirm the new voice is playing on that page.
+-   Which testing method agent to use? Manual text search using .
 -   User Testing Done: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Category Icon Persistence (P0 - CRITICAL)**
-    -   **Description:** User reported that after editing a category to replace an emoji icon with an uploaded image, the change did not persist. The backend  model was missing the  field, and the update logic was incorrectly filtering out empty strings meant to clear the emoji field.
-    -   **Attempted fixes:** The agent added  to the Pydantic model and adjusted the backend update logic to correctly handle empty strings. The frontend  reset logic was also fixed.
-    -   **Next debug checklist:** The user needs to verify the fix by editing a category, uploading an image icon, saving, and then reloading the admin panel to confirm the change is persistent.
-    -   **Why fix this issue and what will be achieved with the fix?** This is a core CMS functionality regression. Fixing it ensures admins can reliably manage category appearance.
+-   **Issue 1: Notification Modal CSS (P1)**
+    -   **Description:** User reported that in the admin panel's New Notification modal, the text for dropdown options like Bildirim Türü and Hedef Kitle was invisible until selected.
+    -   **Attempted fixes:** The agent applied a fix by adding explicit  and  classes to the unselected buttons and input fields in .
+    -   **Next debug checklist:** The user needs to verify the fix by logging into the admin panel, opening the Add New Notification modal, and confirming that all text and options are visible by default.
+    -   **Why fix this issue and what will be achieved with the fix?** Improves the usability of a core admin feature.
     -   **Status:** USER VERIFICATION PENDING
-    -   **Is recurring issue?** N
-    -   **Should Test frontend/backend/both after fix?** Both
-    -   **Blocked on other issue:** None.
--   **Issue 2: Notification Modal CSS (P2)**
-    -   **Description:** The user reported that the New Notification modal in the admin panel has CSS issues, likely a z-index conflict, causing it to render incorrectly or behind other elements.
-    -   **Attempted fixes:** The agent attempted a fix by increasing the z-index of the modal in .
-    -   **Next debug checklist:**
-        1.  Log in as admin.
-        2.  Navigate to the Bildirimler (Notifications) tab.
-        3.  Click Yeni Bildirim Ekle (Add New Notification).
-        4.  Verify the modal appears correctly on top of all other content.
-    -   **Why fix this issue and what will be achieved with the fix?** Improves usability of the admin panel.
-    -   **Status:** USER VERIFICATION PENDING
-    -   **Is recurring issue?** N
+    -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** None.
+    -   **Blocked on other issue:** None
 
 **In progress Task List**:
--   **Task 1: Complete Audio Invalidation UI Feedback (P0)**
-    -   **Where to resume:** The backend logic to clear  when  changes in  is complete. The missing piece is the frontend feedback. In , the  function needs to be modified to re-fetch or locally update the book's pages after a successful update. This will refresh the page list and correctly show the Ses Yok status, prompting the user to regenerate the audio.
-    -   **What will be achieved with this?** This will complete the per-page voice change feature by providing a clear and correct workflow for the admin user.
+-   **Task 1: Remove TRT Çocuk Kitaplık References (P0)**
+    -   **Where to resume:** The agent has run a  command for TRT and found results in  and some binary-looking output. The next step is to perform a more thorough, case-insensitive search across the entire codebase for TRT and TRT Çocuk Kitaplık, then remove any found references from code, comments, or documentation, excluding the  history.
+    -   **What will be achieved with this?** Ensures the application is fully de-branded before launch, as requested by the user.
     -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Frontend
+    -   **Should Test frontend/backend/both after fix?** Not applicable.
     -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks:**
--   **Task 1 (P1):** Fully implement and test the native in-app purchase flow. The backend routes and frontend services are in place but require end-to-end testing with sandbox accounts for Apple/Google. This includes purchase, restore, and subscription status syncing.
--   **Task 2 (P2):** Generate screenshots for the app stores using the provided script ().
+-   **Task 1 (P1):** Finalize Codemagic Android Publishing. The user needs to add the  to their app-level environment variables in Codemagic to allow publishing to the Google Play Store.
+-   **Task 2 (P1):** Fully implement and test the native in-app purchase flow. The backend routes and frontend services are in place but require end-to-end testing with sandbox accounts for Apple/Google, which the user did not have set up previously.
+-   **Task 3 (P2):** Generate screenshots for the app stores using the provided script ().
 
 **Future Tasks:**
 -   Add a Bulk Audio Generation feature to the admin panel.
 -   Implement a reading streak feature to encourage user engagement.
 -   Add a Profile Settings page where users can edit their name.
--   Implement trial expiration push notifications.
+-   Implement trial expiration push notifications (the backend cron job exists, but no push service like Firebase is integrated).
 -   Implement an offline mode for downloaded books.
 -   Implement a night mode / dark theme.
 
 **Completed work in this session**
--   **Critical Bug Fix:** Resolved the recurring audio synchronization bug in the book reader (), which was the primary blocker.
--   **Branding:** Removed the Made with Emergent badge.
--   **Feature: In-App Purchases:** Implemented the backend () and frontend (, ) foundation for handling IAPs and subscriptions.
--   **Feature: Free Trial:** Implemented a 7-day free trial, including backend logic to track trial status and frontend UI updates in the subscription modal.
--   **Feature: In-App Notifications:** Built a complete notification system:
-    -   Backend routes () for CRUD and fetching.
-    -   Frontend UI () to display notifications to users.
-    -   Admin UI () to create and manage custom notifications.
-    -   Automatic notification generation when new books or categories are created.
--   **Feature: Custom Category Icons:** Enabled image uploads for category icons, replacing the static emoji picker, and fixed the associated persistence bug.
--   **Feature: Custom Voice Management:** Implemented a Sesler (Voices) tab in the admin panel for users to manage a list of ElevenLabs voice IDs.
--   **Feature: Per-Page Voice Selection:** Updated the admin panel to allow assigning a specific custom voice to each book page, which is then used for audio generation.
--   **Bug Fix:** Fixed the backend logic to automatically invalidate a page's audio when its assigned voice is changed.
+-   **Production Migration:**
+    -   Migrated the database from local MongoDB to a user-provided MongoDB Atlas cluster.
+    -   Integrated Cloudinary for all image uploads and migrated existing local images.
+-   **Deployment Configuration:**
+    -   Created  and  to configure the backend for deployment on Railway.
+    -   Created  to set up CI/CD pipelines for building and publishing iOS and Android apps.
+    -   Troubleshot and resolved numerous build failures on Codemagic related to Node.js versions, React hook dependencies, and code signing.
+-   **Bug Fixes & Code Quality:**
+    -   Fixed the audio invalidation UI feedback in , ensuring the UI updates correctly when a page's voice is changed.
+    -   Implemented backend task for trial expiration notifications.
+    -   Resolved multiple code review findings:
+        -   Removed hardcoded URLs and added environment variable validation.
+        -   Removed all  and  statements from production builds.
+        -   Cleaned and corrected  files.
+        -   Created  files for both frontend and backend.
+        -   Organized one-off scripts into a  directory.
+        -   Fixed a  comment by connecting the Upgrade button in the profile to the existing .
 
 **Earlier issues found/mentioned but not fixed**
--   The notification modal CSS issue is still pending user verification.
+-   None. The previously mentioned CSS issue has a new fix applied and is awaiting user verification.
 
 **Known issue recurrence from previous fork**
--   **Issue recurrence in previous fork:** Book reader audio-visual synchronization.
--   **Recurrence count:** High.
--   **Status:** RESOLVED. The agent successfully debugged and fixed the complex state management and race conditions in , and the user confirmed the fix.
+-   None.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Frontend:** React, TailwindCSS, CapacitorJS for mobile wrapping.
--   **Backend:** FastAPI, Pydantic, Motor (async MongoDB driver).
--   **Database:** MongoDB.
--   **Authentication:** Emergent-managed Google Social Login (OAuth2).
--   **File Handling:** Local file storage on the backend via a  endpoint.
--   **State Management:** Heavy use of ,  in React, especially within the monolithic .
+-   **Frontend:** React, TailwindCSS, CapacitorJS, Craco
+-   **Backend:** FastAPI, Pydantic, Motor (async MongoDB driver)
+-   **Database:** MongoDB Atlas
+-   **Image Storage:** Cloudinary
+-   **Deployment:** Railway (Backend), Codemagic (Mobile CI/CD)
+-   **Authentication:** Emergent-managed Google Social Login (OAuth2)
 
 **key DB schema**
 -   **users**: 
@@ -126,70 +105,82 @@ A full-stack hybrid mobile application built with React (and Capacitor), FastAPI
 -   **voices**: 
 
 **changes in tech stack**
--   No new technologies added.  was already present and has now been built upon.
+-   **Database:** Migrated from local MongoDB to **MongoDB Atlas**.
+-   **File/Image Storage:** Migrated from local server filesystem to **Cloudinary**.
+-   **Deployment:** Introduced **Railway** for backend hosting and **Codemagic** for mobile CI/CD.
 
 **All files of reference**
--   : Heavily modified to add notifications tab, voices tab, and voice selectors. The  function needs to be fixed here.
--   : Modified to invalidate audio when  changes.
--   : New file for handling IAP and trials.
--   : New file for handling notifications.
--   : New file for managing custom voices.
--   : New component for voice management UI.
--   : Significantly updated to integrate with the new backend endpoints.
--   : Updated to include free trial logic.
+-   : New file for CI/CD configuration.
+-   : New file for backend deployment on Railway.
+-   : Modified to add environment variable validation.
+-   : Overwritten to integrate Cloudinary.
+-   : Updated with Atlas and Cloudinary credentials.
+-   : Updated with all required variables.
+-   : New file for production builds.
+-   : Cleaned up and corrected.
+-   : Modified to remove console logs in production.
+-   : Modified to fix CSS visibility issue.
+-   : Modified to implement subscription modal.
+-   : Modified to add a global error interceptor.
 
 **Areas that need refactoring**:
--    is over 1300 lines long and extremely complex. While new functionality was added in separate components (, ), the core state management and rendering logic for books and pages remains in this single file, making it brittle and hard to maintain.
+-    is still a very large monolithic component that could be broken down for better maintainability.
 
 **key api endpoints**
--   : (GET) Check a user's subscription/trial status.
--   : (POST) Activate a free trial for a user.
--   : (GET) Fetch notifications for the current user.
--   : (POST) Mark a notification as read.
--   : (POST, DELETE) Manage notifications from the admin panel.
--   : (GET, POST, DELETE) Manage the custom voice list.
--   : (POST) Verify a voice ID with ElevenLabs.
+-   : Now uploads directly to Cloudinary.
+-   : One-time script endpoint (can be removed).
+-   : One-time script endpoint (can be removed).
 
 **Critical Info for New Agent**
--   The main stability blocker (audio sync bug) is **resolved**. The user is happy with the core reader experience.
--   Your immediate priority is to finish the change voice invalidates audio feature. This is a small but important fix to complete the workflow. The backend part is done; you just need to ensure the frontend UI refreshes correctly in .
--   After that, confirm the category icon persistence fix and the notification modal CSS fix with the user.
--   The next major feature requested by the user is the full implementation of In-App Purchases.
+-   The application is now configured for a full production deployment pipeline. The backend runs on Railway, the database is on Atlas, and images are on Cloudinary.
+-   The user is actively working on deploying the app via Codemagic. Be prepared to assist with any further build or deployment issues on that platform.
+-   All sensitive keys and credentials are now managed through environment variables, with  files providing documentation. The code includes startup validation to ensure all required variables are set.
 
 **documents and test reports created in this job**
--   : Updated with all new features (IAP, Trial, Notifications, Custom Voices) and a revised backlog.
+-   
+-    (Updated)
+-   
+-   
+-   
+-   
+-   
+-   
+-   
 
 **Last 10 User Messages and any pending HUMAN messages**
--   **10. (LATEST)** User reports that after changing a page's voice in the admin panel and updating, the book still plays the old voice. **This is the current .**
--   **9.** User reports that the new custom voice management (Sesler) tab is working well.
--   **8.** User reports bugs in the Sesler tab: a specific ElevenLabs voice ID couldn't be verified, and the delete confirmation was blocked by the browser.
--   **7.** User clarifies they want a new Sesler (Voices) tab in the admin panel to manage a list of custom ElevenLabs Voice IDs, rather than a generic dropdown.
--   **6.** User wants to use different voices from ElevenLabs per page, not just the default.
--   **5.** User confirms category management is working but reports a persistence issue when updating a category icon.
--   **4.** User reports that the new Notification modal has CSS/visibility problems and that the category icon is static, requesting image upload functionality for it.
--   **3.** User confirms the in-app notification system functionality looks profound and asks about push notifications.
--   **2.** User asks to implement a Free Trial.
--   **1.** User confirms the critical audio sync bug is fixed and asks to remove the Made with Emergent branding.
+-   **10. (LATEST)** User asked the agent to check the codebase for any references to TRT Çocuk Kitaplık. (IN PROGRESS)
+-   **9.** User asked what to do about an error in  ().
+-   **8.** User asked the agent to analyze a code review finding about  statements and provided a detailed list.
+-   **7.** User asked if they should change anything in Railway after the agent fixed a hardcoded URL.
+-   **6.** User provided a code review finding about hardcoded URLs and secrets.
+-   **5.** User asked for help setting up Codemagic for the iOS build.
+-   **4.** User stated they do not have a Mac and asked for recommendations for iOS builds.
+-   **3.** User provided the production backend URL () and stated they want to proceed with a Capacitor Build.
+-   **2.** User asked for the port FastAPI runs on for the Railway deployment URL.
+-   **1.** User confirmed the Railway build is complete and asked for the next step.
 
 **Project Health Check:**
 -   **Broken:** None.
 -   **Mocked:** None.
 
 **3rd Party Integrations**
--   **ElevenLabs (Text-to-Speech):** Used via a backend service for on-demand audio generation.
--   **Emergent-managed Google Auth:** Used for user login.
--   **Capacitor:** For native mobile app wrapping.
-    -   : Installed and partially integrated for handling mobile payments.
+-   **ElevenLabs (Text-to-Speech)**
+-   **Emergent-managed Google Auth**
+-   **Capacitor** (with )
+-   **MongoDB Atlas (Database-as-a-Service)**
+-   **Cloudinary (Image/Media-as-a-Service)**
+-   **Railway (Backend Hosting)**
+-   **Codemagic (Mobile CI/CD)**
 
 **Testing status**
--   Testing agent used after significant changes: NO
+-   Testing agent used after significant changes: YES
 -   Troubleshoot agent used after agent stuck in loop: NO
 -   Test files created: []
--   Known regressions: None. The major regression (audio sync) was fixed.
+-   Known regressions: None.
 
 **Credentials to test flow:**
 -   Log in with any Google account for the standard user flow.
 -   To access the admin panel at , the logged-in user's email must be .
 
 **What agent forgot to execute**
-The previous agent correctly identified and fixed the backend logic for invalidating audio when a page's voice is changed. However, they did not complete the corresponding frontend change. The  function in  must be updated to re-fetch the page list after an update. Without this, the user does not get the visual feedback that the audio has been cleared and needs to be regenerated, leading them to believe the feature is broken.</analysis>
+-   The agent started the task of searching for TRT references but has not completed it. A thorough search across all files and removal of any branding is still required.</analysis>
