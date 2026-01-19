@@ -1,12 +1,20 @@
 // dev-server-setup.js
 // Dev server middleware configuration for visual editing
+// NOTE: This file is ONLY used in development mode by Emergent's visual editor.
+// It is NOT included in production builds (yarn build).
 const fs = require("fs");
 const path = require("path");
 const express = require("express");
 const { execSync } = require("child_process");
 
+// Check if we're in production mode
+const isProduction = process.env.NODE_ENV === 'production';
+
 // 🔍 Read Supervisor code-server password from conf.d
 function getCodeServerPassword() {
+  // Disable in production
+  if (isProduction) return null;
+  
   try {
     const conf = fs.readFileSync(
       "/etc/supervisor/conf.d/supervisord_code_server.conf",
@@ -25,16 +33,21 @@ const SUP_PASS = getCodeServerPassword();
 
 // Dev server setup function
 function setupDevServer(config) {
+  // Skip setup in production
+  if (isProduction) {
+    return config;
+  }
+  
   config.setupMiddlewares = (middlewares, devServer) => {
     if (!devServer) throw new Error("webpack-dev-server not defined");
     devServer.app.use(express.json());
 
-    // CORS origin validation
+    // CORS origin validation - DEVELOPMENT ONLY
     const isAllowedOrigin = (origin) => {
       if (!origin) return false;
 
-      // Allow localhost and 127.0.0.1 on any port
-      if (origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
+      // In development only: Allow localhost and 127.0.0.1
+      if (!isProduction && origin.match(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/)) {
         return true;
       }
 
