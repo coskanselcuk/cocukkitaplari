@@ -360,18 +360,16 @@ const BookReaderLandscape = ({ book, onClose }) => {
         {currentPageData && (
           <div className="h-full flex flex-col">
             <div className="flex-1 relative rounded-2xl overflow-hidden shadow-xl mb-3 min-h-0">
-              <img 
+              <OptimizedImage 
                 src={currentPageData.image} 
                 alt={`Sayfa ${currentPage + 1}`}
+                type="page"
+                blurUp={true}
+                lazy={false}
                 className="w-full h-full object-cover"
                 onLoad={handleImageLoad}
                 onError={handleImageLoad}
               />
-              {!isImageLoaded && (
-                <div className="absolute inset-0 bg-amber-100 flex items-center justify-center">
-                  <Loader2 size={48} className="animate-spin text-orange-500" />
-                </div>
-              )}
               {/* Finish Book Button - shows on last page after audio ends */}
               {showFinishButton && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30">
