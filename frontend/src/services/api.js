@@ -212,6 +212,15 @@ export const authApi = {
   getAppleConfig: async () => {
     const response = await api.get('/auth/apple/config');
     return response.data;
+  },
+  // Google Sign-In
+  verifyGoogleToken: async (googleData) => {
+    const response = await api.post('/auth/google/verify', googleData);
+    return response.data;
+  },
+  getGoogleConfig: async () => {
+    const response = await api.get('/auth/google/config');
+    return response.data;
   }
 };
 
