@@ -7,6 +7,7 @@ import { bookPages as mockPages } from '../../data/mockData';
 import ReaderSettings from './ReaderSettings';
 import CompletionCelebration from './CompletionCelebration';
 import { useAuth } from '../../contexts/AuthContext';
+import OptimizedImage from '../common/OptimizedImage';
 
 const BookReaderLandscape = ({ book, onClose }) => {
   const { user, isAuthenticated } = useAuth();
