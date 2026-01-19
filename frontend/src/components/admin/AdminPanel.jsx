@@ -907,6 +907,7 @@ const AdminPanel = ({ onBack }) => {
                   onChange={(url) => setNewPage({...newPage, image: url})}
                   label="Sayfa Resmi"
                   placeholder="https://images.unsplash.com/..."
+                  imageType="page"
                 />
               </div>
               
