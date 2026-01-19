@@ -298,8 +298,7 @@ export const AuthProvider = ({ children }) => {
     loginWithApple,
     logout,
     canAccessBook,
-    clearAuthError,
-    handleGoogleCallback
+    clearAuthError
   };
 
   return (
