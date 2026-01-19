@@ -211,10 +211,16 @@ const BookReaderLandscape = ({ book, onClose }) => {
         return;
       }
       
+      // CRITICAL: Re-check if audio was already started (user may have manually pressed play)
+      if (audioStartedForPageRef.current === pageToMark) {
+        console.log('Audio already playing for page (manual play), skipping auto-play:', pageToMark);
+        return;
+      }
+      
       // Mark that we're starting audio for this page
       audioStartedForPageRef.current = pageToMark;
       
-      console.log('Playing audio for page:', pageToMark);
+      console.log('Auto-playing audio for page:', pageToMark);
       audio.src = audioUrlToPlay;
       audio.play()
         .then(() => setIsPlaying(true))
