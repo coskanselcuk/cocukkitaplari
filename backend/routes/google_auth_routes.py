@@ -187,5 +187,6 @@ async def get_google_config():
     return {
         "webClientId": GOOGLE_CLIENT_ID,
         "iosClientId": GOOGLE_IOS_CLIENT_ID,
+        "androidClientId": GOOGLE_ANDROID_CLIENT_ID,
         "scopes": ["email", "profile"]
     }
