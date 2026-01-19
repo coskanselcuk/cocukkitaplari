@@ -8,7 +8,7 @@
  * - Automatic format/quality optimization via Cloudinary
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   cloudinaryUrl,
   generateSrcSet,
