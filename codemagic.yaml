@@ -108,7 +108,7 @@ workflows:
 
   # ============================================
   # iOS with TestFlight Publishing
-  # Requires: App Store Connect API Key setup in Codemagic
+  # Uses App Store Connect API for automatic signing
   # ============================================
   ios-publish:
     name: iOS Build + TestFlight
@@ -122,13 +122,8 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.cocukkitaplari.app
-        provisioning_profiles: []  # Let Codemagic fetch/create automatically
-        certificates: automatic
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
-        APP_STORE_CONNECT_ISSUER_ID: $APP_STORE_CONNECT_ISSUER_ID
-        APP_STORE_CONNECT_KEY_IDENTIFIER: $APP_STORE_CONNECT_KEY_IDENTIFIER
-        APP_STORE_CONNECT_PRIVATE_KEY: $APP_STORE_CONNECT_PRIVATE_KEY
       node: 18
       xcode: latest
       cocoapods: default
@@ -156,9 +151,26 @@ workflows:
           cd frontend/ios/App
           pod install
       
+      - name: Fetch signing files
+        script: |
+          app-store-connect fetch-signing-files com.cocukkitaplari.app \
+            --type IOS_APP_STORE \
+            --create
+      
+      - name: Add certificates to keychain
+        script: |
+          keychain initialize
+          keychain add-certificates
+      
       - name: Set up code signing
         script: |
           xcode-project use-profiles
+      
+      - name: Increment build number
+        script: |
+          cd frontend/ios/App
+          LATEST_BUILD=$(app-store-connect get-latest-testflight-build-number "$APP_ID" || echo 0)
+          agvtool new-version -all $((LATEST_BUILD + 1))
       
       - name: Build iOS app
         script: |
@@ -175,6 +187,8 @@ workflows:
       app_store_connect:
         auth: integration
         submit_to_testflight: true
+        beta_groups:
+          - Internal Testers
 
   # ============================================
   # Android with Play Store Publishing
@@ -189,7 +203,7 @@ workflows:
       android_signing:
         - cocukkitaplari_keystore
       groups:
-        - google_play  # Create this group in Codemagic with GCLOUD_SERVICE_ACCOUNT_CREDENTIALS
+        - google_play
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
       node: 18
