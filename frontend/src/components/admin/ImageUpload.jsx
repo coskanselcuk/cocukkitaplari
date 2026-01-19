@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, X, Image, Loader2, Link, Check } from 'lucide-react';
+import { Upload, X, Image, Loader2, Link, Check, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
+import { validateImageDimensions } from '../../utils/cloudinaryHelper';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
@@ -9,13 +10,30 @@ const ImageUpload = ({
   onChange, 
   label = "Resim", 
   placeholder = "Resim yükleyin veya URL girin",
-  className = ""
+  className = "",
+  imageType = null // 'page', 'cover', or 'icon' - enables validation when set
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  const [validationWarnings, setValidationWarnings] = useState([]);
   const [mode, setMode] = useState('upload'); // 'upload' or 'url'
+  const [imageDimensions, setImageDimensions] = useState(null);
   const fileInputRef = useRef(null);
+
+  // Get dimension requirements text based on image type
+  const getDimensionHint = () => {
+    switch (imageType) {
+      case 'page':
+        return 'Önerilen: 2400×1800px (4:3 yatay)';
+      case 'cover':
+        return 'Önerilen: 900×1200px (3:4 dikey)';
+      case 'icon':
+        return 'Önerilen: 450×450px (1:1 kare)';
+      default:
+        return null;
+    }
+  };
 
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
@@ -45,6 +63,27 @@ const ImageUpload = ({
     }
   };
 
+  // Validate image dimensions before upload
+  const validateImage = (file) => {
+    return new Promise((resolve) => {
+      if (!imageType) {
+        resolve({ valid: true, warnings: [], errors: [] });
+        return;
+      }
+
+      const img = new window.Image();
+      img.onload = () => {
+        const validation = validateImageDimensions(img.width, img.height, imageType);
+        setImageDimensions({ width: img.width, height: img.height });
+        resolve(validation);
+      };
+      img.onerror = () => {
+        resolve({ valid: true, warnings: [], errors: [] });
+      };
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const uploadFile = async (file) => {
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -59,6 +98,16 @@ const ImageUpload = ({
       return;
     }
 
+    // Validate dimensions if imageType is set
+    const validation = await validateImage(file);
+    
+    if (validation.errors.length > 0) {
+      setUploadError(validation.errors[0]);
+      return;
+    }
+    
+    setValidationWarnings(validation.warnings);
+
     setIsUploading(true);
     setUploadError(null);
 
@@ -72,8 +121,8 @@ const ImageUpload = ({
         }
       });
 
-      // Construct full URL for the uploaded image
-      const imageUrl = `${API_URL}${response.data.url}`;
+      // Cloudinary returns the full URL directly
+      const imageUrl = response.data.url;
       onChange(imageUrl);
     } catch (error) {
       console.error('Upload error:', error);
@@ -83,20 +132,50 @@ const ImageUpload = ({
     }
   };
 
-  const handleUrlChange = (e) => {
+  const handleUrlChange = async (e) => {
+    const url = e.target.value;
     setUploadError(null);
-    onChange(e.target.value);
+    setValidationWarnings([]);
+    onChange(url);
+
+    // Validate URL image dimensions if imageType is set
+    if (imageType && url) {
+      const img = new window.Image();
+      img.onload = () => {
+        const validation = validateImageDimensions(img.width, img.height, imageType);
+        setImageDimensions({ width: img.width, height: img.height });
+        if (validation.errors.length > 0) {
+          setUploadError(validation.errors[0]);
+        } else {
+          setValidationWarnings(validation.warnings);
+        }
+      };
+      img.onerror = () => {
+        setImageDimensions(null);
+      };
+      img.crossOrigin = 'anonymous';
+      img.src = url;
+    }
   };
 
   const clearImage = () => {
     onChange('');
     setUploadError(null);
+    setValidationWarnings([]);
+    setImageDimensions(null);
   };
+
+  const dimensionHint = getDimensionHint();
 
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-gray-700">{label}</label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700">{label}</label>
+          {dimensionHint && (
+            <span className="text-xs text-gray-400">{dimensionHint}</span>
+          )}
+        </div>
         <div className="flex bg-gray-100 rounded-lg p-0.5">
           <button
             type="button"
@@ -177,6 +256,11 @@ const ImageUpload = ({
               <div className="flex items-center justify-center gap-1 mt-2 text-xs text-green-600">
                 <Check size={12} />
                 <span>Resim yüklendi</span>
+                {imageDimensions && (
+                  <span className="text-gray-400 ml-1">
+                    ({imageDimensions.width}×{imageDimensions.height})
+                  </span>
+                )}
               </div>
             </div>
           ) : (
@@ -214,8 +298,25 @@ const ImageUpload = ({
                   e.target.style.display = 'none';
                 }}
               />
+              {imageDimensions && (
+                <span className="text-xs text-gray-400 ml-2">
+                  ({imageDimensions.width}×{imageDimensions.height})
+                </span>
+              )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Validation warnings */}
+      {validationWarnings.length > 0 && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+          {validationWarnings.map((warning, idx) => (
+            <p key={idx} className="text-xs text-yellow-700 flex items-center gap-1">
+              <AlertTriangle size={12} />
+              {warning}
+            </p>
+          ))}
         </div>
       )}
 
