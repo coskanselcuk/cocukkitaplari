@@ -202,7 +202,7 @@ const NotificationAdmin = () => {
           <div className="text-center py-12 text-gray-500">
             <Bell size={48} className="mx-auto mb-3 text-gray-300" />
             <p>Henüz bildirim yok</p>
-            <p className="text-sm mt-1">Yeni bildirim oluşturmak için "Yeni Bildirim" butonuna tıklayın</p>
+            <p className="text-sm mt-1">Yeni bildirim oluşturmak için &quot;Yeni Bildirim&quot; butonuna tıklayın</p>
           </div>
         ) : (
           <div className="divide-y">
