@@ -145,19 +145,34 @@ const NotificationPanel = ({ isOpen, onClose, onUnreadCountChange }) => {
         </div>
 
         {/* Mark all as read button */}
-        {unreadCount > 0 && (
-          <div className="px-4 py-2 border-b bg-gray-50">
+        {notifications.length > 0 && (
+          <div className="px-4 py-2 border-b bg-gray-50 flex items-center justify-between">
+            {unreadCount > 0 && (
+              <button
+                onClick={handleMarkAllAsRead}
+                disabled={isMarkingAll}
+                className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 disabled:opacity-50"
+              >
+                {isMarkingAll ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <CheckCheck size={14} />
+                )}
+                Tümünü okundu işaretle
+              </button>
+            )}
+            {unreadCount === 0 && <div />}
             <button
-              onClick={handleMarkAllAsRead}
-              disabled={isMarkingAll}
-              className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 disabled:opacity-50"
+              onClick={handleClearAll}
+              disabled={isClearingAll}
+              className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1 disabled:opacity-50"
             >
-              {isMarkingAll ? (
+              {isClearingAll ? (
                 <Loader2 size={14} className="animate-spin" />
               ) : (
-                <CheckCheck size={14} />
+                <Trash2 size={14} />
               )}
-              Tümünü okundu işaretle
+              Tümünü temizle
             </button>
           </div>
         )}
