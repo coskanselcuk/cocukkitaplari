@@ -46,6 +46,16 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### Session: January 19, 2026
+- ✅ **De-branding completed**: Searched and confirmed no "TRT Çocuk Kitaplık" references exist in source code
+- ✅ **Bulk notification delete feature (Option B)**:
+  - **User Panel**: Added "Tümünü temizle" (Clear All) button to remove all notifications from user's view
+  - **Admin Panel**: Added "Tümünü Sil" (Delete All) button to permanently delete all notifications
+  - **Backend**: Added `/api/notifications/clear-all` (user) and `/api/notifications/admin/delete-all` (admin) endpoints
+  - **Database**: Uses `notification_cleared` collection to track user-specific cleared notifications
+
+### Previous Sessions
+
 ### January 18, 2026 - Trial Expiration Push Notifications & Audio Voice Fix
 - **Trial Expiration Notification System**: Automated background task that sends in-app notifications when user's trial is expiring
   - Background task runs every hour to check all users with active trials
