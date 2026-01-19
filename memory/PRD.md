@@ -73,6 +73,20 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
   - **Frontend**: Web uses Google Identity Services (gsi/client) with One Tap support
   - **Capacitor**: Updated `capacitor.config.json` with GoogleAuth plugin configuration
   - **Account Linking**: Same email across providers links to single user account
+- ✅ **Responsive Image Optimization (Phase 1 & 2)**:
+  - **Phase 1 - Cloudinary Helper & Book Reader**:
+    - Created `/app/frontend/src/utils/cloudinaryHelper.js` - URL transformation utility with device detection, srcset generation, blur-up placeholders
+    - Created `/app/frontend/src/components/common/OptimizedImage.jsx` - Reusable component with blur-up loading effect
+    - Updated `BookReaderLandscape.jsx` to use OptimizedImage with blur-up for book pages
+    - Fixed audio restart bug when manually playing after pause/page change
+  - **Phase 2 - Covers, Icons & Admin Validation**:
+    - Updated `BookCard.jsx` to use OptimizedImage for book covers with lazy loading
+    - Updated `ImageUpload.jsx` with dimension validation:
+      - Book pages: validates 4:3 aspect ratio, warns if below 2400×1800px
+      - Book covers: validates 3:4 aspect ratio, warns if below 900×1200px  
+      - Category icons: validates 1:1 aspect ratio, warns if below 450×450px
+    - Shows dimension hints and warnings in admin panel
+    - Displays current image dimensions after upload
 
 ### Previous Sessions
 
