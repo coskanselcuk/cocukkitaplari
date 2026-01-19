@@ -25,6 +25,7 @@ const NotificationAdmin = () => {
   const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
