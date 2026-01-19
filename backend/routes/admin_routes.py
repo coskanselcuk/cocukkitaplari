@@ -1,11 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import logging
 
 from services.tts_service import generate_tts_audio
 from routes.notification_routes import notify_new_book, notify_new_category
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+logger = logging.getLogger(__name__)
 
 mongo_url = os.environ.get('MONGO_URL')
 db_name = os.environ.get('DB_NAME')
