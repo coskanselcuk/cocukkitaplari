@@ -1004,6 +1004,7 @@ const AdminPanel = ({ onBack }) => {
                   onChange={(url) => setEditBook({...editBook, coverImage: url})}
                   label="Kapak Resmi"
                   placeholder="https://images.unsplash.com/..."
+                  imageType="cover"
                 />
               </div>
               <div>
