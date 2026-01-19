@@ -8,6 +8,8 @@ const AuthContext = createContext(null);
 // Admin email - only this user can access admin panel
 const ADMIN_EMAIL = 'coskanselcuk@gmail.com';
 
+// REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -42,51 +44,130 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    // Check for session_id in URL hash (after Google OAuth redirect)
-    const hash = window.location.hash;
-    if (hash.includes('session_id=')) {
-      const sessionId = hash.split('session_id=')[1]?.split('&')[0];
-      if (sessionId) {
-        // Exchange session_id for session_token
-        exchangeSession(sessionId);
-        // Clear the hash
-        window.history.replaceState(null, '', window.location.pathname);
-        return;
-      }
-    }
-
     checkAuth();
   }, []);
 
-  const exchangeSession = async (sessionId) => {
+  // Google Sign-In - Native on iOS, web popup on others
+  const loginWithGoogle = useCallback(async () => {
+    setAuthError(null);
     setIsLoading(true);
+    
     try {
-      const result = await authApi.exchangeSession(sessionId);
-      if (result.success && result.user) {
-        setUser(result.user);
-        setIsAuthenticated(true);
-        // Set user ID for IAP tracking
-        if (result.user.user_id) {
-          setIapUserId(result.user.user_id);
+      const platform = Capacitor.getPlatform();
+      
+      if (platform === 'ios' || platform === 'android') {
+        // Native Google Sign-In for mobile
+        const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+        
+        // Initialize Google Auth (uses capacitor.config.json settings)
+        await GoogleAuth.initialize({
+          clientId: '60785703056-d07ioivj55tmk45p1evgc8o873q1um1q.apps.googleusercontent.com',
+          scopes: ['email', 'profile'],
+          grantOfflineAccess: true
+        });
+        
+        const result = await GoogleAuth.signIn();
+        
+        if (result && result.authentication && result.authentication.idToken) {
+          // Send ID token to backend for verification
+          const response = await authApi.verifyGoogleToken({
+            idToken: result.authentication.idToken,
+            accessToken: result.authentication.accessToken,
+            serverAuthCode: result.serverAuthCode
+          });
+          
+          if (response.success && response.user) {
+            setUser(response.user);
+            setIsAuthenticated(true);
+            if (response.user.user_id) {
+              setIapUserId(response.user.user_id);
+            }
+          } else {
+            throw new Error('Google Sign-In verification failed');
+          }
+        } else {
+          throw new Error('No ID token received from Google');
         }
+      } else {
+        // Web - Use Google Identity Services
+        await loadGoogleScript();
+        
+        // Initialize Google client
+        window.google.accounts.id.initialize({
+          client_id: '60785703056-d07ioivj55tmk45p1evgc8o873q1um1q.apps.googleusercontent.com',
+          callback: handleGoogleCallback,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+        
+        // Show Google One Tap or popup
+        window.google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+            // One Tap not available, use regular sign-in button popup
+            window.google.accounts.id.renderButton(
+              document.getElementById('google-signin-btn'),
+              { theme: 'outline', size: 'large', width: '100%' }
+            );
+          }
+        });
       }
     } catch (error) {
-      setUser(null);
-      setIsAuthenticated(false);
+      if (error.message?.includes('cancelled') || error.message?.includes('popup_closed')) {
+        // User cancelled - not an error
+        setAuthError(null);
+      } else {
+        setAuthError(error.message || 'Google ile giriş başarısız oldu');
+      }
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Google Sign-In (existing Emergent auth)
-  const loginWithGoogle = useCallback(() => {
-    setAuthError(null);
-    // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-    const redirectUrl = window.location.origin;
-    window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
   }, []);
 
-  // Apple Sign-In
+  // Handle Google callback for web
+  const handleGoogleCallback = useCallback(async (response) => {
+    setIsLoading(true);
+    try {
+      if (response.credential) {
+        const result = await authApi.verifyGoogleToken({
+          idToken: response.credential
+        });
+        
+        if (result.success && result.user) {
+          setUser(result.user);
+          setIsAuthenticated(true);
+          if (result.user.user_id) {
+            setIapUserId(result.user.user_id);
+          }
+        } else {
+          throw new Error('Google Sign-In verification failed');
+        }
+      }
+    } catch (error) {
+      setAuthError(error.message || 'Google ile giriş başarısız oldu');
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Load Google Identity Services script
+  const loadGoogleScript = () => {
+    return new Promise((resolve, reject) => {
+      if (window.google?.accounts?.id) {
+        resolve();
+        return;
+      }
+      
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  };
+
+  // Apple Sign-In - Only on iOS
   const loginWithApple = useCallback(async () => {
     setAuthError(null);
     setIsLoading(true);
@@ -155,6 +236,17 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(async () => {
     try {
       await authApi.logout();
+      
+      // Also sign out from Google on native
+      const platform = Capacitor.getPlatform();
+      if (platform === 'ios' || platform === 'android') {
+        try {
+          const { GoogleAuth } = await import('@codetrix-studio/capacitor-google-auth');
+          await GoogleAuth.signOut();
+        } catch (e) {
+          // Ignore errors signing out of Google
+        }
+      }
     } catch (error) {
       // Ignore logout errors
     } finally {
@@ -199,7 +291,8 @@ export const AuthProvider = ({ children }) => {
     loginWithApple,
     logout,
     canAccessBook,
-    clearAuthError
+    clearAuthError,
+    handleGoogleCallback
   };
 
   return (
