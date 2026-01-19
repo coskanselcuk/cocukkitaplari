@@ -60,6 +60,19 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
   - **Frontend**: Profile page shows Apple Sign-In button (black) on iOS, Google Sign-In for all platforms
   - **Database**: Users collection extended with `apple_user_id` and `auth_providers` fields
   - **Account Linking**: If user signs in with Apple using an email that exists (from Google), accounts are linked
+- ✅ **Android Keystore Security Fix**:
+  - Fixed critical keystore generation issue in `codemagic.yaml` 
+  - Now uses permanent keystore uploaded to Codemagic instead of generating fresh each build
+  - Removed hardcoded passwords - now uses Codemagic's secure environment variables
+  - Added `*.keystore`, `*.jks`, `signing.gradle` to `.gitignore`
+  - Created `/app/KEYSTORE_SETUP.md` guide for keystore creation and SHA-1 extraction
+- ✅ **Direct Google OAuth Integration** (Replaced Emergent-managed auth):
+  - **Backend**: New `/api/auth/google/verify` endpoint for Google ID token verification
+  - **Backend**: New `/api/auth/google/config` endpoint for frontend configuration
+  - **Frontend**: Updated AuthContext with direct Google Sign-In using `@codetrix-studio/capacitor-google-auth` for native iOS/Android
+  - **Frontend**: Web uses Google Identity Services (gsi/client) with One Tap support
+  - **Capacitor**: Updated `capacitor.config.json` with GoogleAuth plugin configuration
+  - **Account Linking**: Same email across providers links to single user account
 
 ### Previous Sessions
 
