@@ -35,6 +35,7 @@ const ImageUpload = ({
     if (file) {
       uploadFile(file);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFileSelect = (e) => {
