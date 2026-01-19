@@ -246,6 +246,17 @@ export const notificationsApi = {
   delete: async (notificationId) => {
     const response = await api.delete(`/notifications/admin/${notificationId}`);
     return response.data;
+  },
+  
+  deleteAll: async () => {
+    const response = await api.delete('/notifications/admin/delete-all');
+    return response.data;
+  },
+  
+  // User function to clear all notifications
+  clearAll: async () => {
+    const response = await api.delete('/notifications/clear-all');
+    return response.data;
   }
 };
 
