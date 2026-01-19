@@ -215,10 +215,7 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
                 </div>
                 <button
                   className="w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
-                  onClick={() => {
-                    // TODO: Open native subscription flow
-                    alert('Abonelik işlemi için App Store veya Google Play kullanılacaktır.');
-                  }}
+                  onClick={() => setShowSubscriptionModal(true)}
                 >
                   <Crown size={20} />
                   Premium&apos;a Yükselt
