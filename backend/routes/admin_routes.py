@@ -59,7 +59,7 @@ async def generate_audio_for_book(book_id: str):
                 )
                 success_count += 1
         except Exception as e:
-            print(f"Error generating audio for page {page_id}: {e}")
+            logger.error(f"Error generating audio for page {page_id}: {e}")
             error_count += 1
     
     return {
