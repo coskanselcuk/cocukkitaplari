@@ -61,6 +61,7 @@ const ProfileSelector = ({ onProfileSelect, onCreateProfile }) => {
 
 const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
   const { user, isAuthenticated, isPremiumUser, isAdmin, login, logout, isLoading } = useAuth();
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const avatarColors = ['bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-orange-400'];
   
   // Get display name - use authenticated user or show "Misafir" (Guest)
