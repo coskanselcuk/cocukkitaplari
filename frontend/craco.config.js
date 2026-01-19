@@ -5,6 +5,7 @@ require("dotenv").config();
 // Check if we're in development/preview mode (not production build)
 // Craco sets NODE_ENV=development for start, NODE_ENV=production for build
 const isDevServer = process.env.NODE_ENV !== "production";
+const isProduction = process.env.NODE_ENV === "production";
 
 // Environment variable overrides
 const config = {
@@ -30,6 +31,22 @@ if (config.enableHealthCheck) {
   WebpackHealthPlugin = require("./plugins/health-check/webpack-health-plugin");
   setupHealthEndpoints = require("./plugins/health-check/health-endpoints");
   healthPluginInstance = new WebpackHealthPlugin();
+}
+
+// Build babel plugins array
+const babelPlugins = [];
+
+// Add visual edits metadata plugin in dev mode
+if (config.enableVisualEdits && babelMetadataPlugin) {
+  babelPlugins.push(babelMetadataPlugin);
+}
+
+// Remove console.log statements in production (keep console.error and console.warn)
+if (isProduction) {
+  babelPlugins.push([
+    "transform-remove-console",
+    { exclude: ["error", "warn"] }
+  ]);
 }
 
 const webpackConfig = {
@@ -68,14 +85,13 @@ const webpackConfig = {
       return webpackConfig;
     },
   },
+  // Add babel plugins if any
+  ...(babelPlugins.length > 0 && {
+    babel: {
+      plugins: babelPlugins,
+    },
+  }),
 };
-
-// Only add babel metadata plugin during dev server
-if (config.enableVisualEdits && babelMetadataPlugin) {
-  webpackConfig.babel = {
-    plugins: [babelMetadataPlugin],
-  };
-}
 
 webpackConfig.devServer = (devServerConfig) => {
   // Apply visual edits dev server setup only if enabled
