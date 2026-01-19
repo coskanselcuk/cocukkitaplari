@@ -16,7 +16,7 @@ workflows:
         bundle_identifier: com.cocukkitaplari.app
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
-      node: 18
+      node: 20
       xcode: latest
       cocoapods: default
     
@@ -124,7 +124,7 @@ workflows:
         bundle_identifier: com.cocukkitaplari.app
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
-      node: 18
+      node: 20
       xcode: latest
       cocoapods: default
     
