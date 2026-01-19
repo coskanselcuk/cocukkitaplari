@@ -94,19 +94,8 @@ backend/migration_backup.json
 # Capacitor native builds (generated, not tracked)
 frontend/ios/
 frontend/android/
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
+
+# Android Keystore files - CRITICAL: Never commit these!
+*.keystore
+*.jks
+signing.gradle
