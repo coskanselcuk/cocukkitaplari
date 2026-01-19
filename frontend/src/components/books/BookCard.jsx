@@ -1,6 +1,7 @@
 import React from 'react';
 import { Play, Clock, Star, Headphones, Crown, Lock } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import OptimizedImage from '../common/OptimizedImage';
 
 const BookCard = ({ book, onSelect, size = 'medium' }) => {
   const { isPremiumUser, isAuthenticated } = useAuth();
@@ -24,9 +25,11 @@ const BookCard = ({ book, onSelect, size = 'medium' }) => {
       <div className="relative rounded-2xl overflow-hidden shadow-xl bg-white">
         {/* Book Cover */}
         <div className="relative aspect-[3/4] overflow-hidden">
-          <img
+          <OptimizedImage
             src={book.coverImage}
             alt={book.title}
+            type="cover"
+            lazy={true}
             className={`w-full h-full object-cover ${showLock ? 'filter brightness-75' : ''}`}
           />
           
