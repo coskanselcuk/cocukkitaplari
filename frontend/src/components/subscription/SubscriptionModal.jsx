@@ -36,6 +36,7 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscriptionComplete }) => {
         fetchTrialStatus();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, isAuthenticated, user?.user_id]);
 
   const fetchTrialStatus = async () => {
