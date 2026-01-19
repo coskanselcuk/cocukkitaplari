@@ -102,17 +102,15 @@ workflows:
         script: |
           # Generate keystore if not exists
           KEYSTORE_PATH=$CM_BUILD_DIR/frontend/android/app/cocukkitaplari.keystore
-          if [ ! -f "$KEYSTORE_PATH" ]; then
-            keytool -genkey -v \
-              -keystore $KEYSTORE_PATH \
-              -alias ${CM_KEY_ALIAS:-cocukkitaplari} \
-              -keyalg RSA \
-              -keysize 2048 \
-              -validity 10000 \
-              -storepass ${CM_KEYSTORE_PASSWORD:-changeme123} \
-              -keypass ${CM_KEY_PASSWORD:-changeme123} \
-              -dname "CN=Cocuk Kitaplari, OU=Mobile, O=Cocuk Kitaplari, L=Istanbul, ST=Istanbul, C=TR"
-          fi
+          keytool -genkey -v \
+            -keystore $KEYSTORE_PATH \
+            -alias cocukkitaplari \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass android123 \
+            -keypass android123 \
+            -dname "CN=Cocuk Kitaplari, OU=Mobile, O=Cocuk Kitaplari, L=Istanbul, ST=Istanbul, C=TR"
       
       - name: Configure signing
         script: |
@@ -122,9 +120,9 @@ workflows:
               signingConfigs {
                   release {
                       storeFile file("cocukkitaplari.keystore")
-                      storePassword System.getenv("CM_KEYSTORE_PASSWORD") ?: "changeme123"
-                      keyAlias System.getenv("CM_KEY_ALIAS") ?: "cocukkitaplari"
-                      keyPassword System.getenv("CM_KEY_PASSWORD") ?: "changeme123"
+                      storePassword "android123"
+                      keyAlias "cocukkitaplari"
+                      keyPassword "android123"
                   }
               }
               buildTypes {
