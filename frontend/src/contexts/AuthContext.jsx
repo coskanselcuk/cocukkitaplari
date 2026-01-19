@@ -47,51 +47,7 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Load Google Identity Services script
-  const loadGoogleScript = () => {
-    return new Promise((resolve, reject) => {
-      if (window.google?.accounts?.id) {
-        resolve();
-        return;
-      }
-      
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = resolve;
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-  };
-
-  // Handle Google callback for web
-  const handleGoogleCallback = useCallback(async (response) => {
-    setIsLoading(true);
-    try {
-      if (response.credential) {
-        const result = await authApi.verifyGoogleToken({
-          idToken: response.credential
-        });
-        
-        if (result.success && result.user) {
-          setUser(result.user);
-          setIsAuthenticated(true);
-          if (result.user.user_id) {
-            setIapUserId(result.user.user_id);
-          }
-        } else {
-          throw new Error('Google Sign-In verification failed');
-        }
-      }
-    } catch (error) {
-      setAuthError(error.message || 'Google ile giriş başarısız oldu');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Google Sign-In - Native on iOS, web popup on others
+  // Google Sign-In - Native on iOS/Android, OAuth popup on web
   const loginWithGoogle = useCallback(async () => {
     setAuthError(null);
     setIsLoading(true);
