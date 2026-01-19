@@ -118,6 +118,28 @@ const webpackConfig = {
 };
 
 webpackConfig.devServer = (devServerConfig) => {
+  // Suppress PostHog/analytics runtime errors from the overlay
+  devServerConfig.client = {
+    ...devServerConfig.client,
+    overlay: {
+      errors: true,
+      warnings: false,
+      runtimeErrors: (error) => {
+        // Suppress PostHog/analytics errors that aren't from our code
+        const errorString = (error?.message || '') + (error?.stack || '');
+        if (
+          errorString.includes('PerformanceServerTiming') ||
+          errorString.includes('DataCloneError') ||
+          errorString.includes('posthog') ||
+          errorString.includes('emergentagent')
+        ) {
+          return false;
+        }
+        return true;
+      },
+    },
+  };
+
   // Apply visual edits dev server setup only if enabled
   if (config.enableVisualEdits && setupDevServer) {
     devServerConfig = setupDevServer(devServerConfig);
