@@ -116,14 +116,19 @@ workflows:
     instance_type: mac_mini_m1
     
     integrations:
-      app_store_connect: Cocuk Kitaplari ASC  # Name of your integration in Codemagic
+      app_store_connect: Cocuk Kitaplari ASC
     
     environment:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.cocukkitaplari.app
+        provisioning_profiles: []  # Let Codemagic fetch/create automatically
+        certificates: automatic
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
+        APP_STORE_CONNECT_ISSUER_ID: $APP_STORE_CONNECT_ISSUER_ID
+        APP_STORE_CONNECT_KEY_IDENTIFIER: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        APP_STORE_CONNECT_PRIVATE_KEY: $APP_STORE_CONNECT_PRIVATE_KEY
       node: 18
       xcode: latest
       cocoapods: default
