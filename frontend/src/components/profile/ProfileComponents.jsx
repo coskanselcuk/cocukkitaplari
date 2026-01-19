@@ -133,12 +133,38 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
               </button>
             </div>
           ) : (
-            <button
-              onClick={login}
-              className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-xl font-semibold hover:opacity-90"
-            >
-              <LogIn size={20} /> Google ile Giriş Yap
-            </button>
+            <div className="space-y-3">
+              {/* Apple Sign-In - Primary on iOS */}
+              {isIOS && (
+                <button
+                  onClick={loginWithApple}
+                  disabled={isLoading}
+                  className="w-full flex items-center justify-center gap-2 bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                  data-testid="apple-signin-btn"
+                >
+                  <AppleLogo size={20} />
+                  Apple ile Giriş Yap
+                </button>
+              )}
+              
+              {/* Google Sign-In */}
+              <button
+                onClick={loginWithGoogle}
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 bg-white border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                data-testid="google-signin-btn"
+              >
+                <GoogleLogo size={20} />
+                Google ile Giriş Yap
+              </button>
+              
+              {/* Auth Error Message */}
+              {authError && (
+                <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-2 rounded-lg">
+                  {authError}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
