@@ -77,7 +77,18 @@ const ProfileSelector = ({ onProfileSelect, onCreateProfile }) => {
 };
 
 const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
-  const { user, isAuthenticated, isPremiumUser, isAdmin, login, logout, isLoading } = useAuth();
+  const { 
+    user, 
+    isAuthenticated, 
+    isPremiumUser, 
+    isAdmin, 
+    isIOS,
+    isLoading,
+    authError,
+    loginWithGoogle, 
+    loginWithApple,
+    logout 
+  } = useAuth();
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const avatarColors = ['bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-orange-400'];
   
