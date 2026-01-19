@@ -108,6 +108,25 @@ const NotificationAdmin = () => {
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (!window.confirm('TÜM bildirimleri silmek istediğinize emin misiniz? Bu işlem geri alınamaz.')) {
+      return;
+    }
+
+    try {
+      setIsDeletingAll(true);
+      await notificationsApi.deleteAll();
+      setNotifications([]);
+      setSuccess('Tüm bildirimler silindi');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Failed to delete all notifications:', err);
+      setError('Bildirimler silinemedi');
+    } finally {
+      setIsDeletingAll(false);
+    }
+  };
+
   const getTypeIcon = (type) => {
     const typeConfig = NOTIFICATION_TYPES.find(t => t.value === type);
     return typeConfig?.icon || Bell;
