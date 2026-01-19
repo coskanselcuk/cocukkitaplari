@@ -30,9 +30,11 @@
   "ios": {
     "contentInset": "automatic",
     "preferredContentMode": "mobile",
-    "scheme": "Çocuk Kitapları"
+    "scheme": "Çocuk Kitapları",
+    "minVersion": "14.0"
   },
   "android": {
-    "allowMixedContent": true
+    "allowMixedContent": true,
+    "minSdkVersion": 23
   }
 }
