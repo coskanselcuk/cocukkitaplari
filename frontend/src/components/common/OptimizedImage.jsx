@@ -29,19 +29,21 @@ const OptimizedImage = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [currentSrc, setCurrentSrc] = useState(src);
   const imgRef = useRef(null);
   
   // Get optimized URLs
-  const optimizedSrc = cloudinaryUrl(src, type);
-  const srcSet = generateSrcSet(src, type);
+  const optimizedSrc = cloudinaryUrl(currentSrc, type);
+  const srcSet = generateSrcSet(currentSrc, type);
   const sizes = getSizesAttribute(type);
-  const placeholderSrc = blurUp ? getPlaceholderUrl(src, type) : null;
+  const placeholderSrc = blurUp ? getPlaceholderUrl(currentSrc, type) : null;
   
-  // Reset state when src changes
-  useEffect(() => {
+  // Reset state when src changes - using key pattern instead of useEffect
+  if (src !== currentSrc) {
+    setCurrentSrc(src);
     setIsLoaded(false);
     setHasError(false);
-  }, [src]);
+  }
   
   const handleLoad = (e) => {
     setIsLoaded(true);
