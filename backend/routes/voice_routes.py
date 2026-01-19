@@ -86,7 +86,7 @@ async def create_voice(voice_data: VoiceCreate):
                     el_data = response.json()
                     elevenlabs_name = el_data.get("name")
         except Exception as e:
-            print(f"Could not verify voice (will add anyway): {e}")
+            logger.warning(f"Could not verify voice (will add anyway): {e}")
     
     # If this is set as default, unset other defaults
     if voice_data.is_default:
