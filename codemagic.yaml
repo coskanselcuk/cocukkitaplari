@@ -67,10 +67,12 @@ workflows:
     instance_type: mac_mini_m1
     
     environment:
-      android_signing:
-        - cocukkitaplari_keystore
       vars:
         REACT_APP_BACKEND_URL: "https://cocukkitaplari-production.up.railway.app"
+        # Keystore credentials - set these in Codemagic app settings > Environment variables
+        CM_KEYSTORE_PASSWORD: $CM_KEYSTORE_PASSWORD
+        CM_KEY_ALIAS: $CM_KEY_ALIAS
+        CM_KEY_PASSWORD: $CM_KEY_PASSWORD
       node: 20
       java: 17
     
@@ -96,11 +98,58 @@ workflows:
         script: |
           echo "sdk.dir=$ANDROID_SDK_ROOT" > frontend/android/local.properties
       
+      - name: Generate keystore
+        script: |
+          # Generate keystore if not exists
+          KEYSTORE_PATH=$CM_BUILD_DIR/frontend/android/app/cocukkitaplari.keystore
+          if [ ! -f "$KEYSTORE_PATH" ]; then
+            keytool -genkey -v \
+              -keystore $KEYSTORE_PATH \
+              -alias ${CM_KEY_ALIAS:-cocukkitaplari} \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass ${CM_KEYSTORE_PASSWORD:-changeme123} \
+              -keypass ${CM_KEY_PASSWORD:-changeme123} \
+              -dname "CN=Cocuk Kitaplari, OU=Mobile, O=Cocuk Kitaplari, L=Istanbul, ST=Istanbul, C=TR"
+          fi
+      
+      - name: Configure signing
+        script: |
+          cd frontend/android
+          cat > app/signing.gradle << 'SIGNING'
+          android {
+              signingConfigs {
+                  release {
+                      storeFile file("cocukkitaplari.keystore")
+                      storePassword System.getenv("CM_KEYSTORE_PASSWORD") ?: "changeme123"
+                      keyAlias System.getenv("CM_KEY_ALIAS") ?: "cocukkitaplari"
+                      keyPassword System.getenv("CM_KEY_PASSWORD") ?: "changeme123"
+                  }
+              }
+              buildTypes {
+                  release {
+                      signingConfig signingConfigs.release
+                  }
+              }
+          }
+          SIGNING
+          
+          # Add signing config to build.gradle if not present
+          if ! grep -q "signing.gradle" app/build.gradle; then
+            echo 'apply from: "signing.gradle"' >> app/build.gradle
+          fi
+      
       - name: Build Android AAB
         script: |
           cd frontend/android
           chmod +x gradlew
           ./gradlew bundleRelease
+      
+      - name: Build Android APK
+        script: |
+          cd frontend/android
+          ./gradlew assembleRelease
     
     artifacts:
       - frontend/android/app/build/outputs/**/*.aab
