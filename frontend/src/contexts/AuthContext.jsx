@@ -133,27 +133,78 @@ export const AuthProvider = ({ children }) => {
           throw new Error('No ID token received from Google');
         }
       } else {
-        // Web - Use Google Identity Services
-        await loadGoogleScript();
+        // Web - Use standard OAuth popup flow
+        const clientId = '60785703056-d07ioivj55tmk45p1evgc8o873q1um1q.apps.googleusercontent.com';
+        const redirectUri = window.location.origin;
+        const scope = 'email profile openid';
         
-        // Initialize Google client
-        window.google.accounts.id.initialize({
-          client_id: '60785703056-d07ioivj55tmk45p1evgc8o873q1um1q.apps.googleusercontent.com',
-          callback: handleGoogleCallback,
-          auto_select: false,
-          cancel_on_tap_outside: true
-        });
+        // Create OAuth URL
+        const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+        authUrl.searchParams.set('client_id', clientId);
+        authUrl.searchParams.set('redirect_uri', redirectUri);
+        authUrl.searchParams.set('response_type', 'id_token');
+        authUrl.searchParams.set('scope', scope);
+        authUrl.searchParams.set('nonce', Math.random().toString(36).substring(2));
+        authUrl.searchParams.set('prompt', 'select_account');
         
-        // Show Google One Tap or popup
-        window.google.accounts.id.prompt((notification) => {
-          if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-            // One Tap not available, use regular sign-in button popup
-            window.google.accounts.id.renderButton(
-              document.getElementById('google-signin-btn'),
-              { theme: 'outline', size: 'large', width: '100%' }
-            );
+        // Open popup
+        const width = 500;
+        const height = 600;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+        
+        const popup = window.open(
+          authUrl.toString(),
+          'Google Sign In',
+          `width=${width},height=${height},left=${left},top=${top},popup=yes`
+        );
+        
+        // Listen for redirect with token
+        const checkPopup = setInterval(() => {
+          try {
+            if (popup.closed) {
+              clearInterval(checkPopup);
+              setIsLoading(false);
+              return;
+            }
+            
+            // Check if popup has redirected back to our origin
+            if (popup.location.origin === window.location.origin) {
+              clearInterval(checkPopup);
+              
+              // Extract id_token from URL hash
+              const hash = popup.location.hash.substring(1);
+              const params = new URLSearchParams(hash);
+              const idToken = params.get('id_token');
+              
+              popup.close();
+              
+              if (idToken) {
+                // Verify token with backend
+                authApi.verifyGoogleToken({ idToken })
+                  .then(response => {
+                    if (response.success && response.user) {
+                      setUser(response.user);
+                      setIsAuthenticated(true);
+                      if (response.user.user_id) {
+                        setIapUserId(response.user.user_id);
+                      }
+                    }
+                  })
+                  .catch(err => {
+                    setAuthError(err.message || 'Google ile giriş başarısız oldu');
+                  })
+                  .finally(() => {
+                    setIsLoading(false);
+                  });
+              } else {
+                setIsLoading(false);
+              }
+            }
+          } catch (e) {
+            // Cross-origin error - popup still on Google's domain, keep waiting
           }
-        });
+        }, 500);
       }
     } catch (error) {
       if (error.message?.includes('cancelled') || error.message?.includes('popup_closed')) {
