@@ -16,6 +16,7 @@ router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 
 mongo_url = os.environ.get('MONGO_URL')
 db_name = os.environ.get('DB_NAME')
+ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', 'coskanselcuk@gmail.com')
 
 
 def get_db():
