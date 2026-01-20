@@ -99,15 +99,3 @@ frontend/android/
 *.keystore
 *.jks
 signing.gradle
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
