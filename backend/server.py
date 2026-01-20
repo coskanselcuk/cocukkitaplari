@@ -317,10 +317,20 @@ app.include_router(subscription_router, prefix="/api")
 app.include_router(notification_router, prefix="/api")
 app.include_router(voice_router, prefix="/api")
 
+# CORS Configuration
+# In production, CORS_ORIGINS should be set explicitly (e.g., "https://cocukkitaplari.com,https://www.cocukkitaplari.com")
+# For development/preview, "*" is allowed but logged as a warning
+cors_origins_str = os.environ.get('CORS_ORIGINS', '')
+if cors_origins_str:
+    cors_origins = [origin.strip() for origin in cors_origins_str.split(',') if origin.strip()]
+else:
+    cors_origins = ["*"]
+    logger.warning("CORS_ORIGINS not set - allowing all origins. Set explicitly for production!")
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origins=cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
