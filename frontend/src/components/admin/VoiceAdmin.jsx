@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Plus, Trash2, Edit, Save, X, Mic, Star, StarOff, 
-  Loader2, CheckCircle, AlertCircle, ExternalLink, RefreshCw
+  Loader2, CheckCircle, AlertCircle, ExternalLink, RefreshCw,
+  Download, Play, Pause, Volume2
 } from 'lucide-react';
 import { voicesApi } from '../../services/api';
 
@@ -10,11 +11,20 @@ const VoiceAdmin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showElevenLabsModal, setShowElevenLabsModal] = useState(false);
   const [editingVoice, setEditingVoice] = useState(null);
   const [verifyingId, setVerifyingId] = useState(null);
-  const [deletingVoice, setDeletingVoice] = useState(null); // For delete confirmation
+  const [deletingVoice, setDeletingVoice] = useState(null);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+
+  // ElevenLabs voices state
+  const [elevenLabsVoices, setElevenLabsVoices] = useState([]);
+  const [isLoadingEL, setIsLoadingEL] = useState(false);
+  const [importingVoiceId, setImportingVoiceId] = useState(null);
+  const [playingPreview, setPlayingPreview] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const audioRef = useRef(null);
 
   // New voice form
   const [newVoice, setNewVoice] = useState({
@@ -28,6 +38,16 @@ const VoiceAdmin = () => {
     fetchVoices();
   }, []);
 
+  // Clean up audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
   const fetchVoices = async () => {
     setIsLoading(true);
     try {
@@ -38,6 +58,68 @@ const VoiceAdmin = () => {
       setError('Sesler yüklenemedi');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchElevenLabsVoices = async () => {
+    setIsLoadingEL(true);
+    setError(null);
+    try {
+      const data = await voicesApi.fetchFromElevenLabs();
+      setElevenLabsVoices(data.voices || []);
+      setShowElevenLabsModal(true);
+    } catch (err) {
+      console.error('Failed to fetch ElevenLabs voices:', err);
+      setError(err.response?.data?.detail || 'ElevenLabs sesleri alınamadı. API anahtarını kontrol edin.');
+    } finally {
+      setIsLoadingEL(false);
+    }
+  };
+
+  const handleImportVoice = async (voice) => {
+    setImportingVoiceId(voice.voice_id);
+    try {
+      const imported = await voicesApi.importFromElevenLabs(voice);
+      setVoices([imported, ...voices]);
+      // Update the ElevenLabs list to show it's added
+      setElevenLabsVoices(elevenLabsVoices.map(v => 
+        v.voice_id === voice.voice_id ? { ...v, already_added: true } : v
+      ));
+      setSuccess(`"${voice.name}" başarıyla eklendi!`);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Failed to import voice:', err);
+      setError(err.response?.data?.detail || 'Ses eklenirken hata oluştu');
+    } finally {
+      setImportingVoiceId(null);
+    }
+  };
+
+  const handlePlayPreview = (voice) => {
+    if (!voice.preview_url) return;
+
+    if (playingPreview === voice.voice_id) {
+      // Stop playing
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      setPlayingPreview(null);
+    } else {
+      // Stop any current audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      // Play new audio
+      audioRef.current = new Audio(voice.preview_url);
+      audioRef.current.onended = () => setPlayingPreview(null);
+      audioRef.current.onerror = () => {
+        setPlayingPreview(null);
+        setError('Önizleme yüklenemedi');
+        setTimeout(() => setError(null), 3000);
+      };
+      audioRef.current.play();
+      setPlayingPreview(voice.voice_id);
     }
   };
 
@@ -145,10 +227,19 @@ const VoiceAdmin = () => {
     }
   };
 
+  // Filter ElevenLabs voices by search
+  const filteredELVoices = elevenLabsVoices.filter(v => 
+    v.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    v.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    Object.values(v.labels || {}).some(label => 
+      label?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             <Mic size={24} />
@@ -158,45 +249,29 @@ const VoiceAdmin = () => {
             ElevenLabs seslerini ekleyin ve yönetin
           </p>
         </div>
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
-        >
-          <Plus size={18} />
-          Yeni Ses Ekle
-        </button>
-      </div>
-
-      {/* Info Box */}
-      <div className="bg-purple-50 border border-purple-200 rounded-xl p-4">
-        <h3 className="font-medium text-purple-800 mb-2">ElevenLabs Voice ID Nasıl Bulunur?</h3>
-        <ol className="text-sm text-purple-700 space-y-1 list-decimal list-inside">
-          <li>
-            <a 
-              href="https://elevenlabs.io/app/voice-library" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="underline hover:text-purple-900 inline-flex items-center gap-1"
-            >
-              ElevenLabs Voice Library'ye gidin <ExternalLink size={12} />
-            </a>
-          </li>
-          <li>Kullanmak istediğiniz sesi bulun ve "Add to My Voices" ile ekleyin</li>
-          <li>
-            <a 
-              href="https://elevenlabs.io/app/voice-lab" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="underline hover:text-purple-900 inline-flex items-center gap-1"
-            >
-              My Voices (VoiceLab) sayfasına gidin <ExternalLink size={12} />
-            </a>
-          </li>
-          <li>Sesin üzerindeki "ID" butonuna tıklayarak Voice ID'yi kopyalayın</li>
-        </ol>
-        <p className="text-xs text-purple-600 mt-2 bg-purple-100 p-2 rounded">
-          <strong>Not:</strong> Voice Library'deki sesleri kullanmak için önce "Add to My Voices" ile hesabınıza eklemeniz gerekir.
-        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={fetchElevenLabsVoices}
+            disabled={isLoadingEL}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+            data-testid="fetch-elevenlabs-btn"
+          >
+            {isLoadingEL ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <Download size={18} />
+            )}
+            ElevenLabs'tan Al
+          </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
+            data-testid="add-voice-btn"
+          >
+            <Plus size={18} />
+            Manuel Ekle
+          </button>
+        </div>
       </div>
 
       {/* Success/Error Messages */}
@@ -227,11 +302,23 @@ const VoiceAdmin = () => {
             <Mic size={48} className="mx-auto mb-3 text-gray-300" />
             <p className="font-medium">Henüz ses eklenmemiş</p>
             <p className="text-sm mt-1">Varsayılan ses (Irem) kullanılacak</p>
+            <button
+              onClick={fetchElevenLabsVoices}
+              disabled={isLoadingEL}
+              className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-medium inline-flex items-center gap-2"
+            >
+              {isLoadingEL ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Download size={18} />
+              )}
+              ElevenLabs Seslerini Getir
+            </button>
           </div>
         ) : (
           <div className="divide-y">
             {voices.map((voice) => (
-              <div key={voice.id} className="p-4 hover:bg-gray-50">
+              <div key={voice.id} className="p-4 hover:bg-gray-50" data-testid={`voice-item-${voice.id}`}>
                 {editingVoice?.id === voice.id ? (
                   // Edit mode
                   <div className="space-y-3">
@@ -291,6 +378,11 @@ const VoiceAdmin = () => {
                             Doğrulanmamış
                           </span>
                         )}
+                        {voice.category && (
+                          <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+                            {voice.category}
+                          </span>
+                        )}
                       </div>
                       {voice.description && (
                         <p className="text-sm text-gray-600 mt-1">{voice.description}</p>
@@ -300,6 +392,19 @@ const VoiceAdmin = () => {
                       </p>
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
+                      {voice.preview_url && (
+                        <button
+                          onClick={() => handlePlayPreview(voice)}
+                          className="p-2 hover:bg-purple-100 rounded-lg text-purple-600"
+                          title="Önizle"
+                        >
+                          {playingPreview === voice.id ? (
+                            <Pause size={16} />
+                          ) : (
+                            <Play size={16} />
+                          )}
+                        </button>
+                      )}
                       {!voice.verified && (
                         <button
                           onClick={() => handleVerify(voice.id)}
@@ -346,18 +451,182 @@ const VoiceAdmin = () => {
         )}
       </div>
 
-      {/* Add Modal */}
+      {/* ElevenLabs Voices Modal */}
+      {showElevenLabsModal && (
+        <div 
+          className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4" 
+          onClick={(e) => e.target === e.currentTarget && setShowElevenLabsModal(false)}
+        >
+          <div className="bg-white rounded-2xl max-w-2xl w-full shadow-2xl max-h-[85vh] flex flex-col">
+            <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white rounded-t-2xl">
+              <div>
+                <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+                  <Volume2 size={20} className="text-blue-500" />
+                  ElevenLabs Sesleriniz
+                </h3>
+                <p className="text-sm text-gray-500">{elevenLabsVoices.length} ses bulundu</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowElevenLabsModal(false);
+                  if (audioRef.current) {
+                    audioRef.current.pause();
+                    audioRef.current = null;
+                  }
+                  setPlayingPreview(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-full"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="p-4 border-b">
+              <input
+                type="text"
+                placeholder="Ses ara (isim, kategori, etiket)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            {/* Voices List */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {filteredELVoices.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <Mic size={40} className="mx-auto mb-2 text-gray-300" />
+                  <p>Ses bulunamadı</p>
+                </div>
+              ) : (
+                filteredELVoices.map((voice) => (
+                  <div 
+                    key={voice.voice_id} 
+                    className={`border rounded-xl p-4 transition-colors ${
+                      voice.already_added 
+                        ? 'bg-green-50 border-green-200' 
+                        : 'bg-white hover:bg-gray-50 border-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <Mic size={20} className="text-blue-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h4 className="font-semibold text-gray-800">{voice.name}</h4>
+                          {voice.category && (
+                            <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full">
+                              {voice.category}
+                            </span>
+                          )}
+                          {voice.already_added && (
+                            <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <CheckCircle size={10} /> Eklendi
+                            </span>
+                          )}
+                        </div>
+                        {voice.labels && Object.keys(voice.labels).length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {Object.entries(voice.labels).map(([key, value]) => (
+                              <span key={key} className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded">
+                                {value}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-400 mt-1 font-mono">
+                          {voice.voice_id}
+                        </p>
+                      </div>
+                      <div className="flex gap-2 flex-shrink-0">
+                        {voice.preview_url && (
+                          <button
+                            onClick={() => handlePlayPreview(voice)}
+                            className={`p-2 rounded-lg transition-colors ${
+                              playingPreview === voice.voice_id
+                                ? 'bg-blue-500 text-white'
+                                : 'hover:bg-blue-100 text-blue-600'
+                            }`}
+                            title="Önizle"
+                          >
+                            {playingPreview === voice.voice_id ? (
+                              <Pause size={18} />
+                            ) : (
+                              <Play size={18} />
+                            )}
+                          </button>
+                        )}
+                        {!voice.already_added && (
+                          <button
+                            onClick={() => handleImportVoice(voice)}
+                            disabled={importingVoiceId === voice.voice_id}
+                            className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 flex items-center gap-1 text-sm font-medium"
+                          >
+                            {importingVoiceId === voice.voice_id ? (
+                              <Loader2 size={16} className="animate-spin" />
+                            ) : (
+                              <Plus size={16} />
+                            )}
+                            Ekle
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t bg-gray-50 rounded-b-2xl">
+              <p className="text-xs text-gray-500 text-center">
+                <a 
+                  href="https://elevenlabs.io/app/voice-library" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline inline-flex items-center gap-1"
+                >
+                  ElevenLabs Voice Library'ye git <ExternalLink size={10} />
+                </a>
+                {' '}daha fazla ses eklemek için
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Modal (Manual) */}
       {showAddModal && (
         <div className="fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && setShowAddModal(false)}>
           <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white">
-              <h3 className="font-bold text-lg text-gray-800">Yeni Ses Ekle</h3>
+              <h3 className="font-bold text-lg text-gray-800">Manuel Ses Ekle</h3>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-full"
               >
                 <X size={20} />
               </button>
+            </div>
+
+            {/* Info Box */}
+            <div className="mx-4 mt-4 bg-purple-50 border border-purple-200 rounded-xl p-3">
+              <h4 className="font-medium text-purple-800 text-sm mb-1">Voice ID Nasıl Bulunur?</h4>
+              <ol className="text-xs text-purple-700 space-y-0.5 list-decimal list-inside">
+                <li>
+                  <a 
+                    href="https://elevenlabs.io/app/voice-lab" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="underline hover:text-purple-900"
+                  >
+                    My Voices sayfasına gidin
+                  </a>
+                </li>
+                <li>Sesin üzerindeki "ID" butonuna tıklayın</li>
+              </ol>
             </div>
 
             <form onSubmit={handleCreate} className="p-4 space-y-4">
@@ -373,9 +642,6 @@ const VoiceAdmin = () => {
                   placeholder="e79twtVS2278lVZZQiAD"
                   required
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  My Voices'tan kopyaladığınız Voice ID
-                </p>
               </div>
 
               <div>
