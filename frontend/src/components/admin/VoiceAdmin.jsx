@@ -261,7 +261,7 @@ const VoiceAdmin = () => {
             ) : (
               <Download size={18} />
             )}
-            ElevenLabs'tan Al
+            ElevenLabs&apos;tan Al
           </button>
           <button
             onClick={() => setShowAddModal(true)}
