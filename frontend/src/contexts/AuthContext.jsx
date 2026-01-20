@@ -8,6 +8,11 @@ const AuthContext = createContext(null);
 // Admin email - only this user can access admin panel
 const ADMIN_EMAIL = process.env.REACT_APP_ADMIN_EMAIL || 'coskanselcuk@gmail.com';
 
+// DEV MODE: Allow bypass login in preview/development
+const IS_DEV_MODE = process.env.NODE_ENV === 'development' || 
+  window.location.hostname.includes('preview') ||
+  window.location.hostname.includes('localhost');
+
 // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
 
 export const useAuth = () => {
@@ -27,6 +32,21 @@ export const AuthProvider = ({ children }) => {
   // Check for existing session on mount
   useEffect(() => {
     const checkAuth = async () => {
+      // Check for dev bypass first
+      const devBypass = localStorage.getItem('dev_admin_bypass');
+      if (IS_DEV_MODE && devBypass === 'true') {
+        const devUser = {
+          user_id: 'dev_admin_user',
+          email: ADMIN_EMAIL,
+          name: 'Dev Admin',
+          subscription: { status: 'active', tier: 'premium' }
+        };
+        setUser(devUser);
+        setIsAuthenticated(true);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const userData = await authApi.getCurrentUser();
         setUser(userData);
@@ -45,6 +65,23 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkAuth();
+  }, []);
+
+  // DEV ONLY: Bypass login for testing
+  const devBypassLogin = useCallback(() => {
+    if (!IS_DEV_MODE) {
+      console.warn('Dev bypass only available in development mode');
+      return;
+    }
+    localStorage.setItem('dev_admin_bypass', 'true');
+    const devUser = {
+      user_id: 'dev_admin_user',
+      email: ADMIN_EMAIL,
+      name: 'Dev Admin',
+      subscription: { status: 'active', tier: 'premium' }
+    };
+    setUser(devUser);
+    setIsAuthenticated(true);
   }, []);
 
   // Google Sign-In - Native on iOS/Android, OAuth popup on web
