@@ -170,40 +170,42 @@ const ImageUpload = ({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <label className="block text-sm font-medium text-gray-700">{label}</label>
-          {dimensionHint && (
-            <span className="text-xs text-gray-400">{dimensionHint}</span>
-          )}
+      {!compact && (
+        <div className="flex items-center justify-between">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">{label}</label>
+            {dimensionHint && (
+              <span className="text-xs text-gray-400">{dimensionHint}</span>
+            )}
+          </div>
+          <div className="flex bg-gray-100 rounded-lg p-0.5">
+            <button
+              type="button"
+              onClick={() => setMode('upload')}
+              className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                mode === 'upload' 
+                  ? 'bg-white text-gray-800 shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Upload size={12} className="inline mr-1" />
+              Yükle
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode('url')}
+              className={`px-2 py-1 text-xs rounded-md transition-colors ${
+                mode === 'url' 
+                  ? 'bg-white text-gray-800 shadow-sm' 
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <Link size={12} className="inline mr-1" />
+              URL
+            </button>
+          </div>
         </div>
-        <div className="flex bg-gray-100 rounded-lg p-0.5">
-          <button
-            type="button"
-            onClick={() => setMode('upload')}
-            className={`px-2 py-1 text-xs rounded-md transition-colors ${
-              mode === 'upload' 
-                ? 'bg-white text-gray-800 shadow-sm' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <Upload size={12} className="inline mr-1" />
-            Yükle
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode('url')}
-            className={`px-2 py-1 text-xs rounded-md transition-colors ${
-              mode === 'url' 
-                ? 'bg-white text-gray-800 shadow-sm' 
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            <Link size={12} className="inline mr-1" />
-            URL
-          </button>
-        </div>
-      </div>
+      )}
 
       {mode === 'upload' ? (
         <div
@@ -212,8 +214,9 @@ const ImageUpload = ({
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
           className={`
-            relative border-2 border-dashed rounded-xl p-4 text-center cursor-pointer
+            relative border-2 border-dashed rounded-xl text-center cursor-pointer
             transition-all duration-200
+            ${compact ? 'p-2' : 'p-4'}
             ${isDragging 
               ? 'border-orange-500 bg-orange-50' 
               : 'border-gray-300 hover:border-orange-400 hover:bg-orange-50/50'
@@ -230,9 +233,9 @@ const ImageUpload = ({
           />
 
           {isUploading ? (
-            <div className="flex flex-col items-center gap-2 py-2">
-              <Loader2 size={24} className="animate-spin text-orange-500" />
-              <span className="text-sm text-gray-500">Yükleniyor...</span>
+            <div className={`flex flex-col items-center gap-2 ${compact ? 'py-1' : 'py-2'}`}>
+              <Loader2 size={compact ? 18 : 24} className="animate-spin text-orange-500" />
+              <span className={`${compact ? 'text-xs' : 'text-sm'} text-gray-500`}>Yükleniyor...</span>
             </div>
           ) : value ? (
             <div className="relative">
