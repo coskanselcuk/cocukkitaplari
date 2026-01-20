@@ -271,7 +271,7 @@ async def create_notification(notification: NotificationCreate, request: Request
     
     # Verify admin (optional - can add admin check here)
     user = await get_user_from_request(request)
-    if not user or user.get("email") != "coskanselcuk@gmail.com":
+    if not user or user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Admin access required")
     
     notif_id = f"notif_{uuid.uuid4().hex[:12]}"
@@ -301,7 +301,7 @@ async def list_all_notifications(request: Request, limit: int = 50):
     
     # Verify admin
     user = await get_user_from_request(request)
-    if not user or user.get("email") != "coskanselcuk@gmail.com":
+    if not user or user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Admin access required")
     
     notifications = await db.notifications.find(
@@ -319,7 +319,7 @@ async def delete_notification(notification_id: str, request: Request):
     
     # Verify admin
     user = await get_user_from_request(request)
-    if not user or user.get("email") != "coskanselcuk@gmail.com":
+    if not user or user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Admin access required")
     
     result = await db.notifications.delete_one({"id": notification_id})
@@ -340,7 +340,7 @@ async def delete_all_notifications(request: Request):
     
     # Verify admin
     user = await get_user_from_request(request)
-    if not user or user.get("email") != "coskanselcuk@gmail.com":
+    if not user or user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Admin access required")
     
     # Delete all notifications
