@@ -104,14 +104,21 @@ const FlipbookDemo = () => {
   useEffect(() => {
     if (!selectedBook) return;
     
+    // Reset flipbook state first to avoid react-pageflip errors
+    setPages([]);
+    setTotalPages(0);
+    setCurrentPage(0);
+    
     const fetchPages = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/books/${selectedBook.id}/pages`);
         const bookPages = response.data.pages || [];
-        setPages(bookPages);
-        // Total pages = cover + content pages + back cover
-        setTotalPages(bookPages.length + 2);
-        setCurrentPage(0);
+        // Small delay to allow flipbook to unmount before remounting with new data
+        setTimeout(() => {
+          setPages(bookPages);
+          // Total pages = cover + content pages + back cover
+          setTotalPages(bookPages.length + 2);
+        }, 100);
       } catch (err) {
         console.error('Failed to fetch pages:', err);
       }
