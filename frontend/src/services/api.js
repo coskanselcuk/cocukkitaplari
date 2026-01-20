@@ -188,6 +188,18 @@ export const voicesApi = {
   getDefault: async () => {
     const response = await api.get('/voices/default');
     return response.data;
+  },
+  
+  // Fetch voices directly from ElevenLabs account
+  fetchFromElevenLabs: async () => {
+    const response = await api.get('/voices/elevenlabs');
+    return response.data;
+  },
+  
+  // Import a voice from ElevenLabs
+  importFromElevenLabs: async (voiceData) => {
+    const response = await api.post('/voices/import-from-elevenlabs', voiceData);
+    return response.data;
   }
 };
 
