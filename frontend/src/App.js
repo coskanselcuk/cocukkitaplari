@@ -344,6 +344,13 @@ function AppContent() {
 
 // Wrap with AuthProvider
 function App() {
+  // Check if we're on the flipbook demo route (no auth needed)
+  const isFlipbookDemo = window.location.pathname === '/demo/flipbook';
+  
+  if (isFlipbookDemo) {
+    return <FlipbookDemo />;
+  }
+
   return (
     <AuthProvider>
       <AppContent />
