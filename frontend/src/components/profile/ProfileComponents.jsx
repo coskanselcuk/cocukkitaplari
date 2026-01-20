@@ -83,11 +83,13 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
     isPremiumUser, 
     isAdmin, 
     isIOS,
+    isDevMode,
     isLoading,
     authError,
     loginWithGoogle, 
     loginWithApple,
-    logout 
+    logout,
+    devBypassLogin
   } = useAuth();
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const avatarColors = ['bg-pink-400', 'bg-blue-400', 'bg-green-400', 'bg-purple-400', 'bg-orange-400'];
@@ -145,6 +147,18 @@ const ProfilePage = ({ profile, onBack, onParentDashboard, onAdminPanel }) => {
             </div>
           ) : (
             <div className="space-y-3">
+              {/* DEV MODE: Quick admin login for testing */}
+              {isDevMode && (
+                <button
+                  onClick={devBypassLogin}
+                  className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-3 rounded-xl font-semibold hover:bg-purple-700 transition-colors"
+                  data-testid="dev-login-btn"
+                >
+                  <Settings size={20} />
+                  🔧 Dev Admin Login (Test Only)
+                </button>
+              )}
+              
               {/* Apple Sign-In - Primary on iOS */}
               {isIOS && (
                 <button
