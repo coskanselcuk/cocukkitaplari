@@ -582,12 +582,13 @@ const AdminPanel = ({ onBack }) => {
                     <h2 className="font-bold text-gray-800">{selectedBook.title} - Sayfalar</h2>
                     <div className="flex gap-2">
                       <button
-                        onClick={generateAudioForBook}
-                        disabled={isGeneratingAudio || bookPages.length === 0}
+                        onClick={() => setShowBulkAudioGenerator(true)}
+                        disabled={bookPages.length === 0}
                         className="bg-purple-500 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
                         title={bookPages.length === 0 ? 'Önce sayfa ekleyin' : 'Tüm sayfalar için ses oluştur'}
+                        data-testid="bulk-audio-btn"
                       >
-                        <Volume2 size={16} /> Ses Oluştur
+                        <Volume2 size={16} /> Toplu Ses Oluştur
                       </button>
                       <button
                         onClick={() => setShowAddPage(true)}
@@ -597,13 +598,6 @@ const AdminPanel = ({ onBack }) => {
                       </button>
                     </div>
                   </div>
-
-                  {isGeneratingAudio && (
-                    <div className="mb-4 p-3 bg-purple-50 rounded-lg flex items-center gap-2">
-                      <Loader2 size={16} className="animate-spin text-purple-500" />
-                      <span className="text-sm text-purple-700">{audioGenProgress}</span>
-                    </div>
-                  )}
 
                   {bookPages.length === 0 && (
                     <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
