@@ -20,6 +20,51 @@ def get_db():
     return client[db_name]
 
 
+async def get_user_from_request(request: Request):
+    """Extract user from session token in cookie or Authorization header"""
+    db = get_db()
+    
+    # Try cookie first
+    session_token = request.cookies.get("session_token")
+    
+    # Fall back to Authorization header
+    if not session_token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            session_token = auth_header.replace("Bearer ", "")
+    
+    if not session_token:
+        return None
+    
+    # Look up session
+    session = await db.user_sessions.find_one(
+        {"session_token": session_token},
+        {"_id": 0}
+    )
+    
+    if not session:
+        return None
+    
+    # Check if session expired
+    if session.get("expires_at"):
+        expires_at = session["expires_at"]
+        if isinstance(expires_at, str):
+            expires_at = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+        if expires_at < datetime.now(timezone.utc):
+            return None
+    
+    # Get user
+    user = await db.users.find_one(
+        {"user_id": session["user_id"]},
+        {"_id": 0}
+    )
+    
+    if user:
+        user["user_id"] = session["user_id"]
+    
+    return user
+
+
 class SessionRequest(BaseModel):
     session_id: str
 
