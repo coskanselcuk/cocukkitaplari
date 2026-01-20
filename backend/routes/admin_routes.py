@@ -456,8 +456,9 @@ async def create_book_from_text(
     
     # Generate book ID
     book_id = str(uuid.uuid4())
+    total_pages = len(page_texts)
     
-    # Create book document
+    # Create book document with all required fields
     book_doc = {
         "id": book_id,
         "title": title,
@@ -466,10 +467,13 @@ async def create_book_from_text(
         "coverImage": cover_image,
         "description": "",
         "ageGroup": "4-6",
-        "duration": f"{len(page_texts) * 2} dk",  # Estimate 2 min per page
+        "duration": f"{total_pages * 2} dk",  # Estimate 2 min per page
         "isPremium": False,
         "isNew": True,
         "hasAudio": False,
+        "rating": 0.0,
+        "readCount": 0,
+        "totalPages": total_pages,
         "createdAt": datetime.now(timezone.utc).isoformat()
     }
     
