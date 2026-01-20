@@ -39,6 +39,7 @@ const AdminPanel = ({ onBack }) => {
   const [voices, setVoices] = useState([]);
   const [voicesLoading, setVoicesLoading] = useState(false);
   const [showBookWizard, setShowBookWizard] = useState(false);
+  const [showBulkAudioGenerator, setShowBulkAudioGenerator] = useState(false);
 
   // New book form
   const [newBook, setNewBook] = useState({
