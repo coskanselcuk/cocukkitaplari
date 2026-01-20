@@ -1428,6 +1428,19 @@ const AdminPanel = ({ onBack }) => {
           </div>
         </div>
       )}
+
+      {/* Book Creator Wizard */}
+      {showBookWizard && (
+        <BookCreatorWizard
+          onClose={() => setShowBookWizard(false)}
+          onBookCreated={(book) => {
+            setBooks([...books, book]);
+            fetchData(); // Refresh to get complete book data
+          }}
+          categories={categories}
+          voices={voices}
+        />
+      )}
     </div>
   );
 };
