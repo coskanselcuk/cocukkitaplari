@@ -1437,6 +1437,21 @@ const AdminPanel = ({ onBack }) => {
           voices={voices}
         />
       )}
+
+      {/* Bulk Audio Generator */}
+      {showBulkAudioGenerator && selectedBook && (
+        <BulkAudioGenerator
+          bookId={selectedBook.id}
+          bookTitle={selectedBook.title}
+          totalPages={bookPages.length}
+          pagesWithAudio={bookPages.filter(p => p.audioUrl).length}
+          onComplete={() => {
+            // Refresh pages to show updated audio status
+            fetchBookPages(selectedBook.id);
+          }}
+          onClose={() => setShowBulkAudioGenerator(false)}
+        />
+      )}
     </div>
   );
 };
