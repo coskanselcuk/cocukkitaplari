@@ -547,47 +547,6 @@ async def google_webhook(request: Request):
         return {"status": "error", "message": str(e)}
 
 
-# Admin endpoints
-@router.get("/admin/stats")
-async def get_subscription_stats(request: Request):
-    """Admin endpoint to get subscription statistics"""
-    db = get_db()
-    
-    # Verify admin access
-    admin_user = await get_user_from_request(request)
-    if not admin_user or admin_user.get("email") != "coskanselcuk@gmail.com":
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
-    # Count subscriptions
-    total_users = await db.users.count_documents({})
-    premium_users = await db.users.count_documents({"subscription_tier": "premium"})
-    trial_users = await db.users.count_documents({"is_trial": True})
-    total_purchases = await db.purchases.count_documents({})
-    
-    # Get recent purchases
-    recent_purchases = await db.purchases.find(
-        {},
-        {"_id": 0, "receipt_data": 0}
-    ).sort("created_at", -1).limit(10).to_list(length=10)
-    
-    # Get trial statistics
-    trial_stats = await db.users.find(
-        {"trial_used": True},
-        {"_id": 0, "user_id": 1, "email": 1, "is_trial": 1, "trial_ends_at": 1}
-    ).to_list(length=100)
-    
-    return {
-        "total_users": total_users,
-        "premium_users": premium_users,
-        "trial_users": trial_users,
-        "free_users": total_users - premium_users,
-        "conversion_rate": round((premium_users / total_users * 100) if total_users > 0 else 0, 2),
-        "total_purchases": total_purchases,
-        "recent_purchases": recent_purchases,
-        "trial_stats": trial_stats
-    }
-
-
 @router.get("/admin/trial-notifications")
 async def get_trial_notification_status(request: Request):
     """Admin endpoint to see trial notification history"""
