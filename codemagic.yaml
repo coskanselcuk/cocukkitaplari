@@ -33,6 +33,7 @@ workflows:
         script: |
           cd frontend
           echo "REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL" > .env.production
+          echo "REACT_APP_ADMIN_EMAIL=$REACT_APP_ADMIN_EMAIL" >> .env.production
           yarn build
       
       - name: Add iOS platform
@@ -128,6 +129,7 @@ workflows:
         script: |
           cd frontend
           echo "REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL" > .env.production
+          echo "REACT_APP_ADMIN_EMAIL=$REACT_APP_ADMIN_EMAIL" >> .env.production
           yarn build
       
       - name: Add Android platform
@@ -199,6 +201,7 @@ workflows:
         script: |
           cd frontend
           echo "REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL" > .env.production
+          echo "REACT_APP_ADMIN_EMAIL=$REACT_APP_ADMIN_EMAIL" >> .env.production
           yarn build
       
       - name: Add iOS platform
@@ -319,6 +322,7 @@ workflows:
         script: |
           cd frontend
           echo "REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL" > .env.production
+          echo "REACT_APP_ADMIN_EMAIL=$REACT_APP_ADMIN_EMAIL" >> .env.production
           yarn build
       
       - name: Add Android platform
