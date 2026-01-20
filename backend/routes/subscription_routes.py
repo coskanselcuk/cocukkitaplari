@@ -553,6 +553,11 @@ async def get_subscription_stats(request: Request):
     """Admin endpoint to get subscription statistics"""
     db = get_db()
     
+    # Verify admin access
+    admin_user = await get_user_from_request(request)
+    if not admin_user or admin_user.get("email") != "coskanselcuk@gmail.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
     # Count subscriptions
     total_users = await db.users.count_documents({})
     premium_users = await db.users.count_documents({"subscription_tier": "premium"})
