@@ -322,7 +322,7 @@ const FlipbookDemo = () => {
                   <Page
                     key={page.id}
                     pageNumber={idx + 1}
-                    imageUrl={page.imageUrl}
+                    imageUrl={page.image || page.imageUrl}
                     text={page.text}
                   />
                 ))}
