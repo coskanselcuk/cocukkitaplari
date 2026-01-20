@@ -89,7 +89,8 @@ def validate_env_vars():
             "See backend/.env.example for reference.\n"
             "=" * 60
         )
-        logger.warning(warning_msg)
+        # Use print here since logger may not be set up yet
+        print(warning_msg)
     
     return True
 
