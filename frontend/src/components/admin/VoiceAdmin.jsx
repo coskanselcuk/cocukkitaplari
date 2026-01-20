@@ -730,7 +730,7 @@ const VoiceAdmin = () => {
             </div>
             
             <p className="text-gray-700 mb-6">
-              <strong>"{deletingVoice.name}"</strong> sesini silmek istediğinize emin misiniz?
+              <strong>&quot;{deletingVoice.name}&quot;</strong> sesini silmek istediğinize emin misiniz?
             </p>
             
             <div className="flex gap-3">
