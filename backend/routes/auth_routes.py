@@ -231,9 +231,14 @@ async def downgrade_to_free(user_id: str, request: Request):
 
 
 @router.get("/users")
-async def list_users():
+async def list_users(request: Request):
     """Admin endpoint to list all users"""
     db = get_db()
+    
+    # Verify admin access
+    admin_user = await get_user_from_request(request)
+    if not admin_user or admin_user.get("email") != "coskanselcuk@gmail.com":
+        raise HTTPException(status_code=403, detail="Admin access required")
     
     users = []
     async for user in db.users.find({}, {"_id": 0}):
