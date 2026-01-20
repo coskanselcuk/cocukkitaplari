@@ -9,6 +9,7 @@ import ImageUpload from './ImageUpload';
 import NotificationAdmin from './NotificationAdmin';
 import VoiceAdmin from './VoiceAdmin';
 import BookCreatorWizard from './BookCreatorWizard';
+import BulkAudioGenerator from './BulkAudioGenerator';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
