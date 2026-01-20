@@ -246,6 +246,96 @@ async def get_default_voice():
     return voice
 
 
+@router.get("/elevenlabs")
+async def fetch_elevenlabs_voices():
+    """Fetch all available voices from ElevenLabs account"""
+    if not ELEVENLABS_API_KEY:
+        raise HTTPException(status_code=500, detail="ElevenLabs API anahtarı yapılandırılmamış")
+    
+    db = get_db()
+    
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                "https://api.elevenlabs.io/v1/voices",
+                headers={"xi-api-key": ELEVENLABS_API_KEY}
+            )
+            
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code, 
+                    detail=f"ElevenLabs API hatası: {response.text}"
+                )
+            
+            data = response.json()
+            voices_list = data.get("voices", [])
+            
+            # Get already added voice IDs
+            existing_voices = await db.custom_voices.find({}, {"elevenlabs_id": 1, "_id": 0}).to_list(length=100)
+            existing_ids = {v["elevenlabs_id"] for v in existing_voices}
+            
+            # Format response
+            formatted_voices = []
+            for voice in voices_list:
+                formatted_voices.append({
+                    "voice_id": voice.get("voice_id"),
+                    "name": voice.get("name"),
+                    "category": voice.get("category"),
+                    "description": voice.get("description", ""),
+                    "preview_url": voice.get("preview_url"),
+                    "labels": voice.get("labels", {}),
+                    "already_added": voice.get("voice_id") in existing_ids
+                })
+            
+            return {
+                "voices": formatted_voices,
+                "total": len(formatted_voices)
+            }
+            
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="ElevenLabs API zaman aşımı")
+    except Exception as e:
+        logger.error(f"Error fetching ElevenLabs voices: {e}")
+        raise HTTPException(status_code=500, detail=f"Sesler alınamadı: {str(e)}")
+
+
+@router.post("/import-from-elevenlabs")
+async def import_voice_from_elevenlabs(voice_data: dict):
+    """Import a voice directly from ElevenLabs data"""
+    db = get_db()
+    
+    elevenlabs_id = voice_data.get("voice_id")
+    if not elevenlabs_id:
+        raise HTTPException(status_code=400, detail="voice_id gerekli")
+    
+    # Check if already exists
+    existing = await db.custom_voices.find_one({"elevenlabs_id": elevenlabs_id})
+    if existing:
+        raise HTTPException(status_code=400, detail="Bu ses zaten eklenmiş")
+    
+    voice_id = f"voice_{uuid.uuid4().hex[:12]}"
+    
+    voice_doc = {
+        "id": voice_id,
+        "elevenlabs_id": elevenlabs_id,
+        "name": voice_data.get("name", "Unnamed Voice"),
+        "description": voice_data.get("description", ""),
+        "preview_url": voice_data.get("preview_url", ""),
+        "category": voice_data.get("category", ""),
+        "labels": voice_data.get("labels", {}),
+        "is_default": False,
+        "verified": True,  # Coming from ElevenLabs API, so it's verified
+        "created_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.custom_voices.insert_one(voice_doc)
+    
+    # Remove _id before returning
+    voice_doc.pop("_id", None)
+    
+    return voice_doc
+
+
 @router.post("/set-default/{voice_id}")
 async def set_default_voice(voice_id: str):
     """Set a voice as the default"""
