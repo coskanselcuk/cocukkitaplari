@@ -11,8 +11,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 mongo_url = os.environ.get('MONGO_URL')
 db_name = os.environ.get('DB_NAME')
-# Emergent OAuth service URL - defaults to production
-AUTH_SERVICE_URL = os.environ.get('AUTH_SERVICE_URL', 'https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data')
+# Legacy Emergent OAuth service URL - kept for backwards compatibility but no longer primary auth
+AUTH_SERVICE_URL = os.environ.get('AUTH_SERVICE_URL')
 
 
 def get_db():
