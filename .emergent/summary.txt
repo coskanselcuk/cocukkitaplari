@@ -1,86 +1,84 @@
 <analysis>**original_problem_statement:**
-The user wants to build a pixel-perfect clone of the TRT Çocuk Kitaplık mobile application. The core features include a main screen with category islands, a book library, a landscape book reader with page-by-page audio narration, and a simple admin panel for content management. The application is intended for deployment on Apple and Google app stores with a subscription model for accessing premium content.
+The user wants to build a pixel-perfect clone of the TRT Çocuk Kitaplık mobile application, to be branded as Çocuk Kitapları. The core features include a main screen with category islands, a book library, a landscape book reader with page-by-page audio narration, and a simple admin panel for content management. The application is intended for deployment on Apple and Google app stores with a monthly subscription model for accessing premium content, including a free trial.
 
 **PRODUCT REQUIREMENTS:**
 -   **UI/UX:** Clone the design from the user-provided screen recording. A starry night background for the book library view.
 -   **Book Reader:** Landscape mode with swipe gestures. Audio for each page that plays automatically. When Auto-Play is on, the page should turn automatically when the audio finishes.
 -   **Audio:** Use pre-generated audio. The user should be able to manage a list of custom ElevenLabs voices and assign a specific voice to each page.
--   **Content & Monetization:** Brand name is Çocuk Kitapları. The app will have free and premium books, with access controlled by a monthly subscription. A free trial should be available.
+-   **Content & Monetization:** The app will have free and premium books, with access controlled by a monthly subscription. A free trial should be available.
 -   **Content Management:** An admin panel is required for the user to manage books, pages, categories, and notifications.
--   **Authentication:** User authentication is required to manage subscriptions and sync reading progress.
+-   **Authentication:** User authentication is required to manage subscriptions and sync reading progress, supporting both Google and Apple Sign-In.
 -   **Mobile Deployment:** The app must be easily deployable to iOS and Android app stores using Capacitor.
 -   **Notifications:** An in-app notification system to inform users about new books, categories, or custom announcements, manageable from the admin panel.
+-   **Image Optimization:** Images must be optimized for different devices (phones, tablets) and pixel densities, using responsive techniques and a blur-up loading effect for book pages.
 
-**User's preferred language**: The user communicates in English. However, the application's content and UI text are in **Turkish**. The next agent must continue to use Turkish for all user-facing text in the app.
+**User's preferred language**: The user communicates in English. However, the application's UI and content are in **Turkish**. The next agent must continue to use Turkish for all user-facing text in the app.
 
 **what currently exists?**
-A feature-rich full-stack application built with React, FastAPI, and now running on a production-ready stack.
--   **Infrastructure:** The backend is configured for deployment on Railway, the database has been migrated to a user-provided MongoDB Atlas cluster, and all image assets are now stored and served from a user-provided Cloudinary account.
--   **CI/CD:** A  file is configured to handle iOS and Android builds and publishing, with workflows for building, code signing, and publishing to TestFlight/Play Store.
--   **Core App:** The main application screens, book reader, authentication, and admin panel for content management (Books, Pages, Categories, Voices, Notifications) are fully functional.
--   **Code Quality:** Multiple code review passes have been completed, fixing issues related to hardcoded secrets, removing debug logs from production builds, cleaning up  files, implementing environment variable validation, and organizing one-off scripts.
+A feature-rich full-stack application built with React, FastAPI, and MongoDB, configured for a full production pipeline. The backend is deployed on Railway, the database is on MongoDB Atlas, and images are served from Cloudinary. A  file handles CI/CD for iOS and Android builds.
+
+The application's core features are complete, including the main screens, book reader, admin panel, and authentication. Recent work has focused on migrating to direct Google/Apple OAuth, implementing responsive image optimization, and hardening security by fixing critical issues related to keystore handling, unprotected endpoints, and hardcoded credentials.
 
 **Last working item**:
--   Last item agent was working: At the user's request, the agent was performing a final code review to find and remove any remaining references to the original cloned app, TRT Çocuk Kitaplık, to ensure the final product is de-branded. The agent began searching for the string TRT.
--   Status: IN PROGRESS
--   Agent Testing Done: N
--   Which testing method agent to use? Manual text search using .
+-   Last item agent was working: At the user's request, the agent made the frontend admin email check configurable via an environment variable () for consistency with the backend. This involved updating the , , and  files.
+-   Status: FINISHED
+-   Agent Testing Done: Y
+-   Which testing method agent to use? Manual verification by the user is needed to confirm the variable is working as expected in their Codemagic environment.
 -   User Testing Done: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1: Notification Modal CSS (P1)**
-    -   **Description:** User reported that in the admin panel's New Notification modal, the text for dropdown options like Bildirim Türü and Hedef Kitle was invisible until selected.
-    -   **Attempted fixes:** The agent applied a fix by adding explicit  and  classes to the unselected buttons and input fields in .
-    -   **Next debug checklist:** The user needs to verify the fix by logging into the admin panel, opening the Add New Notification modal, and confirming that all text and options are visible by default.
-    -   **Why fix this issue and what will be achieved with the fix?** Improves the usability of a core admin feature.
+-   **Issue 1: PostHog Error Overlay in Preview (P2)**
+    -   **Description:** An Uncaught runtime errors overlay from PostHog (an analytics tool used in the preview environment) frequently appears, obstructing the view. This is a platform issue, not an app bug.
+    -   **Attempted fixes:** The agent first tried suppressing the error in . When that failed, a more aggressive fix was implemented in  to prevent the error overlay from showing during development.
+    -   **Next debug checklist:** The user needs to confirm if the second fix has resolved the issue in the preview environment. If not, the   settings might need further tweaking.
+    -   **Why fix this issue and what will be achieved with the fix?** Improves the development and testing experience by removing a disruptive and irrelevant error overlay.
     -   **Status:** USER VERIFICATION PENDING
     -   **Is recurring issue?** Y
     -   **Should Test frontend/backend/both after fix?** Frontend
     -   **Blocked on other issue:** None
 
 **In progress Task List**:
--   **Task 1: Remove TRT Çocuk Kitaplık References (P0)**
-    -   **Where to resume:** The agent has run a  command for TRT and found results in  and some binary-looking output. The next step is to perform a more thorough, case-insensitive search across the entire codebase for TRT and TRT Çocuk Kitaplık, then remove any found references from code, comments, or documentation, excluding the  history.
-    -   **What will be achieved with this?** Ensures the application is fully de-branded before launch, as requested by the user.
-    -   **Status:** IN PROGRESS
-    -   **Should Test frontend/backend/both after fix?** Not applicable.
-    -   **Blocked on something:** None.
+-   None.
 
 **Upcoming and Future Tasks**
 **Upcoming Tasks:**
--   **Task 1 (P1):** Finalize Codemagic Android Publishing. The user needs to add the  to their app-level environment variables in Codemagic to allow publishing to the Google Play Store.
--   **Task 2 (P1):** Fully implement and test the native in-app purchase flow. The backend routes and frontend services are in place but require end-to-end testing with sandbox accounts for Apple/Google, which the user did not have set up previously.
--   **Task 3 (P2):** Generate screenshots for the app stores using the provided script ().
+-   **Task 1 (P1):** Test Native Authentication Flows. The direct Google and Apple Sign-In integrations are complete but need to be tested on physical iOS and Android devices by triggering a build via Codemagic.
+-   **Task 2 (P1):** End-to-End In-App Purchase Testing. The backend routes are in place, but the subscription flow needs to be tested with sandbox accounts for both Apple and Google.
+-   **Task 3 (P2):** Generate App Store Screenshots. Use the script at  to create promotional images for the app stores.
 
 **Future Tasks:**
 -   Add a Bulk Audio Generation feature to the admin panel.
 -   Implement a reading streak feature to encourage user engagement.
 -   Add a Profile Settings page where users can edit their name.
--   Implement trial expiration push notifications (the backend cron job exists, but no push service like Firebase is integrated).
+-   Integrate a push notification service (e.g., Firebase) to enable trial expiration notifications.
 -   Implement an offline mode for downloaded books.
 -   Implement a night mode / dark theme.
 
 **Completed work in this session**
--   **Production Migration:**
-    -   Migrated the database from local MongoDB to a user-provided MongoDB Atlas cluster.
-    -   Integrated Cloudinary for all image uploads and migrated existing local images.
--   **Deployment Configuration:**
-    -   Created  and  to configure the backend for deployment on Railway.
-    -   Created  to set up CI/CD pipelines for building and publishing iOS and Android apps.
-    -   Troubleshot and resolved numerous build failures on Codemagic related to Node.js versions, React hook dependencies, and code signing.
--   **Bug Fixes & Code Quality:**
-    -   Fixed the audio invalidation UI feedback in , ensuring the UI updates correctly when a page's voice is changed.
-    -   Implemented backend task for trial expiration notifications.
-    -   Resolved multiple code review findings:
-        -   Removed hardcoded URLs and added environment variable validation.
-        -   Removed all  and  statements from production builds.
-        -   Cleaned and corrected  files.
-        -   Created  files for both frontend and backend.
-        -   Organized one-off scripts into a  directory.
-        -   Fixed a  comment by connecting the Upgrade button in the profile to the existing .
+-   **Authentication Overhaul:**
+    -   Replaced Emergent-managed Google Auth with a direct Google OAuth implementation.
+    -   Implemented native Apple Sign-In for iOS.
+-   **Security Hardening:**
+    -   Fixed a critical Android build issue by moving from on-the-fly keystore generation to a secure, permanent keystore managed via Codemagic secrets. Created .
+    -   Deleted 4 unused and unprotected admin API endpoints.
+    -   Made the  a configurable environment variable across the entire stack.
+    -   Configured backend CORS policy to require explicit origins, removing the insecure  default for production.
+-   **Responsive Image Optimization (Phase 1 & 2):**
+    -   Created a  utility to generate dynamically transformed image URLs.
+    -   Implemented a reusable  component with a blur-up loading effect and  for responsiveness.
+    -   Integrated optimized images into the Book Reader and Book Cover cards.
+    -   Added image aspect ratio and resolution validation to the admin panel's upload component.
+-   **Feature Enhancement:**
+    -   Added Clear All (for users) and Delete All (for admin) functionality to the notifications system.
+-   **Bug Fixes:**
+    -   Resolved a bug where audio would restart incorrectly in the book reader's auto-play mode.
+    -   Fixed the visual appearance of the Google Sign-In popup.
+    -   Attempted to suppress a recurring error overlay from a preview-environment analytics tool.
+-   **De-branding:**
+    -   Completed a thorough search and removal of all remaining references to the original cloned app (TRT Çocuk Kitaplık).
 
 **Earlier issues found/mentioned but not fixed**
--   None. The previously mentioned CSS issue has a new fix applied and is awaiting user verification.
+-   None.
 
 **Known issue recurrence from previous fork**
 -   None.
@@ -92,9 +90,9 @@ A feature-rich full-stack application built with React, FastAPI, and now running
 -   **Frontend:** React, TailwindCSS, CapacitorJS, Craco
 -   **Backend:** FastAPI, Pydantic, Motor (async MongoDB driver)
 -   **Database:** MongoDB Atlas
--   **Image Storage:** Cloudinary
+-   **Image Storage & Transformation:** Cloudinary
 -   **Deployment:** Railway (Backend), Codemagic (Mobile CI/CD)
--   **Authentication:** Emergent-managed Google Social Login (OAuth2)
+-   **Authentication:** Direct Google OAuth (, ), Apple Sign-In (, )
 
 **key DB schema**
 -   **users**: 
@@ -105,59 +103,50 @@ A feature-rich full-stack application built with React, FastAPI, and now running
 -   **voices**: 
 
 **changes in tech stack**
--   **Database:** Migrated from local MongoDB to **MongoDB Atlas**.
--   **File/Image Storage:** Migrated from local server filesystem to **Cloudinary**.
--   **Deployment:** Introduced **Railway** for backend hosting and **Codemagic** for mobile CI/CD.
+-   **Authentication:** Migrated from Emergent-managed Google Auth to a **Direct Google OAuth** implementation.
+-   **Authentication:** Added native **Apple Sign-In** support.
 
 **All files of reference**
--   : New file for CI/CD configuration.
--   : New file for backend deployment on Railway.
--   : Modified to add environment variable validation.
--   : Overwritten to integrate Cloudinary.
--   : Updated with Atlas and Cloudinary credentials.
--   : Updated with all required variables.
--   : New file for production builds.
--   : Cleaned up and corrected.
--   : Modified to remove console logs in production.
--   : Modified to fix CSS visibility issue.
--   : Modified to implement subscription modal.
--   : Modified to add a global error interceptor.
+-   **/app/codemagic.yaml**: Heavily modified to support secure keystore handling and native auth plugins (Google/Apple).
+-   **/app/KEYSTORE_SETUP.md**: New guide for generating and securing the Android signing keystore.
+-   **/app/backend/server.py**: Updated to remove insecure CORS policy and register new auth routes.
+-   **/app/backend/routes/auth_routes.py, apple_auth_routes.py, google_auth_routes.py**: New and modified files for direct authentication.
+-   **/app/backend/.env.example**: Updated with all new required environment variables for Google/Apple auth.
+-   **/app/frontend/src/contexts/AuthContext.jsx**: Rewritten to handle direct Google and Apple auth flows for both web and native.
+-   **/app/frontend/src/utils/cloudinaryHelper.js**: New utility for dynamic Cloudinary image transformations.
+-   **/app/frontend/src/components/common/OptimizedImage.jsx**: New component for responsive, lazy-loaded images with a blur-up effect.
+-   **/app/frontend/src/components/admin/ImageUpload.jsx**: Modified to add validation for image aspect ratio and resolution.
+-   **/app/frontend/src/components/books/BookReaderLandscape.jsx**: Refactored to use  and fixed an audio playback bug.
+-   **/app/frontend/craco.config.js**: Modified to attempt suppression of a preview-mode error overlay.
 
 **Areas that need refactoring**:
--    is still a very large monolithic component that could be broken down for better maintainability.
+-    remains a large monolithic component that could be broken down for better maintainability.
 
 **key api endpoints**
--   : Now uploads directly to Cloudinary.
--   : One-time script endpoint (can be removed).
--   : One-time script endpoint (can be removed).
+-   , : New endpoints for Apple Sign-In.
+-   , : New endpoints for direct Google OAuth.
+-   , : New endpoints for bulk notification deletion.
 
 **Critical Info for New Agent**
--   The application is now configured for a full production deployment pipeline. The backend runs on Railway, the database is on Atlas, and images are on Cloudinary.
--   The user is actively working on deploying the app via Codemagic. Be prepared to assist with any further build or deployment issues on that platform.
--   All sensitive keys and credentials are now managed through environment variables, with  files providing documentation. The code includes startup validation to ensure all required variables are set.
+-   The app's authentication system has been fully migrated from Emergent-managed services to direct Google and Apple OAuth. This requires careful configuration of all related environment variables on Railway for the backend to function.
+-   The Android build process has been secured. Follow the  guide. The  now expects the keystore and its credentials to be provided as secure environment variables.
+-   Image handling is now optimized. The frontend uses a helper () to request dynamically resized and formatted images from Cloudinary. The admin panel validates new image uploads against strict aspect ratio and resolution standards.
 
 **documents and test reports created in this job**
 -   
 -    (Updated)
--   
--   
--   
--   
--   
--   
--   
 
 **Last 10 User Messages and any pending HUMAN messages**
--   **10. (LATEST)** User asked the agent to check the codebase for any references to TRT Çocuk Kitaplık. (IN PROGRESS)
--   **9.** User asked what to do about an error in  ().
--   **8.** User asked the agent to analyze a code review finding about  statements and provided a detailed list.
--   **7.** User asked if they should change anything in Railway after the agent fixed a hardcoded URL.
--   **6.** User provided a code review finding about hardcoded URLs and secrets.
--   **5.** User asked for help setting up Codemagic for the iOS build.
--   **4.** User stated they do not have a Mac and asked for recommendations for iOS builds.
--   **3.** User provided the production backend URL () and stated they want to proceed with a Capacitor Build.
--   **2.** User asked for the port FastAPI runs on for the Railway deployment URL.
--   **1.** User confirmed the Railway build is complete and asked for the next step.
+1.  **User:** Asked if they need to set the  in both Codemagic and Railway.
+2.  **Agent:** Clarified that it's critical for Railway (backend security) but optional for Codemagic (frontend UI), as the frontend value is not for security.
+3.  **User:** Requested to make the frontend  an environment variable for consistency. (Task started)
+4.  **Agent:** Implemented the frontend environment variable for  and updated . (Task finished)
+5.  **User:** Complained about a persistent  overlay from PostHog.
+6.  **Agent:** Explained it's a preview-tool issue and applied a fix in .
+7.  **User:** Reported the PostHog error is still present and even appears in the book reader now.
+8.  **Agent:** Applied a more aggressive fix in  to suppress the development error overlay.
+9.  **User:** Provided a list of critical security issues found by a tool, including unprotected admin endpoints.
+10. **Agent:** Acknowledged the critical security issues and immediately began fixing them.
 
 **Project Health Check:**
 -   **Broken:** None.
@@ -165,7 +154,8 @@ A feature-rich full-stack application built with React, FastAPI, and now running
 
 **3rd Party Integrations**
 -   **ElevenLabs (Text-to-Speech)**
--   **Emergent-managed Google Auth**
+-   **Google OAuth (Direct Integration)** - Requires User API Key
+-   **Apple Sign-In (Direct Integration)** - Requires User API Key
 -   **Capacitor** (with )
 -   **MongoDB Atlas (Database-as-a-Service)**
 -   **Cloudinary (Image/Media-as-a-Service)**
@@ -173,14 +163,14 @@ A feature-rich full-stack application built with React, FastAPI, and now running
 -   **Codemagic (Mobile CI/CD)**
 
 **Testing status**
--   Testing agent used after significant changes: YES
+-   Testing agent used after significant changes: NO
 -   Troubleshoot agent used after agent stuck in loop: NO
 -   Test files created: []
 -   Known regressions: None.
 
 **Credentials to test flow:**
--   Log in with any Google account for the standard user flow.
--   To access the admin panel at , the logged-in user's email must be .
+-   Log in with a Google or Apple account.
+-   To access the admin panel at , the logged-in user's email must match the  environment variable (defaults to ).
 
 **What agent forgot to execute**
--   The agent started the task of searching for TRT references but has not completed it. A thorough search across all files and removal of any branding is still required.</analysis>
+-   The agent successfully completed all user-directed tasks and proactively addressed security and code quality issues found along the way. No requested tasks were overlooked.</analysis>
