@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
           user_id: 'dev_admin_user',
           email: ADMIN_EMAIL,
           name: 'Dev Admin',
-          subscription: { status: 'active', tier: 'premium' }
+          subscription_tier: 'premium'
         };
         setUser(devUser);
         setIsAuthenticated(true);
