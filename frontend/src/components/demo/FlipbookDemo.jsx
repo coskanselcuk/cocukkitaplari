@@ -85,11 +85,12 @@ const FlipbookDemo = () => {
     const fetchBooks = async () => {
       try {
         const response = await axios.get(`${API_URL}/api/books`);
-        setBooks(response.data.books || []);
-        // Auto-select first book with pages
-        if (response.data.books?.length > 0) {
-          const firstBook = response.data.books[0];
-          setSelectedBook(firstBook);
+        const allBooks = response.data.books || [];
+        setBooks(allBooks);
+        // Auto-select "Annemin Elleri" book if available, otherwise first book
+        if (allBooks.length > 0) {
+          const anneminElleri = allBooks.find(b => b.id === 'annemin-elleri');
+          setSelectedBook(anneminElleri || allBooks[0]);
         }
       } catch (err) {
         console.error('Failed to fetch books:', err);
