@@ -46,6 +46,23 @@ Build a clone of the "TRT Çocuk Kitaplık" mobile application for iOS and Andro
 
 ## What's Been Implemented
 
+### Session: January 20, 2026
+- ✅ **Enhanced Voice Management (Phase 1)**:
+  - **Fetch from ElevenLabs**: New "ElevenLabs'tan Al" button fetches all voices from your account
+  - **One-click Import**: Import voices directly with preview URLs and metadata
+  - **Voice Preview**: Play audio samples before importing
+  - **Search/Filter**: Filter ElevenLabs voices by name, category, or labels
+  - **Backend**: New `/api/voices/elevenlabs` and `/api/voices/import-from-elevenlabs` endpoints
+  
+- ✅ **Book Creator Wizard (Phase 2)**:
+  - **4-Step Wizard**: Book Info → Pages → Voice Settings → Review
+  - **Bulk Text Import**: Paste entire story and split by page markers (---, [PAGE], etc.)
+  - **Flexible Image Input**: Upload images or provide URLs per page
+  - **Voice Selection**: Default voice for book + optional per-page override
+  - **Audio Generation**: Option to generate audio immediately or later
+  - **New Component**: `/app/frontend/src/components/admin/BookCreatorWizard.jsx`
+  - **Admin Panel**: New "Sihirbaz" (Wizard) button alongside "Hızlı Ekle" (Quick Add)
+
 ### Session: January 19, 2026
 - ✅ **De-branding completed**: Searched and confirmed no "TRT Çocuk Kitaplık" references exist in source code
 - ✅ **Bulk notification delete feature (Option B)**:
