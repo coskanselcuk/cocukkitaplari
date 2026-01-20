@@ -13,7 +13,6 @@ import AdminPanel from './components/admin/AdminPanel';
 import SearchModal from './components/search/SearchModal';
 import CreateProfileModal from './components/profile/CreateProfileModal';
 import SubscriptionModal from './components/subscription/SubscriptionModal';
-import FlipbookDemo from './components/demo/FlipbookDemo';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { booksApi } from './services/api';
 import { initializeStore, isNativeApp } from './services/iapService';
