@@ -315,8 +315,9 @@ async def create_complete_book(book_data: CompleteBookCreate):
     
     # Generate book ID
     book_id = str(uuid.uuid4())
+    total_pages = len(book_data.pages)
     
-    # Create book document
+    # Create book document with all required fields
     book_doc = {
         "id": book_id,
         "title": book_data.title,
@@ -329,6 +330,9 @@ async def create_complete_book(book_data: CompleteBookCreate):
         "isPremium": book_data.isPremium,
         "isNew": book_data.isNew,
         "hasAudio": False,
+        "rating": 0.0,
+        "readCount": 0,
+        "totalPages": total_pages,
         "createdAt": datetime.now(timezone.utc).isoformat()
     }
     
