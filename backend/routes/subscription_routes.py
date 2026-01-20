@@ -555,7 +555,7 @@ async def get_trial_notification_status(request: Request):
     
     # Get authenticated user
     user = await get_user_from_request(request)
-    if not user or user.get("email") != "coskanselcuk@gmail.com":
+    if not user or user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Admin access required")
     
     # Get all sent trial notifications
@@ -596,7 +596,7 @@ async def trigger_trial_check(request: Request):
     
     # Get authenticated user
     user = await get_user_from_request(request)
-    if not user or user.get("email") != "coskanselcuk@gmail.com":
+    if not user or user.get("email") != ADMIN_EMAIL:
         raise HTTPException(status_code=403, detail="Admin access required")
     
     now = datetime.now(timezone.utc)
