@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, Plus, Trash2, Edit, Save, X, BookOpen, 
-  FileText, Image, Volume2, Loader2, Check, AlertTriangle, Crown, Bell, Mic
+  FileText, Image, Volume2, Loader2, Check, AlertTriangle, Crown, Bell, Mic, Wand2
 } from 'lucide-react';
 import { booksApi, categoriesApi, voicesApi } from '../../services/api';
 import axios from 'axios';
 import ImageUpload from './ImageUpload';
 import NotificationAdmin from './NotificationAdmin';
 import VoiceAdmin from './VoiceAdmin';
+import BookCreatorWizard from './BookCreatorWizard';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL;
 
