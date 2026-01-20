@@ -625,7 +625,7 @@ const VoiceAdmin = () => {
                     My Voices sayfasına gidin
                   </a>
                 </li>
-                <li>Sesin üzerindeki "ID" butonuna tıklayın</li>
+                <li>Sesin üzerindeki &quot;ID&quot; butonuna tıklayın</li>
               </ol>
             </div>
 
