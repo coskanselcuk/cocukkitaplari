@@ -6,7 +6,7 @@ import { setUserId as setIapUserId, clearUserId as clearIapUserId } from '../ser
 const AuthContext = createContext(null);
 
 // Admin email - only this user can access admin panel
-const ADMIN_EMAIL = 'coskanselcuk@gmail.com';
+const ADMIN_EMAIL = process.env.REACT_APP_ADMIN_EMAIL || 'coskanselcuk@gmail.com';
 
 // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
 
