@@ -41,12 +41,12 @@ def validate_env_vars():
     }
     
     optional_vars = {
-        'CORS_ORIGINS': ('Allowed CORS origins', '*'),
+        'CORS_ORIGINS': ('Allowed CORS origins (comma-separated, no wildcards in production)', None),
         'ELEVENLABS_API_KEY': ('ElevenLabs API key for TTS', None),
         'CLOUDINARY_CLOUD_NAME': ('Cloudinary cloud name', None),
         'CLOUDINARY_API_KEY': ('Cloudinary API key', None),
         'CLOUDINARY_API_SECRET': ('Cloudinary API secret', None),
-        'AUTH_SERVICE_URL': ('OAuth service URL', 'https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data'),
+        'AUTH_SERVICE_URL': ('Legacy OAuth service URL (optional)', None),
     }
     
     missing = []
