@@ -22,14 +22,6 @@ import './App.css';
 
 // Main App Content (wrapped by AuthProvider)
 function AppContent() {
-  // Check if we're on the flipbook demo route
-  const isFlipbookDemo = window.location.pathname === '/demo/flipbook';
-  
-  // If flipbook demo, render it directly without auth requirements
-  if (isFlipbookDemo) {
-    return <FlipbookDemo />;
-  }
-
   const { user, isAuthenticated, isLoading: authLoading, login, logout, canAccessBook, isPremiumUser } = useAuth();
   
   const [activeTab, setActiveTab] = useState('home');
