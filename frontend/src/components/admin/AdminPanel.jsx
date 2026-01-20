@@ -37,6 +37,7 @@ const AdminPanel = ({ onBack }) => {
   const [regeneratingPageId, setRegeneratingPageId] = useState(null);
   const [voices, setVoices] = useState([]);
   const [voicesLoading, setVoicesLoading] = useState(false);
+  const [showBookWizard, setShowBookWizard] = useState(false);
 
   // New book form
   const [newBook, setNewBook] = useState({
