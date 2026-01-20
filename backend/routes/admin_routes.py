@@ -1,7 +1,10 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import asyncio
+import json
 
 from services.tts_service import generate_tts_audio
 from routes.notification_routes import notify_new_book, notify_new_category
@@ -19,15 +22,22 @@ def get_db():
 
 
 @router.post("/generate-audio/{book_id}")
-async def generate_audio_for_book(book_id: str):
-    """Generate TTS audio for all pages of a book that don't have audio yet"""
+async def generate_audio_for_book(book_id: str, voice_id: str = None, regenerate_all: bool = False):
+    """Generate TTS audio for all pages of a book that don't have audio yet
+    
+    Args:
+        book_id: The book ID
+        voice_id: Optional voice ID to use for all pages (overrides page-specific voices)
+        regenerate_all: If True, regenerate audio for all pages even if they already have audio
+    """
     db = get_db()
     
-    # Find pages without audio
-    cursor = db.pages.find({
-        "bookId": book_id,
-        "$or": [{"audioUrl": None}, {"audioUrl": {"$exists": False}}]
-    })
+    # Build query based on regenerate_all flag
+    query = {"bookId": book_id}
+    if not regenerate_all:
+        query["$or"] = [{"audioUrl": None}, {"audioUrl": {"$exists": False}}, {"audioUrl": ""}]
+    
+    cursor = db.pages.find(query).sort("pageNumber", 1)
     pages = await cursor.to_list(length=1000)
     
     if not pages:
@@ -35,21 +45,23 @@ async def generate_audio_for_book(book_id: str):
         total = await db.pages.count_documents({"bookId": book_id})
         if total == 0:
             raise HTTPException(status_code=404, detail="No pages found for this book")
-        return {"message": "All pages already have audio", "success_count": 0, "error_count": 0}
+        return {"message": "All pages already have audio", "success_count": 0, "error_count": 0, "total": total}
     
     success_count = 0
     error_count = 0
+    total_pages = len(pages)
     
     for page in pages:
         page_id = page.get('id')
         text = page.get('text', '')
-        voice_id = page.get('voiceId')  # Use page-specific voice if set
+        # Use provided voice_id, or page-specific voice, or None (default)
+        page_voice_id = voice_id or page.get('voiceId')
         
         if not text:
             continue
         
         try:
-            result = await generate_tts_audio(text, voice_id)
+            result = await generate_tts_audio(text, page_voice_id)
             audio_url = result.get('audio_url')
             
             if audio_url:
@@ -62,11 +74,114 @@ async def generate_audio_for_book(book_id: str):
             logger.error(f"Error generating audio for page {page_id}: {e}")
             error_count += 1
     
+    # Update book hasAudio flag
+    if success_count > 0:
+        await db.books.update_one(
+            {"id": book_id},
+            {"$set": {"hasAudio": True}}
+        )
+    
     return {
         "message": f"Audio generated for {success_count} pages",
         "success_count": success_count,
-        "error_count": error_count
+        "error_count": error_count,
+        "total": total_pages
     }
+
+
+@router.get("/generate-audio-stream/{book_id}")
+async def generate_audio_stream(book_id: str, voice_id: str = None, regenerate_all: bool = False):
+    """Generate TTS audio with real-time progress streaming via SSE
+    
+    Args:
+        book_id: The book ID
+        voice_id: Optional voice ID to use for all pages
+        regenerate_all: If True, regenerate audio for all pages
+    """
+    
+    async def event_generator():
+        db = get_db()
+        
+        # Build query based on regenerate_all flag
+        query = {"bookId": book_id}
+        if not regenerate_all:
+            query["$or"] = [{"audioUrl": None}, {"audioUrl": {"$exists": False}}, {"audioUrl": ""}]
+        
+        cursor = db.pages.find(query).sort("pageNumber", 1)
+        pages = await cursor.to_list(length=1000)
+        
+        total_pages = len(pages)
+        
+        if not pages:
+            total = await db.pages.count_documents({"bookId": book_id})
+            if total == 0:
+                yield f"data: {json.dumps({'type': 'error', 'message': 'No pages found'})}\n\n"
+            else:
+                yield f"data: {json.dumps({'type': 'complete', 'message': 'All pages already have audio', 'success': 0, 'errors': 0, 'total': total})}\n\n"
+            return
+        
+        # Send initial status
+        yield f"data: {json.dumps({'type': 'start', 'total': total_pages, 'message': f'Generating audio for {total_pages} pages...'})}\n\n"
+        
+        success_count = 0
+        error_count = 0
+        
+        for idx, page in enumerate(pages):
+            page_id = page.get('id')
+            page_num = page.get('pageNumber', idx + 1)
+            text = page.get('text', '')
+            page_voice_id = voice_id or page.get('voiceId')
+            
+            if not text:
+                error_count += 1
+                yield f"data: {json.dumps({'type': 'progress', 'current': idx + 1, 'total': total_pages, 'page': page_num, 'status': 'skipped', 'message': 'No text'})}\n\n"
+                continue
+            
+            try:
+                # Send generating status
+                yield f"data: {json.dumps({'type': 'progress', 'current': idx + 1, 'total': total_pages, 'page': page_num, 'status': 'generating'})}\n\n"
+                
+                result = await generate_tts_audio(text, page_voice_id)
+                audio_url = result.get('audio_url')
+                
+                if audio_url:
+                    await db.pages.update_one(
+                        {"id": page_id},
+                        {"$set": {"audioUrl": audio_url}}
+                    )
+                    success_count += 1
+                    yield f"data: {json.dumps({'type': 'progress', 'current': idx + 1, 'total': total_pages, 'page': page_num, 'status': 'success'})}\n\n"
+                else:
+                    error_count += 1
+                    yield f"data: {json.dumps({'type': 'progress', 'current': idx + 1, 'total': total_pages, 'page': page_num, 'status': 'error', 'message': 'No audio URL returned'})}\n\n"
+                    
+            except Exception as e:
+                logger.error(f"Error generating audio for page {page_id}: {e}")
+                error_count += 1
+                yield f"data: {json.dumps({'type': 'progress', 'current': idx + 1, 'total': total_pages, 'page': page_num, 'status': 'error', 'message': str(e)[:100]})}\n\n"
+            
+            # Small delay to prevent overwhelming the API
+            await asyncio.sleep(0.1)
+        
+        # Update book hasAudio flag
+        if success_count > 0:
+            await db.books.update_one(
+                {"id": book_id},
+                {"$set": {"hasAudio": True}}
+            )
+        
+        # Send completion status
+        yield f"data: {json.dumps({'type': 'complete', 'success': success_count, 'errors': error_count, 'total': total_pages, 'message': f'Completed: {success_count} success, {error_count} errors'})}\n\n"
+    
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no"
+        }
+    )
 
 
 @router.post("/generate-audio/{book_id}/page/{page_id}")
