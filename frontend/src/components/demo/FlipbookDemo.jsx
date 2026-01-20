@@ -295,6 +295,7 @@ const FlipbookDemo = () => {
             {/* Flipbook */}
             <div className="relative" style={{ perspective: '2000px' }}>
               <HTMLFlipBook
+                key={selectedBook.id}
                 ref={flipBookRef}
                 width={bookSize.width}
                 height={bookSize.height}
