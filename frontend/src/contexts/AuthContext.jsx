@@ -294,6 +294,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       // Ignore logout errors
     } finally {
+      // Clear dev bypass on logout
+      localStorage.removeItem('dev_admin_bypass');
       setUser(null);
       setIsAuthenticated(false);
       setAuthError(null);
@@ -322,6 +324,9 @@ export const AuthProvider = ({ children }) => {
   // Check if running on iOS
   const isIOS = Capacitor.getPlatform() === 'ios';
 
+  // Check if dev mode is available
+  const isDevMode = IS_DEV_MODE;
+
   const value = {
     user,
     isLoading,
@@ -329,11 +334,13 @@ export const AuthProvider = ({ children }) => {
     isPremiumUser,
     isAdmin,
     isIOS,
+    isDevMode,
     authError,
     login,
     loginWithGoogle,
     loginWithApple,
     logout,
+    devBypassLogin,
     canAccessBook,
     clearAuthError
   };
