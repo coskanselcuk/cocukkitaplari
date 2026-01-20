@@ -588,7 +588,7 @@ const VoiceAdmin = () => {
                   rel="noopener noreferrer"
                   className="text-blue-500 hover:underline inline-flex items-center gap-1"
                 >
-                  ElevenLabs Voice Library'ye git <ExternalLink size={10} />
+                  ElevenLabs Voice Library&apos;ye git <ExternalLink size={10} />
                 </a>
                 {' '}daha fazla ses eklemek için
               </p>
