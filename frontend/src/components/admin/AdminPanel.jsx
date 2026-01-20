@@ -512,12 +512,21 @@ const AdminPanel = ({ onBack }) => {
             <div className="bg-white rounded-xl shadow-sm p-4">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="font-bold text-gray-800">Kitaplar</h2>
-                <button
-                  onClick={() => setShowAddBook(true)}
-                  className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1"
-                >
-                  <Plus size={16} /> Yeni Kitap
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowBookWizard(true)}
+                    className="bg-purple-500 hover:bg-purple-600 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1"
+                    data-testid="book-wizard-btn"
+                  >
+                    <Wand2 size={16} /> Sihirbaz
+                  </button>
+                  <button
+                    onClick={() => setShowAddBook(true)}
+                    className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1"
+                  >
+                    <Plus size={16} /> Hızlı Ekle
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-2 max-h-96 overflow-y-auto">
