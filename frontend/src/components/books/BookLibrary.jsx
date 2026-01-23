@@ -52,7 +52,14 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
     return result;
   }, [books, category, selectedAge, searchQuery]);
 
-  const ageGroups = ['all', '3-5', '4-6', '5-7', '6-8', '6-9', '7-10'];
+  const ageGroups = ['all', '3-4', '5-6', '7-8', '9-10'];
+  const ageGroupLabels = {
+    'all': 'Tümü',
+    '3-4': 'Minikler (3-4)',
+    '5-6': 'Anaokullu (5-6)',
+    '7-8': 'Okuyorum (7-8)',
+    '9-10': 'Büyükler (9-10)'
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-900 via-indigo-800 to-indigo-900 pb-24 relative">
