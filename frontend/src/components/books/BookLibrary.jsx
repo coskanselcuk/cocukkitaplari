@@ -135,7 +135,7 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
                     : 'bg-white/10 text-white hover:bg-white/20'
                 }`}
               >
-                {age === 'all' ? 'Tümü' : `${age} yaş`}
+                {ageGroupLabels[age]}
               </button>
             ))}
           </div>
