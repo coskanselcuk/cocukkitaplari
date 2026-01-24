@@ -96,7 +96,6 @@ async def generate_tts_audio(text: str, voice_id: str = None) -> dict:
         return {
             "audio_base64": audio_b64,
             "audio_url": f"data:audio/mpeg;base64,{audio_b64}",
-            "audio_bytes": audio_data,
             "text": text,
             "voice_id": voice_id
         }
