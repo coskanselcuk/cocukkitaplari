@@ -82,7 +82,7 @@ async def generate_tts_audio(text: str, voice_id: str = None) -> dict:
             text=text,
             voice_id=voice_id,
             model_id="eleven_v3",  # v3 alpha - best for storytelling, 70+ languages including Turkish
-            voice_settings=DEFAULT_VOICE_SETTINGS
+            voice_settings=DEFAULT_VOICE_SETTINGS_V3
         )
         
         # Collect audio data
