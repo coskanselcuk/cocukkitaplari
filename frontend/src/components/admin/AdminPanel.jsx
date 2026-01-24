@@ -21,6 +21,7 @@ const AdminPanel = ({ onBack }) => {
   const [categories, setCategories] = useState([]);
   const [selectedBook, setSelectedBook] = useState(null);
   const [bookPages, setBookPages] = useState([]);
+  const [pagesLoading, setPagesLoading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('books');
