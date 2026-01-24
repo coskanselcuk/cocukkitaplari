@@ -197,9 +197,9 @@ const BookReaderLandscape = ({ book, onClose }) => {
     const audioUrlToPlay = currentPageData.audioUrl;
     const pageToMark = currentPage;
     
-    // Calculate remaining delay to ensure 3 seconds from page change
+    // Calculate remaining delay to ensure 2 seconds from page change
     const timeSincePageChange = Date.now() - pageChangeTimeRef.current;
-    const remainingDelay = Math.max(0, 3000 - timeSincePageChange);
+    const remainingDelay = Math.max(0, 2000 - timeSincePageChange);
     
     console.log('Scheduling audio for page:', pageToMark, 'delay:', remainingDelay, 'ms');
     
