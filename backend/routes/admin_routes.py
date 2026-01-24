@@ -299,6 +299,8 @@ async def create_complete_book(book_data: CompleteBookCreate):
     - Optional voice assignment per page or default voice
     - Optional immediate audio generation
     
+    Note: Pages accept both "image" and "imageUrl" fields (for backwards compatibility).
+    
     Example request:
     ```json
     {
@@ -308,8 +310,8 @@ async def create_complete_book(book_data: CompleteBookCreate):
         "coverImage": "https://example.com/cover.jpg",
         "ageGroup": "6-8",
         "pages": [
-            {"text": "Bir varmış bir yokmuş...", "imageUrl": "https://example.com/page1.jpg"},
-            {"text": "Uzak diyarlarda...", "imageUrl": "https://example.com/page2.jpg"}
+            {"text": "Bir varmış bir yokmuş...", "image": "https://example.com/page1.jpg"},
+            {"text": "Uzak diyarlarda...", "image": "https://example.com/page2.jpg"}
         ],
         "defaultVoiceId": "NsFK0aDGLbVusA7tQfOB",
         "generateAudio": false
