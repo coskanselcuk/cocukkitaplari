@@ -172,7 +172,7 @@ function AppContent() {
     const handleAdminClose = async () => {
       // Refetch books when admin panel closes
       try {
-        const response = await booksApi.getAll();
+        const response = await booksApi.getAll({ limit: 50 });
         if (response.books) {
           setBooks(response.books);
         }
