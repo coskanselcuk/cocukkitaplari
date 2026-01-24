@@ -46,10 +46,14 @@ def get_db():
 async def get_books(
     category: Optional[str] = Query(None, description="Filter by category slug"),
     ageGroup: Optional[str] = Query(None, description="Filter by age group"),
-    limit: int = Query(100, ge=1, le=500),
+    search: Optional[str] = Query(None, description="Search in title or author"),
+    limit: int = Query(20, ge=1, le=50),
     offset: int = Query(0, ge=0)
 ):
-    """Get all books with optional filtering"""
+    """Get all books with optional filtering and pagination.
+    
+    For mobile apps, use limit=20 and increment offset for infinite scroll.
+    """
     db = get_db()
     
     # Build query
@@ -58,6 +62,12 @@ async def get_books(
         query["category"] = category
     if ageGroup:
         query["ageGroup"] = ageGroup
+    if search:
+        # Case-insensitive search in title and author
+        query["$or"] = [
+            {"title": {"$regex": search, "$options": "i"}},
+            {"author": {"$regex": search, "$options": "i"}}
+        ]
     
     # Get total count
     total = await db.books.count_documents(query)
