@@ -226,7 +226,7 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
               <BookCard
                 key={book.id}
                 book={book}
-                onClick={() => onBookSelect(book)}
+                onSelect={onBookSelect}
               />
             ))}
           </div>
