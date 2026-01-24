@@ -1,56 +1,112 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { ArrowLeft, Grid, List, BookOpen, Search } from 'lucide-react';
-import { booksApi, categoriesApi } from '../../services/api';
-import { books as mockBooks, categories as mockCategories } from '../../data/mockData';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { ArrowLeft, Grid, List, Search, Loader2 } from 'lucide-react';
+import { booksApi } from '../../services/api';
 import BookCard from './BookCard';
 import { BookCardSkeletonGrid } from './BookCardSkeleton';
+
+const ITEMS_PER_PAGE = 20;
 
 const BookLibrary = ({ category, onBack, onBookSelect }) => {
   const [viewMode, setViewMode] = useState('grid');
   const [selectedAge, setSelectedAge] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [books, setBooks] = useState(mockBooks);
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+  const [total, setTotal] = useState(0);
   
-  // Fetch books from API
+  const observerRef = useRef();
+  const loadMoreRef = useRef();
+
+  // Debounce search input
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const params = category ? { category: category.slug } : {};
-        const response = await booksApi.getAll(params);
-        if (response.books && response.books.length > 0) {
-          setBooks(response.books);
-        }
-      } catch (error) {
-        console.log('Using mock books:', error.message);
-      } finally {
-        setIsLoading(false);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Reset and fetch when filters change
+  useEffect(() => {
+    setBooks([]);
+    setOffset(0);
+    setHasMore(true);
+    setIsLoading(true);
+  }, [category, selectedAge, debouncedSearch]);
+
+  // Fetch books
+  const fetchBooks = useCallback(async (currentOffset = 0, append = false) => {
+    try {
+      const params = {
+        limit: ITEMS_PER_PAGE,
+        offset: currentOffset
+      };
+      
+      if (category) {
+        params.category = category.id || category.slug;
       }
+      if (selectedAge !== 'all') {
+        params.ageGroup = selectedAge;
+      }
+      if (debouncedSearch) {
+        params.search = debouncedSearch;
+      }
+
+      const response = await booksApi.getAll(params);
+      const newBooks = response.books || [];
+      const totalCount = response.total || 0;
+
+      setTotal(totalCount);
+      
+      if (append) {
+        setBooks(prev => [...prev, ...newBooks]);
+      } else {
+        setBooks(newBooks);
+      }
+      
+      setHasMore(currentOffset + newBooks.length < totalCount);
+    } catch (error) {
+      console.error('Error fetching books:', error);
+    } finally {
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  }, [category, selectedAge, debouncedSearch]);
+
+  // Initial fetch
+  useEffect(() => {
+    if (isLoading) {
+      fetchBooks(0, false);
+    }
+  }, [isLoading, fetchBooks]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !isLoading && !isLoadingMore) {
+          setIsLoadingMore(true);
+          const newOffset = offset + ITEMS_PER_PAGE;
+          setOffset(newOffset);
+          fetchBooks(newOffset, true);
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
     };
-    fetchBooks();
-  }, [category]);
-
-  // Filter books
-  const filteredBooks = useMemo(() => {
-    let result = category 
-      ? books.filter(book => book.category === category.slug || book.category === category.id)
-      : books;
-
-    // Filter by age
-    if (selectedAge !== 'all') {
-      result = result.filter(book => book.ageGroup === selectedAge);
-    }
-
-    // Filter by search
-    if (searchQuery) {
-      result = result.filter(book => 
-        book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-    
-    return result;
-  }, [books, category, selectedAge, searchQuery]);
+  }, [hasMore, isLoading, isLoadingMore, offset, fetchBooks]);
 
   const ageGroups = ['all', '3-4', '5-6', '7-8', '9-10'];
   const ageGroupLabels = {
@@ -86,6 +142,7 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
           <button 
             onClick={onBack}
             className="bg-white/10 backdrop-blur-sm rounded-full p-2 text-white hover:bg-white/20 transition-colors"
+            data-testid="back-button"
           >
             <ArrowLeft size={24} />
           </button>
@@ -98,12 +155,14 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
             <button 
               onClick={() => setViewMode('grid')}
               className={`p-2 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white text-indigo-600' : 'bg-white/10 text-white hover:bg-white/20'}`}
+              data-testid="grid-view-btn"
             >
               <Grid size={20} />
             </button>
             <button 
               onClick={() => setViewMode('list')}
               className={`p-2 rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white text-indigo-600' : 'bg-white/10 text-white hover:bg-white/20'}`}
+              data-testid="list-view-btn"
             >
               <List size={20} />
             </button>
@@ -119,6 +178,7 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Kitap ara..."
             className="w-full bg-white/10 text-white placeholder-white/50 rounded-xl py-3 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-orange-400"
+            data-testid="search-input"
           />
         </div>
         
@@ -134,113 +194,92 @@ const BookLibrary = ({ category, onBack, onBookSelect }) => {
                     ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/30' 
                     : 'bg-white/10 text-white hover:bg-white/20'
                 }`}
+                data-testid={`age-filter-${age}`}
               >
                 {ageGroupLabels[age]}
               </button>
             ))}
           </div>
         </div>
+
+        {/* Results count */}
+        <p className="text-white/70 text-sm mt-2">
+          {isLoading ? 'Yükleniyor...' : `${total} kitap bulundu`}
+        </p>
       </div>
-      
-      {/* Books Grid/List */}
-      <div className="px-4 py-4 relative z-10">
+
+      {/* Books grid/list */}
+      <div className="px-4 pt-4 relative z-10">
         {isLoading ? (
-          <>
-            <div className="h-4 w-24 rounded bg-white/10 mb-4 animate-pulse" />
-            {viewMode === 'grid' ? (
-              <BookCardSkeletonGrid count={8} />
-            ) : (
-              <div className="space-y-4" data-testid="list-skeleton">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex gap-4">
-                    <div className="w-20 h-28 rounded-xl bg-white/5 skeleton-shimmer" />
-                    <div className="flex-1 space-y-3">
-                      <div className="h-4 w-3/4 rounded bg-white/10 skeleton-shimmer" />
-                      <div className="h-3 w-1/2 rounded bg-white/10 skeleton-shimmer" />
-                      <div className="h-3 w-full rounded bg-white/10 skeleton-shimmer" />
-                      <div className="flex gap-4">
-                        <div className="h-3 w-16 rounded bg-white/10 skeleton-shimmer" />
-                        <div className="h-3 w-16 rounded bg-white/10 skeleton-shimmer" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                <style>{`
-                  @keyframes shimmer {
-                    0% { background-position: -200% 0; }
-                    100% { background-position: 200% 0; }
-                  }
-                  .skeleton-shimmer {
-                    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
-                    background-size: 200% 100%;
-                    animation: shimmer 1.5s ease-in-out infinite;
-                  }
-                `}</style>
-              </div>
-            )}
-          </>
+          <BookCardSkeletonGrid count={8} />
+        ) : books.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-white/70">
+            <div className="bg-white/10 rounded-full p-6 mb-4">
+              <Search size={40} className="text-white/50" />
+            </div>
+            <p className="text-lg font-medium">Kitap bulunamadı</p>
+            <p className="text-sm mt-1">Farklı bir arama deneyin</p>
+          </div>
+        ) : viewMode === 'grid' ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {books.map((book) => (
+              <BookCard
+                key={book.id}
+                book={book}
+                onClick={() => onBookSelect(book)}
+              />
+            ))}
+          </div>
         ) : (
-          <>
-            <p className="text-white/60 text-sm mb-4">{filteredBooks.length} kitap bulundu</p>
-            
-            {viewMode === 'grid' ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {filteredBooks.map(book => (
-                  <BookCard 
-                    key={book.id} 
-                    book={book} 
-                    onSelect={onBookSelect}
-                    size="medium"
-                  />
-                ))}
+          <div className="space-y-3">
+            {books.map((book) => (
+              <div
+                key={book.id}
+                onClick={() => onBookSelect(book)}
+                className="flex items-center bg-white/10 backdrop-blur-sm rounded-xl p-3 hover:bg-white/20 transition-colors cursor-pointer"
+                data-testid={`book-list-item-${book.id}`}
+              >
+                <img
+                  src={book.coverImage}
+                  alt={book.title}
+                  className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
+                />
+                <div className="ml-4 flex-1 min-w-0">
+                  <h3 className="text-white font-semibold truncate">{book.title}</h3>
+                  <p className="text-white/60 text-sm">{book.author}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-orange-400 text-xs font-medium">{book.ageGroup} yaş</span>
+                    <span className="text-white/40 text-xs">•</span>
+                    <span className="text-white/60 text-xs">{book.duration}</span>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredBooks.map(book => (
-                  <button
-                    key={book.id}
-                    onClick={() => onBookSelect(book)}
-                    className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 flex gap-4 hover:bg-white/15 transition-all duration-300 text-left"
-                  >
-                    <img 
-                      src={book.coverImage} 
-                      alt={book.title}
-                      className="w-20 h-28 object-cover rounded-xl shadow-lg"
-                    />
-                    <div className="flex-1">
-                      <h3 className="font-bold text-white mb-1">{book.title}</h3>
-                      <p className="text-white/60 text-sm mb-2">{book.author}</p>
-                      <p className="text-white/50 text-sm mb-2 line-clamp-2">{book.description}</p>
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="text-cyan-400 font-semibold">{book.duration}</span>
-                        <span className="text-orange-400 font-semibold">{book.ageGroup} yaş</span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+            ))}
+          </div>
+        )}
+
+        {/* Load more trigger */}
+        {hasMore && !isLoading && (
+          <div 
+            ref={loadMoreRef} 
+            className="flex justify-center py-8"
+          >
+            {isLoadingMore && (
+              <div className="flex items-center gap-2 text-white/70">
+                <Loader2 size={20} className="animate-spin" />
+                <span>Daha fazla yükleniyor...</span>
               </div>
             )}
-          </>
+          </div>
+        )}
+
+        {/* End of list indicator */}
+        {!hasMore && books.length > 0 && (
+          <div className="text-center py-8 text-white/50 text-sm">
+            Tüm kitaplar gösterildi ({total})
+          </div>
         )}
       </div>
-      
-      {/* Empty State */}
-      {filteredBooks.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 relative z-10">
-          <div className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center mb-4">
-            <BookOpen className="text-white/40" size={40} />
-          </div>
-          <p className="text-white/60 text-lg">Kitap bulunamadı</p>
-        </div>
-      )}
-
-      {/* Add twinkle animation */}
-      <style>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.2; }
-          50% { opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 };
