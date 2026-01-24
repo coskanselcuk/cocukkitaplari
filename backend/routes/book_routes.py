@@ -47,12 +47,13 @@ async def get_books(
     category: Optional[str] = Query(None, description="Filter by category slug"),
     ageGroup: Optional[str] = Query(None, description="Filter by age group"),
     search: Optional[str] = Query(None, description="Search in title or author"),
-    limit: int = Query(20, ge=1, le=50),
+    limit: int = Query(20, ge=1, le=500),
     offset: int = Query(0, ge=0)
 ):
     """Get all books with optional filtering and pagination.
     
     For mobile apps, use limit=20 and increment offset for infinite scroll.
+    For admin panel, use limit=500 to fetch all books.
     """
     db = get_db()
     
