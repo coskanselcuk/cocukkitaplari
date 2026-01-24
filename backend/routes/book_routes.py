@@ -46,7 +46,7 @@ def get_db():
 async def get_books(
     category: Optional[str] = Query(None, description="Filter by category slug"),
     ageGroup: Optional[str] = Query(None, description="Filter by age group"),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0)
 ):
     """Get all books with optional filtering"""
