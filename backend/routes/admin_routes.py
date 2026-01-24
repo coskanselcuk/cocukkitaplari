@@ -258,8 +258,13 @@ import uuid
 
 class PageInput(BaseModel):
     text: str
-    imageUrl: str
+    image: Optional[str] = None
+    imageUrl: Optional[str] = None  # Alias for backwards compatibility
     voiceId: Optional[str] = None
+    
+    def get_image(self) -> str:
+        """Get image URL from either field"""
+        return self.image or self.imageUrl or ""
 
 class CompleteBookCreate(BaseModel):
     """Schema for creating a complete book with all pages in one request"""
