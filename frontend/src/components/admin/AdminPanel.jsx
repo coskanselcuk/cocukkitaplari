@@ -113,8 +113,9 @@ const AdminPanel = ({ onBack }) => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
+      // Fetch all books for admin management (up to 500)
       const [booksRes, catsRes] = await Promise.all([
-        booksApi.getAll(),
+        booksApi.getAll({ limit: 500 }),
         categoriesApi.getAll()
       ]);
       setBooks(booksRes.books || []);
