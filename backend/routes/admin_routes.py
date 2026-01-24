@@ -355,7 +355,8 @@ async def create_complete_book(book_data: CompleteBookCreate):
             "bookId": book_id,
             "pageNumber": idx + 1,
             "text": page_input.text,
-            "imageUrl": page_input.imageUrl,
+            "image": page_input.get_image(),  # Use helper to accept both image and imageUrl
+            "hotspots": [],  # Initialize empty hotspots
             "voiceId": voice_id,
             "audioUrl": None
         }
