@@ -605,7 +605,7 @@ const AdminPanel = ({ onBack }) => {
                     </div>
                   </div>
 
-                  {bookPages.length === 0 && (
+                  {bookPages.length === 0 && !pagesLoading && (
                     <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                       <p className="text-sm text-yellow-700">
                         <strong>İpucu:</strong> Ses oluşturmak için önce kitaba sayfa eklemeniz gerekiyor.
@@ -614,7 +614,12 @@ const AdminPanel = ({ onBack }) => {
                   )}
 
                   <div className="space-y-3 max-h-80 overflow-y-auto">
-                    {bookPages.length === 0 ? (
+                    {pagesLoading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 size={24} className="animate-spin text-orange-500" />
+                        <span className="ml-2 text-gray-500">Sayfalar yükleniyor...</span>
+                      </div>
+                    ) : bookPages.length === 0 ? (
                       <p className="text-gray-500 text-center py-8">Henüz sayfa eklenmemiş. Sayfa Ekle butonuna tıklayın.</p>
                     ) : (
                       bookPages.map((page, idx) => (
