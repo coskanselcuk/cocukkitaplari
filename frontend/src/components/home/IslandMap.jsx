@@ -27,15 +27,20 @@ const IslandMap = ({ onCategorySelect }) => {
 
   // Dynamic island positions based on number of categories
   const getIslandConfigs = (count) => {
-    // Default positions for up to 7 islands
+    // Positions for up to 12 islands - responsive layout
     const positions = [
-      { top: '5%', left: '50%', transform: 'translateX(-50%)', size: 'large', decoration: 'volcano' },
-      { top: '30%', left: '8%', size: 'medium', decoration: 'trees' },
-      { top: '25%', right: '8%', size: 'medium', decoration: 'castle' },
-      { top: '55%', left: '15%', size: 'medium', decoration: 'lab' },
-      { top: '55%', right: '15%', size: 'medium', decoration: 'house' },
-      { top: '75%', left: '35%', size: 'small', decoration: 'trees' },
-      { top: '75%', right: '35%', size: 'small', decoration: 'castle' },
+      { top: '3%', left: '50%', transform: 'translateX(-50%)', size: 'large', decoration: 'volcano' },
+      { top: '22%', left: '8%', size: 'medium', decoration: 'trees' },
+      { top: '18%', right: '8%', size: 'medium', decoration: 'castle' },
+      { top: '40%', left: '5%', size: 'medium', decoration: 'lab' },
+      { top: '38%', right: '5%', size: 'medium', decoration: 'house' },
+      { top: '55%', left: '20%', size: 'small', decoration: 'trees' },
+      { top: '55%', right: '20%', size: 'small', decoration: 'castle' },
+      { top: '70%', left: '8%', size: 'small', decoration: 'lab' },
+      { top: '70%', right: '8%', size: 'small', decoration: 'house' },
+      { top: '82%', left: '30%', size: 'small', decoration: 'trees' },
+      { top: '82%', right: '30%', size: 'small', decoration: 'volcano' },
+      { top: '92%', left: '50%', transform: 'translateX(-50%)', size: 'small', decoration: 'castle' },
     ];
     return positions.slice(0, count);
   };
