@@ -140,6 +140,9 @@ const AdminPanel = ({ onBack }) => {
   };
 
   const selectBook = async (book) => {
+    // Clear pages immediately to prevent showing stale data
+    setBookPages([]);
+    setPagesLoading(true);
     setSelectedBook(book);
     try {
       const response = await booksApi.getPages(book.id);
@@ -147,6 +150,8 @@ const AdminPanel = ({ onBack }) => {
     } catch (error) {
       console.error('Error fetching pages:', error);
       setBookPages([]);
+    } finally {
+      setPagesLoading(false);
     }
   };
 
