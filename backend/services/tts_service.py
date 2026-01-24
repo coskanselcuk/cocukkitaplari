@@ -22,11 +22,20 @@ else:
     logger.warning("ELEVENLABS_API_KEY not found in environment")
 
 # Turkish child-friendly voice settings
-# Using a warm, friendly voice suitable for children's stories
-DEFAULT_VOICE_SETTINGS = VoiceSettings(
-    stability=0.75,  # More stable for consistent narration
+# For eleven_v3: stability must be one of [0.0, 0.5, 1.0]
+# 0.0 = Creative, 0.5 = Natural, 1.0 = Robust
+DEFAULT_VOICE_SETTINGS_V3 = VoiceSettings(
+    stability=0.5,  # Natural - balanced for storytelling
     similarity_boost=0.75,
     style=0.5,  # Balanced style
+    use_speaker_boost=True
+)
+
+# Legacy settings for v2 models (kept for backward compatibility)
+DEFAULT_VOICE_SETTINGS_V2 = VoiceSettings(
+    stability=0.75,
+    similarity_boost=0.75,
+    style=0.5,
     use_speaker_boost=True
 )
 
