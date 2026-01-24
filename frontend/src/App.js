@@ -39,11 +39,12 @@ function AppContent() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [books, setBooks] = useState([]);
 
-  // Fetch books from API
+  // Fetch books from API - only fetch what's needed for home page carousels
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await booksApi.getAll();
+        // Fetch enough for home page carousels (new, popular, recommended)
+        const response = await booksApi.getAll({ limit: 50 });
         if (response.books) {
           setBooks(response.books);
         }
