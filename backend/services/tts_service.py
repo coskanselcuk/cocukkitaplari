@@ -68,11 +68,11 @@ async def generate_tts_audio(text: str, voice_id: str = None) -> dict:
         voice_id = IREM_VOICE_ID
     
     try:
-        # Generate audio using multilingual model for Turkish support
+        # Generate audio using Eleven v3 (alpha) - best for storytelling with emotional expressiveness
         audio_generator = client.text_to_speech.convert(
             text=text,
             voice_id=voice_id,
-            model_id="eleven_multilingual_v2",  # Best for Turkish
+            model_id="eleven_v3",  # v3 alpha - best for storytelling, 70+ languages including Turkish
             voice_settings=DEFAULT_VOICE_SETTINGS
         )
         
