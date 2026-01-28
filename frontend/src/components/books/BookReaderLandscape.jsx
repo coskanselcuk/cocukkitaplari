@@ -249,8 +249,16 @@ const BookReaderLandscape = ({ book, onClose }) => {
       const current = currentPageRef.current;
       
       if (current < total - 1) {
-        console.log('Auto-advancing to page:', current + 1);
-        setCurrentPage(current + 1);
+        // Add a 1.5 second delay before auto-advancing to next page
+        // This gives children time to absorb the content
+        console.log('Waiting 1.5s before auto-advancing to page:', current + 1);
+        setTimeout(() => {
+          // Verify we're still in auto-play mode and on the same page
+          if (autoPlayRef.current && currentPageRef.current === current) {
+            console.log('Auto-advancing to page:', current + 1);
+            setCurrentPage(current + 1);
+          }
+        }, 1500);
       } else {
         // Last page - show finish button instead of auto-advancing to celebration
         console.log('Last page audio ended - showing finish button');
